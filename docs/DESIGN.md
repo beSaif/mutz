@@ -1,6 +1,6 @@
 # DESIGN.md (paste into every UI prompt)
 
-1. **Palette with roles.** Red `#E30613` for actions, the vertical rule and the active tab only (hover `#B8000F`, tint `#FCE3E5`). Black `#111111` text, grey `#5E5E5E` secondary text, hairlines `#D9D9D9`, panel `#FAFAFA`, paper `#FFFFFF`. No other hues, no gradients, no yellow (not a Bernese colour).
+1. **Palette with roles.** Red `#E30613` for actions, the vertical rule and the active tab only (hover `#B8000F`, tint `#FCE3E5`). Black `#111111` text, grey `#5E5E5E` secondary text, hairlines `#D9D9D9`, panel `#FAFAFA`, paper `#FFFFFF`. No other hues, no gradients. One exception: honey `#C68400` fills the honey pot (coverage) and nothing else; it is 3.1:1 on white, so the fill level stays readable.
 2. **Type with roles.** `"Helvetica Neue", Helvetica, Arial, sans-serif`. Bold (Neue Helvetica 85) for titles and emphasis, regular (45) for text. Scale 28 / 24 / 21 / 18 / 15 / 13 / 12 px.
 3. **Layout concept.** Swiss two column grid: labels left, content right, flush left, generous white space. Rows and tables, not cards. Square corners (2 px on inputs only), buttons 44 px tall.
 4. **Signature element.** One thin vertical red rule dividing the two columns (the Canton's Linienelement), on every main screen and down the A4 teaser PDF.

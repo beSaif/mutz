@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% set active_page = "leads" %}
 {% block title %}Contact the researchers · {{ lead.title }}{% endblock %}
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
+{% block viewclass %}panes{% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:999 1 640px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:20px">
@@ -19,7 +20,7 @@
 <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:baseline"><b>Intro draft for {{ cur.name }}</b><span class="lb">{{ {'de':'German','fr':'French'}.get(cur.lang,'English') }} · written from shareable needs only</span>
 <span style="flex:1"></span>{% for l in ['de','fr','en'] %}<button class="b s {{ 'k' if cur.lang == l }}" data-lang="{{ l }}">{{ l|upper }}</button>{% endfor %}</div>
 <label for="draft" class="lb">Edit before sending</label>
-<textarea id="draft" lang="{{ cur.lang }}" rows="10" class="in" style="font-size:14px;line-height:1.55;resize:vertical" placeholder="Write the draft, or let Mutz draft it from the shareable needs.">{{ cur.draft }}</textarea>
+<textarea id="draft" lang="{{ cur.lang }}" rows="10" class="in" style="font-size:14px;line-height:1.55;resize:vertical" placeholder="Write the draft, or let Bärner Mutz draft it from the shareable needs.">{{ cur.draft }}</textarea>
 <p class="lb" style="margin:0">The confidential description and the CEO's emails are not used. Only needs marked shareable.</p>
 <p class="lb hidden" id="omsg" style="margin:0"></p>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b s {{ 'p' if not cur.draft }}" data-gen>{{ 'Draft it' if not cur.draft else 'Draft again' }}</button><button class="b s" data-copy>Copy</button><a class="b s" id="mailto" href="mailto:?subject={{ 'Anfrage: Gespräch mit einem Unternehmen' if cur.lang == 'de' else ('Demande: rencontre avec une entreprise' if cur.lang == 'fr' else 'Request: meeting with a company') }}">Open in mail</a><button class="b s" data-short>Rewrite shorter</button><button class="b s" data-sent>Mark as sent</button></div>

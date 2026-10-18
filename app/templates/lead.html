@@ -1,13 +1,14 @@
 {% extends "base.html" %}{% set active_page = "leads" %}
 {% block title %}After sending · {{ lead.title }}{% endblock %}
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
+{% block viewclass %}panes{% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:1 1 380px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:18px">
 <h1 style="margin:0;font-size:24px">Timeline</h1>
 <div class="tl">
 {% for e in entries %}
-<div class="it {{ 'red' if loop.last and e.kind in ('email','call','note') }}"><span class="lb">{{ e.at|date }} · {{ {'one_pager':'one pager','website':'website','pitch':'pitch','email':'email','call':'call notes','note':'note'}.get(e.kind, e.kind) }}{% if e.added_by and e.added_by != 'officer' %} · added through Mutz{% endif %}</span>
+<div class="it {{ 'red' if loop.last and e.kind in ('email','call','note') }}"><span class="lb">{{ e.at|date }} · {{ {'one_pager':'one pager','website':'website','pitch':'pitch','email':'email','call':'call notes','note':'note'}.get(e.kind, e.kind) }}{% if e.added_by and e.added_by != 'officer' %} · added through Bärner Mutz{% endif %}</span>
 <b style="display:block">{{ {'one_pager':'Company description','website':'Company website'}.get(e.kind) or (e.text if e.kind == 'pitch' else e.kind|capitalize) }}</b>
 {% if e.kind in ('email','call','note') %}<p style="margin:4px 0 0">{{ e.text|truncate(400) }}</p>{% elif e.kind == 'website' %}<p class="lb" style="margin:2px 0 0">{{ e.text }}</p>{% endif %}
 <span class="lb">{{ 'Confidential' if e.confidential else 'Public' }}{% if e.kind in ('email','call','note') %} · {{ 'shareable' if e.shareable else 'not shareable' }}{% endif %}</span></div>

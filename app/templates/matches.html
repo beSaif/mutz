@@ -1,12 +1,13 @@
 {% extends "base.html" %}{% set active_page = "leads" %}
 {% block title %}Matches · {{ lead.title }}{% endblock %}
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
+{% block viewclass %}panes{% endblock %}
 {% block content %}
-<main class="two">
-<aside style="flex:1 1 280px;padding:24px 24px 24px 32px;display:flex;flex-direction:column;gap:2px">
+<main class="two mx">
+<aside style="flex:0 0 280px;padding:24px 20px 24px 32px;display:flex;flex-direction:column;gap:2px">
 <div class="verdict"><span>Verdict</span><b style="display:block;font-size:18px">{% if searching %}Searching…{% else %}Bid on {{ bid }} of {{ needs|length }} needs{% endif %}</b></div>
 {% for n in needs %}
-<a class="need {{ 'on' if n.id == cur.id }}" href="?need={{ n.id }}" {% if n.id == cur.id %}aria-current="true"{% endif %}>{{ ui.pot(n.coverage if n.searched_at else None) }}<span style="flex:1;min-width:0"><b style="display:block">{{ n.label or (n.type|nlabel) }}</b><span class="lb">{% if not n.searched_at %}{{ 'Searching…' if searching else 'Not searched' }}{% elif n.error %}Error · try again{% else %}{% set r = n.result or {} %}{% set res = r.results or [] %}{{ ui.potlabel(n.coverage) }}{% if n.coverage == 'none' %}{{ ' · no source for suppliers yet' if (n.route or {}).kind == 'not_covered' else ' · nothing with evidence' }}{% elif (n.route or {}).kind == 'curated' %} · {{ [(n.route.entries or [])|length, 3]|min }} curated{% else %} · {{ res|length }} match{{ 'es' if res|length != 1 }}, {{ res|map(attribute='unit')|unique|list|length }} unit{{ 's' if res|map(attribute='unit')|unique|list|length != 1 }}{% endif %}{% endif %}</span></span></a>
+<a class="need {{ 'on' if n.id == cur.id }}" href="{{ murl(need=n.id, type='all', cov='', rec='', smin='', grade='') }}" {% if n.id == cur.id %}aria-current="true"{% endif %}>{{ ui.pot(n.coverage if n.searched_at else None) }}<span style="flex:1;min-width:0"><b style="display:block">{{ n.label or (n.type|nlabel) }}</b><span class="lb">{% if not n.searched_at %}{{ 'Searching…' if searching else 'Not searched' }}{% elif n.error %}Error · try again{% else %}{% set r = n.result or {} %}{% set res = r.results or [] %}{{ ui.potlabel(n.coverage) }}{% if n.coverage == 'none' %}{{ ' · no source for suppliers yet' if (n.route or {}).kind == 'not_covered' else ' · nothing with evidence' }}{% elif (n.route or {}).kind == 'curated' %} · {{ [(n.route.entries or [])|length, 3]|min }} curated{% else %} · {{ res|length }} match{{ 'es' if res|length != 1 }}, {{ res|map(attribute='unit')|unique|list|length }} unit{{ 's' if res|map(attribute='unit')|unique|list|length != 1 }}{% endif %}{% endif %}</span></span></a>
 {% endfor %}
 {% if curated %}
 <div style="margin-top:20px;padding:14px;border:1px dashed #111"><b style="display:block;font-size:14px">You might not have thought of</b>
@@ -17,8 +18,9 @@
 <p class="lb" style="margin-top:16px"><a href="/leads/{{ lead.id }}/brief">Edit the needs</a></p>
 </aside>
 <div aria-hidden="true" class="vr"></div>
-<section style="flex:999 1 560px;min-width:0;padding:24px 32px;display:flex;flex-direction:column" id="results">
-<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px"><h1 style="margin:0;font-size:24px">{{ cur.label or (cur.type|nlabel) }}</h1><span class="lb">{% if cur.searched_at and results %}{{ total }} match{{ 'es' if total != 1 }} · sorted by evidence × recency{% endif %}</span></div>
+<section class="pcol" style="flex:1 1 560px;min-width:0" id="results">
+<div class="pane" style="padding:24px 32px 88px;display:flex;flex-direction:column">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px"><h1 style="margin:0;font-size:24px">{{ cur.label or (cur.type|nlabel) }}</h1><span class="lb">{% if cur.searched_at and total %}{% if results|length != total %}{{ results|length }} of {% endif %}{{ total }} match{{ 'es' if total != 1 }} · sorted by {{ (sorts|selectattr(0, 'equalto', sort)|first)[1]|lower }}{% endif %}</span></div>
 <p style="margin:-6px 0 12px;font-size:14px">{{ cur.text }}</p>
 
 {% if not cur.searched_at %}
@@ -58,6 +60,8 @@
 </div></article>
 {% if loop.last and loop.length > 3 %}</details>{% endif %}
 {% else %}<p>No curated entry for this need type yet.</p>{% endfor %}
+{% elif not results and total %}
+<div class="pn" style="max-width:680px"><h2 style="margin:0;font-size:18px">No match passes these filters.</h2><p class="lb" style="margin:0">{{ total }} match{{ 'es' if total != 1 }} found for this need. Loosen a filter in Rank and filter, or clear them.</p><div><a class="b s" href="{{ murl(type='all', cov='', rec='', smin='', grade='') }}">Clear filters</a></div></div>
 {% elif not results %}
 {# no match state #}
 <section class="pn" aria-label="No match" style="max-width:680px">
@@ -77,29 +81,40 @@
 <p class="lb" style="margin:0">Logged anonymously for the <a href="/insights">gap report</a>: field and coverage only, no company name.</p>
 </section>
 {% else %}
-<div role="group" aria-label="Match types" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">{% for k, label in filters %}<a class="b s {{ 'k' if ftype == k }}" href="?need={{ cur.id }}&type={{ k }}">{{ label }} {{ total if k == 'all' else counts.get(k, 0) }}</a>{% endfor %}</div>
+<div role="group" aria-label="Match types" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">{% for k, label in filters %}<a class="b s {{ 'k' if ftype == k }}" href="{{ murl(type=k) }}">{{ label }} {{ total if k == 'all' else counts.get(k, 0) }}</a>{% endfor %}</div>
 {% for r in results %}
 {% if r.is_adjacent and (loop.first or not loop.previtem.is_adjacent) %}<div style="border-top:1px solid #111;padding:14px 0 4px"><b>Adjacent</b> <span class="lb">Close to the need, not a direct match. Worth a look; not counted in recall.</span></div>{% endif %}
-<article class="res{{ ' sel' if whynot and whynot.get('shown') and whynot.entity_id == r.entity_id }}" data-entity="{{ r.entity_id }}" data-need="{{ cur.id }}"><div class="lb">{% if whynot %}<b style="color:#111;font-size:15px">{{ loop.index }}</b><br>{% endif %}{{ r.type|tlabel }}<br>{{ r.unit }}{% if r.is_adjacent %}<br><span class="chip d" style="margin-top:6px">Adjacent</span>{% endif %}</div><div style="min-width:0">
+{% set open = whynot and whynot.get('shown') and whynot.entity_id == r.entity_id %}
+<article class="res mc{{ ' sel' if open or (not whynot and loop.first) }}" data-entity="{{ r.entity_id }}" data-need="{{ cur.id }}">
+<div class="sc0" title="Score: evidence × role × recency × type. Details in Rank and filter.">{% if r.parts %}<b>{{ '%.2f'|format(r.parts.score) }}</b><span class="bar"><i style="width:{{ [r.parts.score * 100, 100]|min|round|int }}%"></i></span>{% else %}<b>–</b>{% endif %}<span class="lb">{% if whynot %}#{{ loop.index }} · {% endif %}score</span></div>
+<div style="min-width:0">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="flex:1;min-width:0">
 <h2 style="margin:0;font-size:18px" lang="de">{{ r.name }}</h2>
-{% set fl = [r.function, r.unit if r.ftype == 'person' else None]|select|list %}{% if fl %}<p class="lb" style="margin:2px 0 8px">{{ fl|join(' · ') }}</p>{% else %}<div style="height:6px"></div>{% endif %}
-{% set expl = r.explanation or r.reason %}
-{% if expl %}<p style="margin:0 0 10px">{{ expl|cite(r.reasons) }}</p>{% endif %}
-{% set cited = r.cited or [1, 2] %}{% for s in r.reasons if loop.index in cited %}<p class="q"{% if expl %} style="color:#5E5E5E"{% endif %}>“{{ s.quote|cq }}” <a href="{{ s.deep_link or s.url }}" target="_blank" rel="noopener">[{{ s.n }}]</a></p>{% endfor %}
-{% set rest = r.reasons|length - (cited|length) %}{% if rest > 0 %}<details class="lb" style="margin:0 0 6px"><summary style="cursor:pointer">{{ rest }} more quote{{ 's' if rest != 1 }}</summary>{% for s in r.reasons if loop.index not in cited %}<p class="q" style="color:#5E5E5E">“{{ s.quote|cq }}” <a href="{{ s.deep_link or s.url }}" target="_blank" rel="noopener">[{{ s.n }}]</a></p>{% endfor %}</details>{% endif %}
-<p class="lb" style="margin:4px 0 10px">{{ {'active':'Active','quiet':'Quiet','past':'Past'}.get(r.recency, r.recency or '') }}{% if r.fetched_at %} · page fetched {{ r.fetched_at|date }}{% endif %} · {{ r.reasons|length }} quote{{ 's' if r.reasons|length != 1 }}, {{ r.reasons|map(attribute='url')|unique|list|length }} page{{ 's' if r.reasons|map(attribute='url')|unique|list|length != 1 }}{% if r.coverage %} · {{ r.coverage }} evidence{% endif %}</p>
-{% set ppl = r.people or r.contacts %}
-{% if ppl %}<p class="lb" style="margin:0 0 8px"><span style="color:#111">People:</span> {% for p in ppl[:5] %}{% if p is mapping %}{% if p.url %}<a href="{{ p.url }}" target="_blank" rel="noopener">{{ p.name }}</a>{% else %}{{ p.name }}{% endif %}{% if p.function %} ({{ p.function }}){% endif %}{% else %}{{ p }}{% endif %}{{ ', ' if not loop.last }}{% endfor %}{% if ppl|length > 5 %} and {{ ppl|length - 5 }} more{% endif %}</p>{% endif %}
-{% set c = r.contact or {} %}
-{% if r.ftype == 'person' and (c.email or c.phone or c.profile_url) %}<p class="lb" style="margin:0 0 8px">{% if c.profile_url %}<a href="{{ c.profile_url }}" target="_blank" rel="noopener">Public profile</a>{% endif %}{% if c.email %}{{ ' · ' if c.profile_url }}<a href="mailto:{{ c.email }}">{{ c.email }}</a>{% endif %}{% if c.phone %} · {{ c.phone }}{% endif %}</p>{% endif %}
-{% if r.grants %}<dl class="sd">{% for g in r.grants[:2] %}<dt>SNSF grant</dt><dd><a href="{{ g.url }}" target="_blank" rel="noopener">{{ g.title }}</a> · {{ g.start }} to {{ g.end }}{% if g.institute or g.person_institute %}<span class="lb" style="display:block">{% if g.role %}{{ g.role }} · {% endif %}{% if g.institute %}held at {{ g.institute }}{% endif %}{% if g.person_institute and g.person_institute != g.institute %}{{ ' · ' if g.institute }}person's institute: {{ g.person_institute }}{% endif %}</span>{% endif %}</dd>{% endfor %}{% if r.grants_other %}<dt></dt><dd class="lb">and {{ r.grants_other }} other SNSF grant{{ 's' if r.grants_other != 1 }}, not on this topic</dd>{% endif %}</dl>
-{% elif r.grants_other %}<details class="lb" style="margin:0 0 10px"><summary style="cursor:pointer">SNSF grants: {{ r.grants_other }}</summary>None of their titles share a term with this need.</details>{% endif %}
-<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">{% for s in r.reasons[:2] %}<a class="chip" href="{{ s.deep_link or s.url }}" target="_blank" rel="noopener" title="Opens the page at the quote">[{{ s.n }}] {{ s.url|host }}</a>{% endfor %}<a href="/leads/{{ lead.id }}/map?all=1" style="font-size:13px">Show in map</a><span style="flex:1"></span>
-<span class="dec" data-state="{{ r.decision or '' }}">
+{% set fl = [r.type|tlabel, r.unit if r.unit != r.name else None, r.function]|select|list %}<p class="lb" style="margin:2px 0 0">{{ fl|join(' · ') }}</p>
+</div>
+<span class="dec" data-state="{{ r.decision or '' }}" style="flex:none;display:flex;gap:6px;align-items:center">
 {% if r.decision == 'accept' %}<span style="font-size:13px;font-weight:700">Accepted{% if r.added_by and r.added_by != 'officer' %} · added by you{% endif %}</span> <button class="b s" data-decide="">Undo</button>
 {% elif r.decision == 'reject' %}<span style="font-size:13px;color:#5E5E5E">Rejected</span> <button class="b s" data-decide="">Undo</button>
 {% else %}<button class="b s" data-decide="reject">Reject</button> <button class="b s p" data-decide="accept">Accept</button>{% endif %}
-</span></div>
+</span>
+</div>
+{% set ppl = r.people or r.contacts %}{% set c = r.contact or {} %}{% set npg = r.reasons|map(attribute='url')|unique|list|length %}
+<div class="tags">{% if r.recency %}<span class="tg{{ ' on' if r.recency == 'active' }}">{{ rec_label.get(r.recency, r.recency) }}{% if r.recency_year %} · {{ r.recency_year }}{% endif %}</span>{% endif %}{% if r.coverage %}<span class="tg{{ ' on' if r.coverage == 'strong' }}">{{ r.coverage|capitalize }} evidence</span>{% endif %}{% if r.grade %}<span class="tg">Apertus {{ r.grade }}/3</span>{% endif %}{% if r.is_adjacent %}<span class="tg d">Adjacent</span>{% endif %}<span class="lb">{{ r.reasons|length }} quote{{ 's' if r.reasons|length != 1 }}, {{ npg }} page{{ 's' if npg != 1 }}{% if ppl %} · {{ ppl|length }} {{ 'people' if ppl|length != 1 else 'person' }}{% endif %}{% if r.grants %} · SNSF grant{{ 's' if r.grants|length != 1 }}{% endif %}</span></div>
+{% set expl = r.explanation or r.reason %}{% set cited = r.cited or [1, 2] %}
+<details class="nm"{% if open %} open{% endif %}>
+<summary class="lb">Why it matches</summary>
+<div style="margin-top:8px">
+{% if expl %}<p style="margin:0 0 10px">{{ expl|cite(r.reasons) }}</p>{% endif %}
+{% for s in r.reasons %}{% if loop.index in cited %}<p class="q"{% if expl %} style="color:#5E5E5E"{% endif %}>“{{ s.quote|cq }}” <a href="{{ s.deep_link or s.url }}" target="_blank" rel="noopener">[{{ s.n }}]</a></p>{% endif %}{% endfor %}
+{% set rest = r.reasons|length - (cited|length) %}{% if rest > 0 %}<details class="lb" style="margin:0 0 6px"><summary style="cursor:pointer">{{ rest }} more quote{{ 's' if rest != 1 }}</summary>{% for s in r.reasons %}{% if loop.index not in cited %}<p class="q" style="color:#5E5E5E">“{{ s.quote|cq }}” <a href="{{ s.deep_link or s.url }}" target="_blank" rel="noopener">[{{ s.n }}]</a></p>{% endif %}{% endfor %}</details>{% endif %}
+{% if ppl %}<p class="lb" style="margin:0 0 8px"><span style="color:#111">People:</span> {% for p in ppl[:5] %}{% if p is mapping %}{% if p.url %}<a href="{{ p.url }}" target="_blank" rel="noopener">{{ p.name }}</a>{% else %}{{ p.name }}{% endif %}{% if p.function %} ({{ p.function }}){% endif %}{% else %}{{ p }}{% endif %}{{ ', ' if not loop.last }}{% endfor %}{% if ppl|length > 5 %} and {{ ppl|length - 5 }} more{% endif %}</p>{% endif %}
+{% if r.ftype == 'person' and (c.email or c.phone or c.profile_url) %}<p class="lb" style="margin:0 0 8px">{% if c.profile_url %}<a href="{{ c.profile_url }}" target="_blank" rel="noopener">Public profile</a>{% endif %}{% if c.email %}{{ ' · ' if c.profile_url }}<a href="mailto:{{ c.email }}">{{ c.email }}</a>{% endif %}{% if c.phone %} · {{ c.phone }}{% endif %}</p>{% endif %}
+{% if r.grants %}<dl class="sd">{% for g in r.grants[:2] %}<dt>SNSF grant</dt><dd><a href="{{ g.url }}" target="_blank" rel="noopener">{{ g.title }}</a> · {{ g.start }} to {{ g.end }}{% if g.institute or g.person_institute %}<span class="lb" style="display:block">{% if g.role %}{{ g.role }} · {% endif %}{% if g.institute %}held at {{ g.institute }}{% endif %}{% if g.person_institute and g.person_institute != g.institute %}{{ ' · ' if g.institute }}person's institute: {{ g.person_institute }}{% endif %}</span>{% endif %}</dd>{% endfor %}{% if r.grants_other %}<dt></dt><dd class="lb">and {{ r.grants_other }} other SNSF grant{{ 's' if r.grants_other != 1 }}, not on this topic</dd>{% endif %}</dl>
+{% elif r.grants_other %}<p class="lb" style="margin:0 0 8px">SNSF grants: {{ r.grants_other }}, none sharing a term with this need.</p>{% endif %}
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">{% for s in r.reasons[:2] %}<a class="chip" href="{{ s.deep_link or s.url }}" target="_blank" rel="noopener" title="Opens the page at the quote">[{{ s.n }}] {{ s.url|host }}</a>{% endfor %}<a href="/leads/{{ lead.id }}/map?all=1" style="font-size:13px">Show in map</a>{% if r.fetched_at %}<span class="lb">Page fetched {{ r.fetched_at|date }}</span>{% endif %}</div>
+</div>
+</details>
 </div></article>
 {% endfor %}
 {% if whynot and not whynot.get('shown') %}
@@ -109,15 +124,50 @@
 <div style="min-width:0"><h2 style="margin:0;font-size:18px">{{ whynot.name }}</h2>
 <p style="margin:4px 0 8px;font-size:14px">{{ whynot.reason }}</p>
 {% if whynot.stages %}<table class="sc" style="margin:0 0 8px"><thead><tr><th>Signal</th><th>Score</th><th>Rank</th><th>Note</th></tr></thead><tbody>{% for st in whynot.stages %}<tr><td>{{ st.stage }}</td><td>{{ st.score if st.score is not none else '–' }}</td><td>{{ st.rank if st.rank is not none else '–' }}</td><td>{{ st.note }}</td></tr>{% endfor %}</tbody></table>{% endif %}
-<p class="lb" style="margin:0 0 8px">Searched {{ whynot.searched_sources|archives }}. Numbers from the ranking log; Mutz never reranks silently.</p>
+<p class="lb" style="margin:0 0 8px">Searched {{ whynot.searched_sources|archives }}. Numbers from the ranking log; Bärner Mutz never reranks silently.</p>
 <div style="display:flex;gap:6px;flex-wrap:wrap">{% if whynot.in_index and whynot.entity_id %}<button class="b s" data-anyway='{{ {"entity_id": whynot.entity_id, "type": "person" if whynot.entity_id.startswith("person") else "unit", "name": whynot.name, "unit": "", "function": "", "coverage": "thin", "reasons": whynot.evidence or []}|tojson|forceescape }}'>Add anyway</button>{% endif %}<button class="b s" data-missed="{{ whynot.name }}" data-eid="{{ whynot.entity_id or '' }}" data-q="{{ cur.text }}">This is a missed expert</button><a class="b s" href="?need={{ cur.id }}">Close</a></div>
 <span class="lb">“Add anyway” marks it as added by you. “Missed expert” saves a new test case.</span>
 </div></article>
 {% endif %}
 {% endif %}
 {% if any_grants %}<p class="lb" style="margin:12px 0 0">Grant data: SNSF (CC BY-SA 4.0), via opendata.swiss.</p>{% endif %}
-<div style="display:flex;gap:12px;margin-top:12px;padding-top:16px;border-top:1px solid #111;align-items:center;flex-wrap:wrap"><span class="lb" style="flex:1"><span id="nacc">{{ n_acc }}</span> accepted across all needs · <a href="#" data-mutz-ask="Why isn't [name] in the list for {{ cur.label or cur.text }}?">Someone missing? Ask Mutz why not</a> · <form method="get" style="display:inline-flex;gap:6px;align-items:center"><input type="hidden" name="need" value="{{ cur.id }}"><label for="why" class="lb">or check a name</label><input id="why" name="why" value="{{ why }}" class="in" style="font-size:13px;padding:4px 8px;width:170px" placeholder="e.g. Prof. Lisa Koch"></form></span><a class="b" href="/leads/{{ lead.id }}/map">Open evidence map</a><a class="b p" href="/leads/{{ lead.id }}/pitch">Build pitch</a></div>
+</div>
+<div class="dock" style="display:flex;gap:12px;padding:12px 32px;align-items:center;flex-wrap:wrap"><span style="flex:1"></span><a class="b p" href="/leads/{{ lead.id }}/map">Open evidence map</a></div>
 </section>
+{% if cur.searched_at and total and (cur.route or {}).kind != 'curated' %}
+<aside class="rk" aria-label="Rank and filter" style="flex:0 0 340px;padding:24px 24px 24px 20px;border-left:1px solid #D9D9D9;background:#FAFAFA;display:flex;flex-direction:column;gap:18px">
+<div>
+<h2 class="rh">Sort by</h2>
+<div class="fg">{% for k, label, desc in sorts %}<a href="{{ murl(sort=k) }}" class="{{ 'on' if sort == k }}" title="{{ desc }}"{% if sort == k %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}</div>
+<p class="lb" style="margin:6px 0 0">{% for k, label, desc in sorts if k == sort %}{{ desc }}{% endfor %}</p>
+</div>
+<div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="rh">Filter</h2>{% if filtered %}<a class="lb" href="{{ murl(cov='', rec='', smin='', grade='') }}">Clear filters</a>{% endif %}</div>
+<p class="fl">Evidence</p>
+<div class="fg"><a href="{{ murl(cov='') }}" class="{{ 'on' if not cov }}">All</a>{% for k in ['strong', 'thin'] %}<a href="{{ murl(cov=k) }}" class="{{ 'on' if cov == k }}">{{ k|capitalize }} <span>{{ facets.cov.get(k, 0) }}</span></a>{% endfor %}</div>
+<p class="fl">Activity</p>
+<div class="fg"><a href="{{ murl(rec='') }}" class="{{ 'on' if not rec }}">All</a>{% for k in ['active', 'quiet', 'past'] %}<a href="{{ murl(rec=k) }}" class="{{ 'on' if rec == k }}">{{ rec_label[k] }} <span>{{ facets.rec.get(k, 0) }}</span></a>{% endfor %}</div>
+<p class="fl">Score</p>
+<div class="fg"><a href="{{ murl(smin='') }}" class="{{ 'on' if not smin }}">Any</a>{% for k, label in bands %}<a href="{{ murl(smin=k) }}" class="{{ 'on' if smin == k }}">{{ label }} <span>{{ facets.smin[k] }}</span></a>{% endfor %}</div>
+{% if facets.grade %}<p class="fl">Apertus 70B grade</p>
+<div class="fg"><a href="{{ murl(grade='') }}" class="{{ 'on' if not grade }}">All</a>{% for k in ['3', '2', '1'] %}<a href="{{ murl(grade=k) }}" class="{{ 'on' if grade == k }}">{{ grades[k|int] }} <span>{{ facets.grade.get(k, 0) }}</span></a>{% endfor %}</div>{% endif %}
+</div>
+<div>
+<h2 class="rh">How the score is built</h2>
+<p class="lb" style="margin:0 0 10px"><b style="color:#111">Score = Evidence × Role × Recency × Type × Small group.</b> Each factor is between 0 and 1, except a 1.1 boost for small groups. Click a match to see its numbers.</p>
+{% for r in results if r.parts %}
+<div class="bd{{ '' if (whynot and whynot.get('shown') and whynot.entity_id == r.entity_id) or (not (whynot and whynot.get('shown')) and loop.first) else ' hidden' }}" data-bd="{{ r.entity_id }}">
+<p style="margin:0 0 6px;font-size:14px"><b lang="de">{{ r.name }}</b></p>
+<table class="sc">
+{% for label, v, note in r.parts.rows %}<tr><td style="width:84px">{{ '' if loop.first else '× ' }}{{ label }}</td><td class="hl" style="width:44px;text-align:right">{{ '%.2f'|format(v) }}</td><td class="lb">{{ note }}</td></tr>{% endfor %}
+<tr><td><b>= Score</b></td><td class="hl" style="text-align:right">{{ '%.2f'|format(r.parts.score) }}</td><td class="lb">{{ r.coverage|capitalize if r.coverage }}{{ ' evidence: ' if r.coverage }}{{ 'two or more pages with a strong quote' if r.coverage == 'strong' else 'one page or weaker quotes' if r.coverage == 'thin' }}</td></tr>
+</table>
+</div>
+{% endfor %}
+<p class="lb" style="margin:10px 0 0">Ranking weights live in search/query.py and every query is logged. Bärner Mutz never reranks silently.</p>
+</div>
+</aside>
+{% endif %}
 </main>
 {% endblock %}
 {% block scripts %}

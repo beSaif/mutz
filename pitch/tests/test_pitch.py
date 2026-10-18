@@ -238,7 +238,8 @@ def test_clean_pdf_links_and_no_internal_notes(tmp_path, valid):
                  "Invented example. Maker", "demo-0001", "Erika", "Muster"):
         assert leak.replace(" ", "") not in txt, leak
     assert "TalveraSensorikGmbH" in txt
-    assert "Prototype,notanofficialCantonofBerntool" in txt
+    assert txt.count("Prototype,notanofficialCantonofBerntool") == 1   # once, on the cover
+    assert "DraftedwithApertusonSwissinfrastructure(CSCS)" in txt
     assert "LedbyDr.MaxBeispiel" in txt              # named because the officer switched it on
 
 

@@ -1,23 +1,34 @@
 {% extends "base.html" %}{% set active_page = "leads" %}
 {% block title %}Pitch · {{ lead.title }}{% endblock %}
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
+{% block viewclass %}panes{% endblock %}
 {% block content %}
-<main class="two" id="pitchapp" style="max-width:1280px">
-<aside style="flex:1 1 210px;max-width:240px;padding:24px;border-right:1px solid #D9D9D9">
-<p class="lb" style="margin:0 0 8px">Outline, drag to reorder</p>
+<main id="pitchapp">
+<aside aria-label="Outline" style="flex:0 0 250px;padding:20px 16px 20px 24px;border-right:1px solid #D9D9D9">
+<p class="lb" style="margin:0 0 8px">Outline. Drag to reorder, the eye hides a section from the PDF.</p>
 <div id="outline"></div>
 <div id="toast" role="status"></div>
-<p class="lb" style="margin:16px 0 0" id="checkedcount"></p>
+<div style="margin:16px 0 0" id="checkedcount"></div>
 </aside>
-<section style="flex:999 1 400px;min-width:0;padding:24px;display:flex;flex-direction:column;gap:14px" id="editor"></section>
-<section style="flex:1 1 380px;padding:24px;background:#F2F2F2;display:flex;flex-direction:column;gap:12px;align-items:center">
-<span class="lb" style="align-self:flex-start" id="pvlabel">A4 preview</span>
-<div class="a4" id="preview"></div>
-<a class="b p" href="/leads/{{ lead.id }}/review">Review and export</a>
+<section class="pcol" style="flex:1 1 600px;min-width:0;background:#E6E6E6" aria-label="Document">
+<div class="pe-bar">
+<span class="lb" id="pgno">Page 1</span>
+<span style="flex:1"></span>
+<span class="lb">Click any text on the page to edit it</span>
+<span class="pe-z" role="group" aria-label="Zoom"><button type="button" class="b s" data-z="-" aria-label="Zoom out">−</button><span id="zl" class="lb" style="min-width:42px;text-align:center">100%</span><button type="button" class="b s" data-z="+" aria-label="Zoom in">+</button><button type="button" class="b s" data-z="fit">Fit</button></span>
+</div>
+<div class="pane" id="canvas"><div class="pages" id="pages"></div></div>
 </section>
+<aside class="pcol" aria-label="Inspector" style="flex:0 0 330px;border-left:1px solid #D9D9D9">
+<div class="pane" id="inspector" style="padding:20px 24px 88px"></div>
+<div class="dock r" style="padding:12px 24px;display:flex;flex-direction:column;gap:6px">
+<a class="b p" href="/leads/{{ lead.id }}/export" style="justify-content:center">Continue to export</a>
+<span class="lb" style="text-align:center">Nothing is sent from here. Export is the next step.</span>
+</div>
+</aside>
 </main>
 {% endblock %}
 {% block scripts %}
 <script src="/static/pitch.js"></script>
-<script>initPitch({{ lead.id|tojson }}, {{ draft|tojson }}, {{ section|tojson }});</script>
+<script>initPitch({{ lead.id|tojson }}, {{ draft|tojson }}, {{ section|tojson }}, {{ {"logo": logo, "company": (lead.profile or {}).get("name") or lead.title, "date": today}|tojson }});</script>
 {% endblock %}

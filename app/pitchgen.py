@@ -10,14 +10,17 @@ from datetime import datetime, timezone
 
 from app.stubs import BANNED, PROMISE
 
+# The pitch answers three questions in order: why Bern, what Bern offers, how to start.
 SECTIONS = [
     {"id": "cover", "title": "Cover"},
-    {"id": "why", "title": "Why Bern for you"},
-    {"id": "matches", "title": "Matches"},
-    {"id": "infra", "title": "Infrastructure"},
-    {"id": "visit", "title": "Suggested visit day"},
+    {"id": "why", "title": "Why Bern for you", "part": "why"},
+    {"id": "matches", "title": "Research partners", "part": "what"},
+    {"id": "infra", "title": "Labs, facilities and services", "part": "what"},
+    {"id": "visit", "title": "How to start", "part": "how"},
     {"id": "sources", "title": "Sources", "auto": True},
 ]
+HOW = ("Nothing is arranged yet. If you plan a visit, tell us which groups interest you most. "
+       "The agency then asks each group whether they are available and proposes a day in Bern.")
 
 STYLE = ("Write like a Bernese civil servant briefing a CEO: plain, concrete, short. Max 2 sentences per card. "
          "Use nouns from the quotes (devices, methods, patient groups). Only state what the quotes say. "
@@ -151,8 +154,25 @@ def new_draft(lead, needs, accepted):
             why.append(dict(c, card_id=_cid(), section="why", entity_id=c["entity_id"], origin="verified quote"))
     draft = {"case_id": lead["id"], "sections": [dict(s, hidden=False) for s in SECTIONS], "cards": why + cards,
              "title": f"Bern for {(lead.get('profile') or {}).get('name') or lead['title']}",
-             "intro": "", "officer": {"name": "[Officer name]", "email": ""}, "lang": lead.get("lang") or "en",
+             "intro": "", "how": HOW, "officer": {"name": "[Officer name]", "email": ""}, "lang": lead.get("lang") or "en",
              "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "visit": visit_day(cards)}
+    return draft
+
+
+OLD_TITLES = {"Matches": "Research partners", "Infrastructure": "Labs, facilities and services",
+              "Suggested visit day": "How to start"}
+
+
+def upgrade(draft):
+    """Drafts made before the why, what, how structure: default titles renamed, part and how text filled in.
+    Titles the officer changed are kept."""
+    parts = {s["id"]: s.get("part") for s in SECTIONS}
+    for s in draft.get("sections", []):
+        if s.get("title") in OLD_TITLES and s["id"] in ("matches", "infra", "visit"):
+            s["title"] = OLD_TITLES[s["title"]]
+        if parts.get(s["id"]) and not s.get("part"):
+            s["part"] = parts[s["id"]]
+    draft.setdefault("how", HOW)
     return draft
 
 
@@ -230,7 +250,7 @@ def to_contract(draft, lead):
                       "status": "edited" if c.get("edited") else ("verified" if c.get("sources") and all(s.get("quote") for s in c["sources"]) else "needs_check")})
     return {"case_id": lead["id"], "company": {"name": prof.get("name") or lead.get("company") or lead["title"],
                                                "country": prof.get("country", ""), "summary": prof.get("product") or lead.get("summary") or ""},
-            "title": draft.get("title") or lead["title"], "intro": draft.get("intro", ""),
+            "title": draft.get("title") or lead["title"], "intro": draft.get("intro", ""), "how": draft.get("how", HOW),
             "officer": draft.get("officer") or {"name": "", "email": ""}, "cards": cards,
             "sections": [s for s in draft["sections"] if not s.get("hidden") and not s.get("deleted")],
             "visit": draft.get("visit", []), "lang": draft.get("lang", "en"), "created_at": draft.get("created_at"),

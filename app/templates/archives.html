@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% set active_page = "archives" %}
 {% block title %}Archives{% endblock %}
+{% block viewclass %}panes{% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:999 1 600px;min-width:0;padding:32px">
@@ -24,7 +25,7 @@
 </div>
 <p class="lb" style="margin:12px 0 0">{{ arch.total|num }} pages in total. The BORIS research portal is not crawled because its robots.txt blocks our fetcher. People can ask to be removed through the agency. Companies and suppliers have no source yet; next: Zefix and cantonal cluster lists.</p>
 </section>
-<aside style="flex:1 1 380px;padding:32px;border-left:1px solid #E30613;display:flex;flex-direction:column;gap:12px">
+<aside style="flex:1 1 380px;padding:32px;border-left:1px solid #D9D9D9;display:flex;flex-direction:column;gap:12px">
 <h2 style="margin:0;font-size:18px">Add an archive</h2>
 <form method="get" action="/archives" style="display:flex;flex-direction:column;gap:12px">
 <label for="url" class="lb">Public website</label>

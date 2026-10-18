@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% set active_page = "insights" %}
 {% block title %}Capability map{% endblock %}
+{% block viewclass %}panes{% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:999 1 720px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:20px">
@@ -19,7 +20,7 @@
 </tbody></table></div>{% endif %}
 <p class="lb" style="margin:0">Several independent pages is strong, one weak page is thin, nothing is absent. Leads asking come from the anonymous lead log{% if not has_demand %}, which is still empty: every field counts as low demand until leads are triaged{% endif %}.</p>
 </section>
-<aside style="flex:1 1 340px;padding:32px;border-left:1px solid #E30613;display:flex;flex-direction:column;gap:14px">
+<aside style="flex:1 1 340px;padding:32px;border-left:1px solid #D9D9D9;display:flex;flex-direction:column;gap:14px">
 <h2 style="margin:0;font-size:18px">Supply against demand</h2>
 <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
 {% for k, sub, txt in [('Outbound target','Strong supply, low demand','The agency contacts companies first.'),('Keep pitching','Strong supply, high demand',"Bern's winning fields."),('Decline quickly','No supply, low demand','Say so in seconds.'),('Policy gap','No supply, high demand','See the gap report.')] %}

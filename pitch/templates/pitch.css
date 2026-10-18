@@ -1,20 +1,22 @@
-/* Canton of Bern look (docs/DESIGN.md). A4, two columns, one thin rule line
-   down the middle of every page: black 0.15 mm as printed in the manual. */
+/* Canton of Bern look (docs/DESIGN.md). A4, one reading column: why Bern, what Bern offers, how to start. */
 @page {
   size: A4;
   margin: 22mm 18mm 20mm 18mm;
-  @bottom-left {
-    content: "Prototype, not an official Canton of Bern tool";
-    font: 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #5E5E5E;
-    vertical-align: top; padding-top: 6mm;
-  }
   @bottom-right {
     content: counter(page) " / " counter(pages);
     font: 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #5E5E5E;
     vertical-align: top; padding-top: 6mm;
   }
 }
-@page :first { @bottom-right { content: none; } }
+/* the disclaimer prints once per document, on the cover */
+@page :first {
+  @bottom-left {
+    content: "Prototype, not an official Canton of Bern tool";
+    font: 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #5E5E5E;
+    vertical-align: top; padding-top: 6mm;
+  }
+  @bottom-right { content: none; }
+}
 
 html { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #111111;
        font-size: 9.5pt; line-height: 1.45; }
@@ -22,14 +24,6 @@ body { margin: 0; hyphens: auto; overflow-wrap: anywhere; }
 a { color: #111111; text-decoration: none; }
 p { margin: 0 0 2.5mm; }
 
-/* The rule line: content box is 174 mm wide, the page middle is at 87 mm. */
-.rule { position: fixed; left: 87mm; top: -22mm; height: 297mm; width: 0;
-        border-left: 0.15mm solid #111111; }
-
-.row { overflow: hidden; margin-bottom: 6mm; }
-.row .l { float: left; width: 80mm; }
-.row .r { margin-left: 94mm; }
-.l .label { color: #5E5E5E; font-size: 8.5pt; display: block; }
 
 h1, h2, h3 { margin: 0; font-weight: bold; line-height: 1.2; }
 h1 { font-size: 21pt; margin-bottom: 4mm; bookmark-level: 1; bookmark-label: "Cover"; }
@@ -38,12 +32,15 @@ h3 { font-size: 10pt; bookmark-level: none; }
 body.review h3 { bookmark-level: 2; }
 
 /* Cover */
-.cover { page-break-after: always; }
-.logo { height: 22mm; margin-bottom: 30mm; }
-.logo-text { font-weight: bold; font-size: 12pt; margin-bottom: 30mm; display: block; }
-.cover .for { font-size: 12pt; margin-bottom: 10mm; }
-.meta .row { margin-bottom: 3mm; }
-.intro { font-size: 11pt; margin-top: 10mm; }
+.cover { page-break-after: always; max-width: 140mm; }
+.logo { height: 22mm; margin-bottom: 40mm; }
+.logo-text { font-weight: bold; font-size: 12pt; margin-bottom: 40mm; display: block; }
+.cover h1 { font-size: 26pt; }
+.cover .for { font-size: 12pt; margin-bottom: 14mm; }
+table.meta { border-collapse: collapse; }
+table.meta td { padding: 0 6mm 3mm 0; vertical-align: top; }
+table.meta td.label { color: #5E5E5E; font-size: 8.5pt; width: 32mm; padding-top: 0.4mm; }
+.intro { font-size: 11pt; margin-top: 12mm; }
 .banner { border: 0.3mm solid #E30613; color: #E30613; padding: 2mm 3mm; font-weight: bold;
           margin-bottom: 8mm; }
 .internal { background: #FAFAFA; border-left: 0.6mm solid #D9D9D9; padding: 2mm 3mm;
@@ -51,11 +48,14 @@ body.review h3 { bookmark-level: 2; }
 
 /* Sections and cards */
 section.sec { page-break-before: always; }
-.lede { color: #5E5E5E; }
-.card { border-top: 0.2mm solid #D9D9D9; padding-top: 3mm; page-break-inside: avoid; }
+.kicker { font-size: 8.5pt; font-weight: bold; letter-spacing: 0.06em; text-transform: uppercase;
+          color: #5E5E5E; margin: 0 0 1.5mm; }
+section.sec h2 { margin-bottom: 2mm; }
+.lede { color: #5E5E5E; margin-bottom: 6mm; }
+.card { border-top: 0.2mm solid #D9D9D9; padding: 3mm 0 1mm; page-break-inside: avoid; }
 .card .sub { color: #5E5E5E; margin: 0.5mm 0 1.5mm; }
-.kind { display: block; font-weight: bold; font-size: 8.5pt; }
-.status { display: block; font-size: 8pt; margin-top: 1mm; }
+.kind { font-size: 8pt; color: #5E5E5E; margin: 0 0 1mm; }
+.status { font-size: 8pt; }
 .status.verified { color: #111111; }
 .status.edited { color: #E30613; }
 .status.needs_check { color: #E30613; font-weight: bold; }
@@ -83,7 +83,7 @@ ol.sources a.url { text-decoration: underline; overflow-wrap: anywhere; }
 .ev .url { font-size: 7.5pt; color: #5E5E5E; overflow-wrap: anywhere; }
 .links a { margin-right: 4mm; }
 
-/* Short sections follow on the same page */
-section.sec.cont { page-break-before: auto; margin-top: 12mm; }
 /* Never hyphenate an address: a copied URL must work */
+/* A section of the same part (why, what, how) continues on the page */
+section.sec.cont { page-break-before: auto; margin-top: 12mm; }
 .url, a[href^="http"], a[href^="mailto"] { hyphens: manual; }

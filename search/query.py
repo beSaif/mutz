@@ -758,6 +758,7 @@ def query(text, k=10, sources=None, expansions=None, need_type=None, log=True):
         item = {
             "entity_id": r["eid"], "type": e["type"], "name": e["name"], "unit": e.get("unit"),
             "unit_id": e.get("unit_id"), "function": e.get("function"), "score": round(r["final"], 4),
+            "match": round(r["match"], 4), "boost": r.get("boost", 1.0),   # parts of score, shown to the officer
             "coverage": cov, "recency": r["recency"], "recency_year": r["recency_year"],
             "recency_basis": r["recency_basis"], "seniority": r["seniority"], "url": e.get("url"),
             "source": e.get("source"), "reasons": r["reasons"], "explanation": r.get("explanation"),

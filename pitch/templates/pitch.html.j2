@@ -16,105 +16,79 @@
 {% endif %}
 </head>
 <body class="{{ mode }}">
-<div class="rule" aria-hidden="true"></div>
 
 {# ------------------------------------------------------------- Cover #}
 <section class="cover">
-  <div class="row">
-    <div class="l">
-      {% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="{{ agency }}">
-      {% else %}<span class="logo-text">{{ agency }}</span>{% endif %}
-    </div>
-    <div class="r"></div>
-  </div>
-  <div class="row">
-    <div class="l">{% if review %}<span class="label">Lead</span>{% endif %}</div>
-    <div class="r">
-      {% if review %}<div class="banner">Review copy. Every claim shows its quote and source. Send the clean PDF to the company.</div>{% endif %}
-      <h1>{{ title }}</h1>
-      <p class="for">For {{ company.name }}{% if company.country %}, {{ company.country }}{% endif %}</p>
-    </div>
-  </div>
-  <div class="meta">
-    <div class="row"><div class="l"><span class="label">Date</span></div><div class="r">{{ date }}</div></div>
-    <div class="row"><div class="l"><span class="label">Contact</span></div>
-      <div class="r">{{ officer.name }}<br>{{ agency }}{% if officer.email %}<br><a href="mailto:{{ officer.email }}">{{ officer.email }}</a>{% endif %}</div></div>
-    {% if review and case_id %}<div class="row"><div class="l"><span class="label">Case</span></div><div class="r">{{ case_id }}</div></div>{% endif %}
-    {% if review and company.summary %}
-    <div class="row"><div class="l"><span class="label">Lead summary, internal</span></div>
-      <div class="r"><div class="internal">{{ company.summary }}</div></div></div>
-    {% endif %}
-  </div>
-  {% if intro %}
-  <div class="row"><div class="l"></div><div class="r"><p class="intro">{{ intro }}</p></div></div>
-  {% endif %}
+  {% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="{{ agency }}">
+  {% else %}<span class="logo-text">{{ agency }}</span>{% endif %}
+  {% if review %}<div class="banner">Review copy. Every claim shows its quote and source. Send the clean PDF to the company.</div>{% endif %}
+  <h1>{{ title }}</h1>
+  <p class="for">For {{ company.name }}{% if company.country %}, {{ company.country }}{% endif %}</p>
+  <table class="meta">
+    <tr><td class="label">Date</td><td>{{ date }}</td></tr>
+    <tr><td class="label">Contact</td><td>{{ officer.name }}<br>{{ agency }}{% if officer.email %}<br><a href="mailto:{{ officer.email }}">{{ officer.email }}</a>{% endif %}</td></tr>
+    {% if review and case_id %}<tr><td class="label">Case</td><td>{{ case_id }}</td></tr>{% endif %}
+    {% if review and company.summary %}<tr><td class="label">Lead summary, internal</td><td><div class="internal">{{ company.summary }}</div></td></tr>{% endif %}
+  </table>
+  {% if intro %}<p class="intro">{{ intro }}</p>{% endif %}
 </section>
 
-{# ------------------------------------------------------------- Sections #}
-{% for sec in sections %}
-<section class="sec{{ " cont" if sec.key == "infrastructure" }}" id="sec-{{ sec.key }}">
-  <div class="row">
-    <div class="l"><h2>{{ sec.title }}</h2></div>
-    <div class="r"><p class="lede">
-      {%- if sec.key == "why" %}{{ sec.cards|length }} reason{{ "s" if sec.cards|length != 1 }}, each with a source.
-      {%- elif sec.key == "matches" %}Research groups and projects in Bern that fit your plans. Each entry links to the public page it is based on.
-      {%- else %}Facilities and support services you can use in Bern.{% endif -%}
-    </p></div>
-  </div>
+{# ------------------------------------------------------------- Why, what, how #}
+{% set prev = namespace(part="") %}
+{% for key in blocks %}
+{% if key == "visit" %}
+{% if visit_day %}
+<section class="sec" id="sec-visit">{% set prev.part = "How" %}
+  <p class="kicker">How</p>
+  <h2>{{ visit_title }}</h2>
+  <p class="lede">{{ how or "A draft programme for one day in Bern. Nothing is arranged yet. If you decide to visit, the agency asks each group whether they are available." }}</p>
+  <table class="visit">
+    {% for v in visit_day %}
+    <tr><td class="time">{{ v.time }}</td><td>{{ v.topic }}{% if v.with %}<br><span class="lede">{{ v.with }}</span>{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endif %}
+{% else %}
+{% set sec = sections|selectattr("key", "equalto", key)|first %}
+<section class="sec{{ " cont" if prev.part == sec.part }}" id="sec-{{ sec.key }}">
+  {% if prev.part != sec.part %}<p class="kicker">{{ sec.part }}</p>{% endif %}{% set prev.part = sec.part %}
+  <h2>{{ sec.title }}</h2>
+  <p class="lede">
+    {%- if sec.key == "why" %}{{ sec.cards|length }} reason{{ "s" if sec.cards|length != 1 }}, each with a source.
+    {%- elif sec.key == "matches" %}Research groups and projects in Bern that fit your plans. Each entry links to the public page it is based on.
+    {%- else %}Facilities and support services you can use in Bern.{% endif -%}
+  </p>
   {% for it in sec.cards %}
-  <div class="row card" id="{{ it.id }}">
-    <div class="l">
-      {% if sec.key == "why" %}<span class="kind">Point {{ loop.index }}</span>
-      {% elif it.kind %}<span class="kind">{{ it.kind }}</span>{% endif %}
-      {% if review %}<span class="status {{ it.status }}">{{ it.status_label }}</span>{% endif %}
-    </div>
-    <div class="r">
-      {% if sec.key != "why" %}
-      <h3>{{ it.heading }}</h3>
-      {% if it.sub %}<p class="sub">{{ it.sub }}</p>{% endif %}
-      {% if it.person %}<p class="sub">Led by {{ it.person }}</p>{% endif %}
-      {% endif %}
-      <p>{{ it.text }}{% for n in it.refs %}<sup class="ref"><a href="#{{ 'ev' if review else 'src' }}-{{ n }}">[{{ n }}]</a></sup>{% endfor %}</p>
-      {% if review %}
-        {% for n in it.refs %}{% set s = sources[n - 1] %}
-        <p class="evline">[{{ n }}] {% if s.quote %}“{{ s.quote }}” {% endif %}{{ s.host }} ·
-          <a href="{{ s.deep_link if s.quote else s.url }}">{{ "Open at quote" if s.quote else "Open page" }}</a></p>
-        {% endfor %}
-        {% if it.notes %}<div class="internal notes"><b>Officer note:</b> {{ it.notes }}</div>{% endif %}
-      {% endif %}
-    </div>
+  <div class="card" id="{{ it.id }}">
+    <p class="kind">{% if sec.key == "why" %}Point {{ loop.index }}{% elif it.kind %}{{ it.kind }}{% endif %}{% if review %} <span class="status {{ it.status }}">· {{ it.status_label }}</span>{% endif %}</p>
+    {% if sec.key != "why" %}
+    <h3>{{ it.heading }}</h3>
+    {% if it.sub %}<p class="sub">{{ it.sub }}</p>{% endif %}
+    {% if it.person %}<p class="sub">Led by {{ it.person }}</p>{% endif %}
+    {% endif %}
+    <p>{{ it.text }}{% for n in it.refs %}<sup class="ref"><a href="#{{ 'ev' if review else 'src' }}-{{ n }}">[{{ n }}]</a></sup>{% endfor %}</p>
+    {% if review %}
+      {% for n in it.refs %}{% set s = sources[n - 1] %}
+      <p class="evline">[{{ n }}] {% if s.quote %}“{{ s.quote }}” {% endif %}{{ s.host }} ·
+        <a href="{{ s.deep_link if s.quote else s.url }}">{{ "Open at quote" if s.quote else "Open page" }}</a></p>
+      {% endfor %}
+      {% if it.notes %}<div class="internal notes"><b>Officer note:</b> {{ it.notes }}</div>{% endif %}
+    {% endif %}
   </div>
   {% endfor %}
 </section>
-{% endfor %}
-
-{# ------------------------------------------------------------- Visit day #}
-{% if visit_day %}
-<section class="sec cont" id="sec-visit">
-  <div class="row">
-    <div class="l"><h2>A suggested visit day</h2></div>
-    <div class="r">
-      <p class="lede">A draft programme for one day in Bern. Nothing is arranged yet. If you decide to visit, the agency asks each group whether they are available.</p>
-      <table class="visit">
-        {% for v in visit_day %}
-        <tr><td class="time">{{ v.time }}</td><td>{{ v.topic }}{% if v.with %}<br><span class="lede">{{ v.with }}</span>{% endif %}</td></tr>
-        {% endfor %}
-      </table>
-    </div>
-  </div>
-</section>
 {% endif %}
+{% endfor %}
 
 {# ------------------------------------------------------------- Sources #}
 <section class="sec" id="sec-sources">
-  <div class="row">
-    <div class="l"><h2>{{ "Evidence" if review else "Sources" }}</h2></div>
-    <div class="r"><p class="lede">
-      {%- if review %}Each [n] with the exact quote from the public page. "Open at quote" opens the page scrolled to the sentence; if the page has changed, it opens at the top.
-      {%- else %}Every statement in this document is based on these public pages.{% endif -%}
-    </p></div>
-  </div>
-  <div class="row"><div class="l"></div><div class="r">
+  <h2>{{ "Evidence" if review else "Sources" }}</h2>
+  <p class="lede">
+    {%- if review %}Each [n] with the exact quote from the public page. "Open at quote" opens the page scrolled to the sentence; if the page has changed, it opens at the top.
+    {%- else %}Every statement in this document is based on these public pages.{% endif -%}
+  </p>
+  <p class="lede">Drafted with Apertus on Swiss infrastructure (CSCS); confidential figures and contact data were struck before any text left the agency.</p>
   {% if review %}
     {% for s in sources %}
     <div class="ev" id="ev-{{ s.n }}">
@@ -131,7 +105,6 @@
       {% endfor %}
     </ol>
   {% endif %}
-  </div></div>
 </section>
 </body>
 </html>

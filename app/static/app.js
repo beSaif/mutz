@@ -57,7 +57,7 @@
   }
   function addBot(m) {
     var d = document.createElement("div"); d.className = "m bot";
-    var h = '<span class="w">Mutz</span><p>' + cite(m.text, m.sources) + "</p>";
+    var h = '<span class="w">Bärner Mutz</span><p>' + cite(m.text, m.sources) + "</p>";
     if (m.note) h += '<span class="lb">' + esc(m.note) + "</span>";
     if (m.table) {
       h += '<table class="sc"><thead><tr>' + m.table.head.map(function (x) { return "<th>" + esc(x) + "</th>"; }).join("") + "</tr></thead><tbody>";
@@ -97,7 +97,7 @@
     busy = true;
     addMe(q); input.value = "";
     var wait = document.createElement("div"); wait.className = "m bot"; wait.setAttribute("role", "status");
-    wait.innerHTML = '<span class="w">Mutz</span><div style="display:flex;gap:10px;align-items:center">' + $("#tpl-search").innerHTML + '<p class="lb">Bear with me… searching the archives.</p></div>';
+    wait.innerHTML = '<span class="w">Bärner Mutz</span><div style="display:flex;gap:10px;align-items:center">' + $("#tpl-search").innerHTML + '<p class="lb">Bear with me… searching the archives.</p></div>';
     msgs.appendChild(wait); msgs.scrollTop = msgs.scrollHeight;
     post("/api/mutz", {key: key, message: q, ctx: ctx, selection: selection}).then(function (r) {
       wait.remove(); addBot(r);
@@ -158,8 +158,11 @@
     if (autoExtract && f) { reading(); f.submit(); }
     var t = $("[data-lead-title]");
     if (t) t.addEventListener("change", function () { post("/api/leads/" + lid, {title: t.value}); });
+    var openNeed = null;
+    try { openNeed = sessionStorage.getItem("openNeed"); sessionStorage.removeItem("openNeed"); } catch (x) {}
     $$("[data-need]").forEach(function (row) {
       var id = row.dataset.need;
+      if (id === openNeed) { var dt = row.querySelector("details.nm"); if (dt) dt.open = true; }
       var tx = row.querySelector("[data-need-text]");
       if (tx) {
         tx.addEventListener("blur", function () { post("/api/needs/" + id, {text: tx.textContent}); });
@@ -170,7 +173,7 @@
       });
       var add = row.querySelector("[data-addterm]");
       if (add) add.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") { e.preventDefault(); post("/api/needs/" + id, {add_term: add.value}).then(function () { location.reload(); }); }
+        if (e.key === "Enter") { e.preventDefault(); try { sessionStorage.setItem("openNeed", id); } catch (x) {} post("/api/needs/" + id, {add_term: add.value}).then(function () { location.reload(); }); }
       });
       var sh = row.querySelector("[data-share]");
       if (sh) sh.addEventListener("change", function () { post("/api/needs/" + id, {shareable: sh.checked}); });
@@ -215,9 +218,10 @@
           });
           return;
         }
-        if (e.target.closest("a,button")) return;
+        if (e.target.closest("a,button,input")) return;
         $$("article.sel").forEach(function (x) { x.classList.remove("sel"); });
         a.classList.add("sel");
+        $$("[data-bd]").forEach(function (x) { x.classList.toggle("hidden", x.dataset.bd !== a.dataset.entity); });
         window.mutzSelect({entity_id: a.dataset.entity, need: a.dataset.need, name: a.querySelector("h2").textContent});
       });
     });

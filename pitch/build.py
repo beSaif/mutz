@@ -117,6 +117,10 @@ SECTIONS = [
     ("matches", "Matches"),
     ("infrastructure", "Infrastructure and services"),
 ]
+# The pitch reads as why Bern, what Bern offers, how to start. Each section carries its part as a kicker.
+PARTS = {"why": "Why", "matches": "What", "infrastructure": "What", "visit": "How"}
+BLOCKS = ["why", "matches", "infrastructure", "visit"]
+VISIT_TITLE = "A suggested visit day"
 _SECTION_BY_TYPE = {
     "why": "why", "why_bern": "why", "point": "why", "reason": "why",
     "infrastructure": "infrastructure", "service": "infrastructure",
@@ -185,6 +189,8 @@ def _prose_fields(pitch) -> list[tuple[str, str, int | None]]:
     out = [("Title", pitch.get("title") or "", None), ("Intro", pitch.get("intro") or "", None)]
     for i, c in _included(pitch):
         out.append((f"{_card_label(i, c)} text", c.get("text") or "", i))
+    if pitch.get("how"):
+        out.append(("How to start", pitch.get("how") or "", None))
     for j, v in enumerate(pitch.get("visit_day") or []):
         if isinstance(v, dict):
             out.append((f"Visit day line {j + 1}",
@@ -351,6 +357,12 @@ def _context(pitch: dict, mode: str) -> dict:
     index: dict[tuple, int] = {}
     sections = []
     claim_no = 0
+    # order and titles as the officer set them in the editor; the app calls the infrastructure section "infra"
+    given = [({"infra": "infrastructure"}.get(sec.get("id"), sec.get("id")), sec) for sec in pitch.get("sections") or []
+             if isinstance(sec, dict)]
+    titles = {k: sec["title"] for k, sec in given if sec.get("title")}
+    order = [k for k, _ in given if k in BLOCKS]
+    order += [k for k in BLOCKS if k not in order]
     for key, title in SECTIONS:
         items = []
         for i, c in _included(pitch):
@@ -396,7 +408,7 @@ def _context(pitch: dict, mode: str) -> dict:
                 "notes": c.get("notes") or "",
             })
         if items:
-            sections.append({"key": key, "title": title, "cards": items})
+            sections.append({"key": key, "title": titles.get(key) or title, "part": PARTS[key], "cards": items})
     for s in sources:  # mark sources whose claim was edited
         s["status"] = "edited" if s["edited"] else ("verified" if s["quote"] else "needs_check")
 
@@ -408,7 +420,9 @@ def _context(pitch: dict, mode: str) -> dict:
         "company": company, "officer": pitch.get("officer") or {},
         "date": _fmt_date(pitch.get("created_at")) or _fmt_date(date.today()),
         "case_id": pitch.get("case_id") or "",
-        "sections": sections, "sources": sources,
+        "sections": sections, "sources": sources, "how": pitch.get("how") or "",
+        "blocks": [k for k in order if k == "visit" or any(sec["key"] == k for sec in sections)],
+        "visit_title": titles.get("visit") or VISIT_TITLE,
         "visit_day": [v for v in pitch.get("visit_day") or [] if isinstance(v, dict)],
         "logo_uri": logo_uri, "agency": AGENCY_NAME,
         "n_cards": sum(len(s["cards"]) for s in sections),

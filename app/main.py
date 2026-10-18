@@ -13,7 +13,7 @@ from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
@@ -21,6 +21,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app import contracts, db, pitchgen, stubs
+from search.query import RECENCY_MULT, SMALL_UNIT_BOOST, TYPE_W
 
 log = logging.getLogger("mutz.app")
 ROOT = Path(__file__).parent
@@ -50,7 +51,25 @@ async def lifespan(_app):
     yield
 
 
-app = FastAPI(title="mutz Expertise Navigator", lifespan=lifespan)
+app = FastAPI(title="Bärner Mutz", lifespan=lifespan)
+BASIC_AUTH = os.environ.get("MUTZ_BASIC_AUTH", "")  # "user:password" puts the whole app behind a login, for a shared link
+
+
+@app.middleware("http")
+async def basic_auth(request: Request, call_next):
+    if not BASIC_AUTH or request.url.path == "/health":
+        return await call_next(request)
+    import base64, secrets
+    scheme, _, cred = request.headers.get("authorization", "").partition(" ")
+    try:
+        given = base64.b64decode(cred).decode() if scheme.lower() == "basic" else ""
+    except Exception:
+        given = ""
+    if secrets.compare_digest(given.encode(), BASIC_AUTH.encode()):
+        return await call_next(request)
+    return Response(status_code=401, headers={"WWW-Authenticate": 'Basic realm="mutz"'})
+
+
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 T = Jinja2Templates(directory=ROOT / "templates")
 db.init()
@@ -81,6 +100,16 @@ TYPE_FILTER = [("all", "All"), ("person", "People"), ("study", "Studies"), ("uni
                ("infrastructure", "Infrastructure")]
 NEED_LABEL = {"research": "R&D partner", "infrastructure": "Infrastructure", "supplier": "Supplier",
               "funding": "Funding", "transfer": "Tech transfer", "other": "Other"}
+# Matches screen: how the list can be ordered and narrowed. Every option says what it does (no silent reranking).
+SORTS = [("score", "Score", "Highest score first, as the search ranked it. A unit's best people follow it, at most 3 per unit."),
+         ("evidence", "Evidence", "How closely the quotes match the need, before the role, recency and type weights."),
+         ("recency", "Most recent", "Latest year found on its public pages, newest first."),
+         ("activity", "Active first", "Active, then quiet, then past. Score decides within each group."),
+         ("name", "Name", "A to Z.")]
+REC_ORDER = {"active": 0, "quiet": 1, "past": 2}
+REC_LABEL = {"active": "Active", "quiet": "Quiet", "past": "Past"}
+SCORE_BANDS = [("0.75", "0.75 or more"), ("0.5", "0.5 or more"), ("0.25", "0.25 or more")]
+GRADE_LABEL = {3: "Direct", 2: "Partial", 1: "Adjacent"}
 STAGES = ["new", "triaged", "pitched", "visit", "won", "lost"]
 LOST_REASONS = ["Chose another canton", "No Bern strength", "Project stopped", "No reply"]
 
@@ -442,15 +471,18 @@ def case_ctx(l, step):
     has_matches = any(n.get("searched_at") for n in db.needs(l["id"]))
     draft, saved = db.pitch_draft(l["id"])
     sent = bool(db.versions(l["id"]))
+    cards = pitchgen.visible_cards(draft) if draft else []
     return {"step": step, "done": {"brief": bool(db.needs(l["id"])), "matches": has_matches,
-                                   "map": bool(db.accepted(l["id"])), "pitch": sent},
+                                   "map": bool(db.accepted(l["id"])),
+                                   "pitch": sent or bool(cards and all(c.get("checked") for c in cards)), "export": sent},
             "saved": saved, "sent": sent}
 
 
 @app.get("/leads/{lid}", response_class=HTMLResponse)
 def lead_open(lid: str):
     l = get_lead(lid)
-    step = {"brief": "brief", "matches": "matches", "map": "map", "pitch": "pitch", "sent": "after"}.get(l["step"], "brief")
+    step = {"brief": "brief", "matches": "matches", "map": "map", "pitch": "pitch", "export": "export",
+            "sent": "after"}.get(l["step"], "brief")
     if l["stage"] in ("pitched", "visit", "won", "lost"):
         step = "after"
     return RedirectResponse(f"/leads/{lid}/{step}", 303)
@@ -685,12 +717,60 @@ def decorate(n, lid):
             out.append(m)
     for r in out:
         r["is_adjacent"] = bool(r.get("adjacent") or "adjacent" in (r.get("tags") or []))
+        r["parts"] = score_parts(r, n.get("type"))
     out.sort(key=lambda r: r["is_adjacent"])  # direct matches first, adjacent after (stable keeps the rank)
     return out
 
 
+def score_parts(r, need_type):
+    """search.query's ranking formula, factor by factor: score = evidence x role x recency x type x boost.
+    Results stored before the search recorded evidence and boost get evidence back-derived, boost included."""
+    if r.get("score") is None:
+        return None
+    score = float(r["score"])
+    rec = r.get("recency") or "active"
+    rm = RECENCY_MULT.get(rec, 1.0)
+    sen = float(r["seniority"]) if r.get("seniority") is not None else (0.5 if r["ftype"] == "person" else 1.0)
+    tw = 1.0 if need_type == "infrastructure" else TYPE_W.get(r.get("type"), 1.0)
+    boost, match = r.get("boost"), r.get("match")
+    derived = match is None
+    if derived:
+        match = score / (sen * rm * tw) if sen * rm * tw else 0.0
+    g = r.get("grade")
+    ev_note = "Best quote against the need, local cross encoder"
+    if g:
+        ev_note += f", blended 60 % with the Apertus 70B grade {g}/3"
+    if derived:
+        ev_note += ". Older search: includes any small-group boost"
+    rows = [
+        ("Evidence", match, ev_note),
+        ("Role", sen, ("Function weight: " + (r.get("function") or "not stated")) if r["ftype"] == "person" else "Units, studies and infrastructure count fully"),
+        ("Recency", rm, f"{REC_LABEL.get(rec, rec)}" + (": " + re.sub(r"https?://\S+?(?=\)|$|\s)", lambda u: host(u.group(0)), r["recency_basis"]) if r.get("recency_basis") else "") + " (active 1.0, quiet 0.8, past 0.6)"),
+        ("Type", tw, "Infrastructure counts 0.6 unless the need asks for it, studies 0.9" if tw != 1.0 else "Full weight for this need"),
+    ]
+    if not derived:
+        rows.append(("Small group", boost or 1.0, f"x{SMALL_UNIT_BOOST} for a small unit with a strong quote (fair exposure)" if (boost or 1.0) > 1 else "No boost"))
+    return {"rows": rows, "score": score, "evidence": match, "derived": derived}
+
+
+def sort_filter(results, sort, cov, rec, smin, grade):
+    """Filter on the score signals, then order. Adjacent matches stay after direct ones in every order."""
+    out = [r for r in results
+           if (not cov or r.get("coverage") == cov) and (not rec or r.get("recency") == rec)
+           and (not smin or (r.get("score") or 0) >= float(smin)) and (not grade or str(r.get("grade")) == grade)]
+    key = {"evidence": lambda r: -((r.get("parts") or {}).get("evidence") or 0),
+           "recency": lambda r: (-(r.get("recency_year") or 0), -(r.get("score") or 0)),
+           "activity": lambda r: (REC_ORDER.get(r.get("recency"), 3), -(r.get("score") or 0)),
+           "name": lambda r: (r.get("name") or "").lower()}.get(sort)
+    if key:
+        out.sort(key=key)
+    out.sort(key=lambda r: r["is_adjacent"])
+    return out
+
+
 @app.get("/leads/{lid}/matches", response_class=HTMLResponse)
-def matches(request: Request, lid: str, need: str = "", type: str = "all", why: str = ""):
+def matches(request: Request, lid: str, need: str = "", type: str = "all", why: str = "", sort: str = "score",
+            cov: str = "", rec: str = "", smin: str = "", grade: str = ""):
     l = get_lead(lid)
     ns = db.needs(lid)
     if not ns:
@@ -702,7 +782,21 @@ def matches(request: Request, lid: str, need: str = "", type: str = "all", why: 
     cur = next((n for n in ns if n["id"] == need), None) or next((n for n in ns if n.get("searched_at") and n.get("coverage") != "none"), None) or ns[0]
     results = decorate(cur, lid) if cur.get("searched_at") else []
     counts = Counter(r["ftype"] for r in results)
-    shown = [r for r in results if type == "all" or r["ftype"] == type]
+    sort = sort if sort in dict((k, 1) for k, *_ in SORTS) else "score"
+    cov = cov if cov in ("strong", "thin") else ""
+    rec = rec if rec in REC_ORDER else ""
+    smin = smin if smin in dict(SCORE_BANDS) else ""
+    grade = grade if grade in ("1", "2", "3") else ""
+    typed = [r for r in results if type == "all" or r["ftype"] == type]
+    shown = sort_filter(typed, sort, cov, rec, smin, grade)
+    facets = {"cov": Counter(r.get("coverage") for r in typed), "rec": Counter(r.get("recency") for r in typed),
+              "smin": {b: sum(1 for r in typed if (r.get("score") or 0) >= float(b)) for b, _ in SCORE_BANDS},
+              "grade": Counter(str(r.get("grade")) for r in typed if r.get("grade"))}
+    state = {"need": cur["id"], "type": type, "sort": sort, "cov": cov, "rec": rec, "smin": smin, "grade": grade}
+
+    def murl(**kw):
+        q = {**state, **kw}
+        return "?" + urlencode({k: v for k, v in q.items() if v and not (k == "type" and v == "all") and not (k == "sort" and v == "score")})
     # number sources across the visible list
     n_src = 0
     for r in shown:
@@ -730,7 +824,9 @@ def matches(request: Request, lid: str, need: str = "", type: str = "all", why: 
     arch = archive_stats()
     pending = [n for n in ns if not n.get("searched_at")]
     return render(request, "matches.html", lead=l, needs=ns, cur=cur, results=shown, counts=counts, total=len(results),
-                  ftype=type, filters=TYPE_FILTER, bid=bid,
+                  ftype=type, filters=TYPE_FILTER, bid=bid, sorts=SORTS, sort=sort, cov=cov, rec=rec, smin=smin,
+                  grade=grade, facets=facets, bands=SCORE_BANDS, grades=GRADE_LABEL, rec_label=REC_LABEL, murl=murl,
+                  filtered=bool(cov or rec or smin or grade), n_typed=len(typed),
                   any_grants=any(r.get("grants") or r.get("grants_other") for r in shown), n_acc=n_acc, curated=curated[:2], searching=searching,
                   pending=pending, arch=arch, case=case_ctx(l, "matches"), whynot=whynot, why=why,
                   mutz={"screen": "Matches", "lead": lid, "need": cur["id"], "need_text": cur["text"],
@@ -769,59 +865,123 @@ async def missed(request: Request):
 
 # ---------------------------------------------------------------- evidence map
 
+_PAGES = {}
+HOW_NOTE = {"Read": "Read: the quote stands word for word on the page.",
+            "Derived": "Derived: worked out from the page, not quoted. Check it before use.",
+            "Missing": "Missing: no crawled page states it."}
+
+
+def page_meta(url):
+    """Title and fetch date of a crawled page, by URL without the #fragment."""
+    if not url:
+        return {}
+    c = stubs.corpus()
+    if _PAGES.get("c") is not c:
+        _PAGES.clear()
+        _PAGES.update(c=c, ix={p["url"].split("#")[0]: p for p in c.pages.values()})
+    pg = _PAGES["ix"].get(url.split("#")[0]) or {}
+    return {"title": pg.get("title"), "fetched": fmt_date(pg.get("fetched_at"))}
+
+
+def _src(url, quote=None, deep_link=None):
+    return {"url": url, "host": host(url or ""), "quote": quote, "deep_link": deep_link or url, **page_meta(url)}
+
+
+def profile(r):
+    """A match's ranking factors on one 0-1 scale, for the radar: score_parts' rows plus the Apertus grade."""
+    parts = {k: v for k, v, _ in ((r.get("parts") or {}).get("rows") or [])}
+    clamp = lambda v: None if v is None else max(0.0, min(1.0, round(float(v), 2)))
+    return [["Evidence", clamp(parts.get("Evidence"))], ["Role", clamp(parts.get("Role"))],
+            ["Recency", clamp(parts.get("Recency"))], ["Type", clamp(parts.get("Type"))],
+            ["Apertus grade", clamp(r["grade"] / 3) if r.get("grade") else None]]
+
+
 def build_map(lid, only_accepted=True):
+    """Need -> match -> fact -> source, as a nested tree. The page collapses it to needs and matches.
+    detail holds everything the side panel shows for each node, keyed by the node's data-id."""
     ns = db.needs(lid)
-    acc = db.decisions(lid)
-    accd = {(d["need_id"], d["entity_id"]) for d in acc if d["decision"] == "accept"}
-    cols = []  # each column = one fact/source leaf
-    needs_out, matches_out, facts, edges = [], [], [], []
-    entity_needs = Counter()
-    for n in ns:
-        for r in decorate(n, lid):
-            if (n["id"], r["entity_id"]) in accd:
-                entity_needs[r["entity_id"]] += 1
-    W, G = 170, 20
-    x = 80
-    for ni, n in enumerate(ns):
-        ms = [r for r in decorate(n, lid) if (n["id"], r["entity_id"]) in accd or (not only_accepted and r.get("decision") != "reject")]
+    accd = {(d["need_id"], d["entity_id"]) for d in db.decisions(lid) if d["decision"] == "accept"}
+    per_need = [(n, decorate(n, lid)) for n in ns]
+    entity_needs = Counter(r["entity_id"] for n, rs in per_need for r in rs if (n["id"], r["entity_id"]) in accd)
+    in_needs = {}  # entity -> the needs it is accepted for, or suggested in
+    for ni, (n, rs) in enumerate(per_need):
+        for r in rs:
+            if (n["id"], r["entity_id"]) in accd or (not only_accepted and r.get("decision") != "reject"):
+                in_needs.setdefault(r["entity_id"], []).append(
+                    {"i": ni + 1, "label": n["label"], "accepted": (n["id"], r["entity_id"]) in accd})
+    needs_out, detail = [], {}
+    for ni, (n, rs) in enumerate(per_need):
+        ms = [r for r in rs if (n["id"], r["entity_id"]) in accd or (not only_accepted and r.get("decision") != "reject")]
         if not ms:
             continue
-        nx0 = x
-        for r in ms[:4]:
-            mx0 = x
+        matches_out = []
+        for r in ms:
+            acc = (n["id"], r["entity_id"]) in accd
+            mid = f"m:{n['id']}:{r['entity_id']}"
             leaves = []
-            for s in (r.get("reasons") or [])[:2]:
-                leaves.append({"kind": "Fact · Read", "label": s.get("quote", ""), "url": s.get("url"), "quote": s.get("quote"),
-                               "deep_link": s.get("deep_link") or s.get("url"), "style": "read",
-                               "src": host(s.get("url", "")) + (" · " + (r.get("unit") or "")[:20] if r.get("unit") else "")})
             if r.get("function"):
                 fsrc = (r.get("reasons") or [{}])[0]
-                leaves.insert(0, {"kind": "Function · Read", "label": r["function"], "url": fsrc.get("url"),
-                                  "quote": fsrc.get("quote"), "deep_link": fsrc.get("deep_link") or fsrc.get("url"),
-                                  "style": "derived", "src": host(fsrc.get("url", ""))})
+                leaves.append({"kind": "Function", "how": "Derived", "label": r["function"], "url": fsrc.get("url"),
+                               "quote": fsrc.get("quote"), "deep_link": fsrc.get("deep_link") or fsrc.get("url"),
+                               "style": "derived", "src": host(fsrc.get("url", ""))})
             elif r["ftype"] == "person":
-                leaves.append({"kind": "Function · Missing", "label": "Not stated on any source", "style": "missing"})
+                leaves.append({"kind": "Function", "how": "Missing", "label": "Not stated on any source", "style": "missing"})
+            for s_ in (r.get("reasons") or [])[:3]:
+                leaves.append({"kind": "Fact", "how": "Read", "label": s_.get("quote", ""), "url": s_.get("url"), "quote": s_.get("quote"),
+                               "deep_link": s_.get("deep_link") or s_.get("url"), "style": "read", "src": host(s_.get("url", ""))})
             for g in (r.get("grants") or [])[:1]:
-                leaves.append({"kind": "Grant · Read", "label": g.get("title", ""), "url": g.get("url"), "quote": g.get("title"),
+                leaves.append({"kind": "Grant", "how": "Read", "label": g.get("title", ""), "url": g.get("url"), "quote": g.get("title"),
                                "deep_link": g.get("url"), "style": "read", "src": host(g.get("url", "")) or "SNSF"})
-            leaves = leaves[:3] or [{"kind": "Fact · Missing", "label": "No quote stored", "style": "missing"}]
-            for lf in leaves:
-                lf.update(x=x, need=n["id"], entity=r["entity_id"], mname=r.get("name"))
-                facts.append(lf)
-                x += W + G
-            mx1 = x - G
-            mw = max(W, min(220, mx1 - mx0))
-            matches_out.append({"x": (mx0 + mx1) / 2 - mw / 2, "w": mw, "cx": (mx0 + mx1) / 2, "need": n["id"],
-                                "entity": r["entity_id"], "name": r.get("name"), "type": TYPE_LABEL.get(r["ftype"], "Match"),
-                                "badge": entity_needs[r["entity_id"]] if entity_needs[r["entity_id"]] > 1 else 0,
-                                "leaves": [lf["x"] + W / 2 for lf in facts if lf["entity"] == r["entity_id"] and lf["need"] == n["id"]]})
-        nx1 = x - G
-        nw = max(W, min(220, nx1 - nx0))
-        needs_out.append({"x": (nx0 + nx1) / 2 - nw / 2, "w": nw, "cx": (nx0 + nx1) / 2, "id": n["id"], "i": ni + 1,
-                          "label": n["label"], "text": n["text"], "cov": n.get("coverage") or "none",
-                          "kids": [m["cx"] for m in matches_out if m["need"] == n["id"]]})
-        x += 20
-    return {"needs": needs_out, "matches": matches_out, "facts": facts, "width": max(x, 900), "W": W}
+            if not leaves:
+                leaves = [{"kind": "Fact", "how": "Missing", "label": "No quote stored", "style": "missing"}]
+            for k, f in enumerate(leaves):
+                f["id"], f["sid"] = f"{mid}:f{k}", f"{mid}:s{k}"
+                src = _src(f.get("url"), f.get("quote"), f.get("deep_link")) if f.get("url") else None
+                detail[f["id"]] = {"kind": "Fact", "title": f["label"], "sub": f["kind"] + " · " + f["how"], "how": f["how"],
+                                   "how_note": HOW_NOTE[f["how"]], "quote": f.get("quote"), "src": src,
+                                   "match": r.get("name"), "match_id": mid, "need": n["label"], "need_i": ni + 1,
+                                   "entity": r["entity_id"], "need_id": n["id"], "accepted": acc}
+                if src:
+                    detail[f["sid"]] = {"kind": "Source", "title": src.get("title") or src["host"], "sub": src["host"], "src": src,
+                                        "quote": f.get("quote"), "fact_id": f["id"], "match": r.get("name")}
+            seen, pages = set(), []
+            for x in (r.get("reasons") or []):
+                u = (x.get("url") or "").split("#")[0]
+                if u and u not in seen:
+                    seen.add(u)
+                    pages.append(_src(x.get("url")))
+            people = [{"name": p.get("name"), "role": p.get("function")} for p in (r.get("contacts") or r.get("people") or [])]
+            detail[mid] = {
+                "kind": "Match", "title": r.get("name"), "sub": TYPE_LABEL.get(r["ftype"], "Match") + (" · accepted" if acc else " · suggested, not accepted"),
+                "type": TYPE_LABEL.get(r["ftype"], "Match"), "unit": r.get("unit") if r.get("unit") != r.get("name") else None,
+                "role": r.get("function"), "person": r["ftype"] == "person", "people": people,
+                "recency": " · ".join(x for x in [REC_LABEL.get(r.get("recency"), r.get("recency") or ""),
+                                                  str(r["recency_year"]) if r.get("recency_year") else ""] if x) or None,
+                "recency_basis": re.sub(r"https?://\S+?(?=\)|$|\s)", lambda u: host(u.group(0)), r["recency_basis"]) if r.get("recency_basis") else None,
+                "coverage": r.get("coverage"), "grade": GRADE_LABEL.get(r.get("grade")) and f"{r['grade']}/3, {GRADE_LABEL[r['grade']].lower()}",
+                "score": round(float(r["score"]), 2) if r.get("score") is not None else None,
+                "why": re.sub(r"\s*(\[\d+\])+", "", r.get("explanation") or r.get("reason") or "").strip() or None,
+                "facts": [{"quote": x.get("quote"), **_src(x.get("url"), x.get("quote"), x.get("deep_link"))} for x in (r.get("reasons") or [])],
+                "grants": [{"title": g.get("title"), "url": g.get("url"), "year": str(g.get("start") or g.get("year") or "")[:4] or None} for g in (r.get("grants") or [])],
+                "grants_other": r.get("grants_other") or 0,
+                "pages": pages, "needs": in_needs.get(r["entity_id"], []), "profile": profile(r),
+                "entity": r["entity_id"], "need_id": n["id"], "accepted": acc, "added_by": r.get("added_by")}
+            matches_out.append({"entity": r["entity_id"], "id": mid, "name": r.get("name"), "type": TYPE_LABEL.get(r["ftype"], "Match"),
+                                "accepted": acc, "facts": leaves,
+                                "badge": entity_needs[r["entity_id"]] if entity_needs[r["entity_id"]] > 1 else 0})
+        mids = [mt["id"] for mt in matches_out]
+        for mid_ in mids:  # the radar overlays the next two matches of the same need
+            detail[mid_]["peers"] = [x for x in mids if x != mid_][:2]
+        nid = f"n:{n['id']}"
+        detail[nid] = {"kind": "Need", "title": n["label"], "sub": f"Need {ni + 1}", "text": n["text"],
+                       "sentence": n.get("from_sentence") or None,
+                       "from": {"pdf": "the PDF", "website": "the website", "keywords": "your keywords"}.get(n.get("source"), "the pasted text"),
+                       "cov": n.get("coverage") or "none", "shown": len(ms), "accepted_n": sum(1 for r in ms if (n["id"], r["entity_id"]) in accd),
+                       "found": len((n.get("result") or {}).get("results") or []),
+                       "terms": [t["t"] for t in n.get("terms") or [] if t.get("on")]}
+        needs_out.append({"id": n["id"], "nid": nid, "i": ni + 1, "label": n["label"], "text": n["text"],
+                          "cov": n.get("coverage") or "none", "matches": matches_out})
+    return {"needs": needs_out, "detail": detail}
 
 
 @app.get("/leads/{lid}/map", response_class=HTMLResponse)
@@ -846,6 +1006,7 @@ def ensure_draft(lid):
         draft = pitchgen.new_draft(l, db.needs(lid), acc)
         db.save_pitch(lid, draft)
     else:
+        pitchgen.upgrade(draft)
         # accepted after the draft was made: append as new match cards, never touch existing ones
         have = {c.get("entity_id") for c in draft["cards"]}
         add = [d for d in acc if d["entity_id"] not in have and d.get("match")]
@@ -864,7 +1025,8 @@ def pitch(request: Request, lid: str, section: str = "why"):
     if l["step"] in ("brief", "matches", "map"):
         db.update_lead(lid, step="pitch")
     return render(request, "pitch.html", lead=l, draft=draft, section=section, case=case_ctx(l, "pitch"),
-                  mutz={"screen": "Pitch", "lead": lid, "corner": "left", "bubble": "Ask Mutz about this pitch"})
+                  today=datetime.now().strftime("%-d %B %Y"),
+                  mutz={"screen": "Pitch", "lead": lid, "corner": "left", "bubble": "Ask Bärner Mutz about this pitch"})
 
 
 @app.post("/api/pitch/{lid}")
@@ -897,14 +1059,23 @@ def pitch_reset(lid: str):
     return {"ok": True}
 
 
-# ---------------------------------------------------------------- review and export
+# ---------------------------------------------------------------- export: review, PDF, send
+# Its own step after the pitch: the pitch screen only builds content, nothing leaves from there.
 
-@app.get("/leads/{lid}/review", response_class=HTMLResponse)
+@app.get("/leads/{lid}/review")
+def review_old(request: Request, lid: str):
+    q = request.url.query
+    return RedirectResponse(f"/leads/{lid}/export" + (f"?{q}" if q else ""), 307)
+
+
+@app.get("/leads/{lid}/export", response_class=HTMLResponse)
 def review(request: Request, lid: str, done: int = 0, err: str = ""):
     l = get_lead(lid)
     draft = ensure_draft(lid) if (db.accepted(lid) or db.pitch_draft(lid)[0]) else None
     if not draft:
         return RedirectResponse(f"/leads/{lid}/pitch", 303)
+    if l["step"] in ("brief", "matches", "map", "pitch"):
+        db.update_lead(lid, step="export")
     p = pitchgen.to_contract(draft, l)
     try:
         problems = contracts.validate(p)
@@ -914,7 +1085,7 @@ def review(request: Request, lid: str, done: int = 0, err: str = ""):
     stats = {"verified": sum(1 for c in cards if not c.get("edited") and c.get("sources") and all(s.get("quote") for s in c["sources"])),
              "edited": sum(1 for c in cards if c.get("edited") and c.get("sources")),
              "nosource": sum(1 for c in cards if not c.get("sources")),
-             "unchecked": sum(1 for c in cards if not c.get("checked"))}
+             "unchecked": sum(1 for c in cards if not c.get("checked")), "total": len(cards)}
     srcs, seen = [], {}
     for c in cards:
         for s in c.get("sources", []):
@@ -925,8 +1096,8 @@ def review(request: Request, lid: str, done: int = 0, err: str = ""):
             srcs.append({**s, "card": c, "n": len(srcs) + 1})
     vs = db.versions(lid)
     return render(request, "review.html", lead=l, draft=draft, stats=stats, problems=problems, srcs=srcs, versions=vs,
-                  done=done, err=err, case=case_ctx(l, "pitch"),
-                  mutz={"screen": "Review", "lead": lid, "corner": "left",
+                  done=done, err=err, case=case_ctx(l, "export"),
+                  mutz={"screen": "Export", "lead": lid, "corner": "left",
                         "bubble": "Every card has a source. Good to send." if not stats["nosource"] and not problems else None})
 
 
@@ -936,7 +1107,7 @@ def export(lid: str, clean: str = Form(""), review_pdf: str = Form(""), pjson: s
     draft = ensure_draft(lid)
     cards = pitchgen.visible_cards(draft)
     if any(not c.get("checked") for c in cards) and not override:
-        return RedirectResponse(f"/leads/{lid}/review?err=unchecked", 303)
+        return RedirectResponse(f"/leads/{lid}/export?err=unchecked", 303)
     p = pitchgen.to_contract(draft, l)
     if override:
         p["override_review_gate"] = True
@@ -951,14 +1122,14 @@ def export(lid: str, clean: str = Form(""), review_pdf: str = Form(""), pjson: s
     except Exception as e:
         probs = getattr(e, "problems", None) or [str(e)]
         log.warning("export refused: %s", probs)
-        return RedirectResponse(f"/leads/{lid}/review?err=" + "; ".join(probs)[:400].replace("&", "and"), 303)
+        return RedirectResponse(f"/leads/{lid}/export?err=" + "; ".join(probs)[:400].replace("&", "and"), 303)
     (out / "pitch.json").write_text(json.dumps({**p, "draft": draft}, ensure_ascii=False, indent=1))
     built_from = [e["id"] for e in db.entries(lid)]
     db.add_version(lid, {**p, "draft": draft}, built_from)
     db.add_entry(lid, "pitch", f"Pitch v{n} sent", confidential=0)
     db.update_lead(lid, stage="pitched", step="sent")
     db.update_signal_stage(lid, "pitched")
-    return RedirectResponse(f"/leads/{lid}/review?done={n}", 303)
+    return RedirectResponse(f"/leads/{lid}/export?done={n}", 303)
 
 
 @app.get("/leads/{lid}/export/v{n}/{name}")

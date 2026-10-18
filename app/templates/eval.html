@@ -1,8 +1,11 @@
 {% extends "base.html" %}{% set active_page = "eval" %}
 {% block title %}Evaluation{% endblock %}
+{% block viewclass %}panes{% endblock %}
 {% block content %}
 {% set mt = (ev or {}).get('metrics', {}) %}
 {% macro pct(v) %}{% if v is none %}–{% elif v is number %}{{ (v * 100)|round|int }}%{% else %}{{ v }}{% endif %}{% endmacro %}
+{# a rate as a bar, the number as its label; the tick marks the target #}
+{% macro rate(v, target=none) %}{% if v is number %}<span class="v">{{ pct(v) }}</span><span class="bar" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (v * 100)|round|int }}" aria-valuetext="{{ pct(v) }}{{ ', target ' ~ (target * 100)|int ~ '%' if target }}" style="position:relative;max-width:180px"><i style="width:{{ (v * 100)|round|int }}%"></i>{% if target %}<b class="tgt" style="left:{{ (target * 100)|int }}%" title="Target {{ (target * 100)|int }}%"></b>{% endif %}</span>{% else %}<span class="v">{{ pct(v) }}</span>{% endif %}{% endmacro %}
 {% macro sm(key) %}{% set out = [] %}{% for k in ['heldout','synthetic','dev'] %}{% if splits[k] %}{% set v = splits[k].metrics.get(key) %}{% set _ = out.append(pct(v) ~ ' ' ~ k) %}{% endif %}{% endfor %}{{ out|join(' · ') or '–' }}{% endmacro %}
 <main class="two">
 <section style="flex:999 1 620px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:22px">
@@ -11,10 +14,10 @@
 {% if ev %}
 <div>
 <div class="cr lb" style="border-bottom-color:#111"><span>Criterion</span><span>{{ ev.split|capitalize }} set · other splits</span><span>Target</span></div>
-<div class="cr"><span><b>Expected experts in top 10</b><span class="lb" style="display:block">Recall@10 on the gold set. Adjacent results are excluded.</span></span><span><span class="v">{{ pct(mt.get('recall_at_10')) }}</span><span class="lb" style="display:block">{{ sm('recall_at_10') }}</span></span><span class="lb">≥ 80%</span></div>
-<div class="cr"><span><b>Lay terms find the same experts</b><span class="lb" style="display:block">Synonym parity: overlap of the top 10 across {{ (mt.get('synonym_groups') or {})|length }} groups such as “glucose sensors”, “CGM” and “biosensing”</span></span><span><span class="v">{{ pct(mt.get('synonym_parity')) }}</span><span class="lb" style="display:block">top 10 overlap {{ pct(mt.get('synonym_overlap')) }}</span></span><span class="lb">high</span></div>
-<div class="cr"><span><b>Results with a supporting public page</b><span class="lb" style="display:block">Every quote found on its cited page{% if mt.get('citation_failures') %} · {{ mt.citation_failures|length }} failures{% endif %}</span></span><span class="v">{{ pct(mt.get('citation_validity')) }}</span><span class="lb">100%</span></div>
-<div class="cr"><span><b>Required fields filled</b><span class="lb" style="display:block">{% for k, v in (mt.get('field_completeness_by_field') or {}).items() %}{{ k|replace('_',' ') }} {{ pct(v) }}{{ ' · ' if not loop.last }}{% endfor %}</span></span><span class="v">{{ pct(mt.get('field_completeness')) }}</span><span class="lb">high</span></div>
+<div class="cr"><span><b>Expected experts in top 10</b><span class="lb" style="display:block">Recall@10 on the gold set. Adjacent results are excluded.</span></span><span>{{ rate(mt.get('recall_at_10'), 0.8) }}<span class="lb" style="display:block">{{ sm('recall_at_10') }}</span></span><span class="lb">≥ 80%</span></div>
+<div class="cr"><span><b>Lay terms find the same experts</b><span class="lb" style="display:block">Synonym parity: overlap of the top 10 across {{ (mt.get('synonym_groups') or {})|length }} groups such as “glucose sensors”, “CGM” and “biosensing”</span></span><span>{{ rate(mt.get('synonym_parity')) }}<span class="lb" style="display:block">top 10 overlap {{ pct(mt.get('synonym_overlap')) }}</span></span><span class="lb">high</span></div>
+<div class="cr"><span><b>Results with a supporting public page</b><span class="lb" style="display:block">Every quote found on its cited page{% if mt.get('citation_failures') %} · {{ mt.citation_failures|length }} failures{% endif %}</span></span><span>{{ rate(mt.get('citation_validity'), 1.0) }}</span><span class="lb">100%</span></div>
+<div class="cr"><span><b>Required fields filled</b><span class="lb" style="display:block">{% for k, v in (mt.get('field_completeness_by_field') or {}).items() %}{{ k|replace('_',' ') }} {{ pct(v) }}{{ ' · ' if not loop.last }}{% endfor %}</span></span><span>{{ rate(mt.get('field_completeness')) }}</span><span class="lb">high</span></div>
 <div class="cr"><span><b>New site through config</b><span class="lb" style="display:block">One entry in config/sources.json, no code change. See Archives.</span></span><span class="v">1 step</span><span class="lb">yes</span></div>
 {% if weakest %}<div class="cr" style="background:#FCE3E5;padding-left:8px;padding-right:8px"><span><b>Weakest category</b><span class="lb" style="display:block">Shown on purpose</span></span><span><b>{{ weakest[0]|replace('_',' ') }}</b><span class="lb" style="display:block">{{ pct(weakest[1]) }} Recall@10</span></span><span class="lb">fix next</span></div>{% endif %}
 </div>
@@ -38,7 +41,7 @@
 {% endif %}
 {% endif %}
 </section>
-<aside style="flex:1 1 340px;padding:32px;border-left:1px solid #E30613;display:flex;flex-direction:column;gap:20px">
+<aside style="flex:1 1 340px;padding:32px;border-left:1px solid #D9D9D9;display:flex;flex-direction:column;gap:20px">
 {% set checks = mt.get('checks') or {} %}
 {% if tests or checks %}<div><h2 style="margin:0 0 6px;font-size:18px">Pipeline checks</h2>
 {% for t in tests %}<div class="tc"><b {% if not t.passed %}style="color:#B8000F"{% endif %}>{{ 'Pass' if t.passed else 'Fail' }}</b><span>{{ t.name }}</span></div>{% endfor %}
@@ -49,10 +52,10 @@
 <p style="margin:0 0 6px;font-size:14px">{{ ex.units_exposed }} units appear in the top 10 across all queries. The most shown unit has {{ pct(ex.top1_share) }} of the slots, the top five {{ pct(ex.top5_share) }}.</p>
 <p class="lb" style="margin:0">Gini {{ ex.gini }} · normalised entropy {{ ex.entropy_norm }} (1 is perfectly even)</p></div>{% endif %}
 <div><h2 style="margin:0 0 6px;font-size:18px">What Recall@10 does not measure</h2>
-<p style="margin:0;font-size:14px">The gold set was picked from the same pages we crawl. Real relevance shows only after company feedback, so the officer's accept rate is the metric that counts.{% if missed %} {{ missed }} missed expert{{ 's' if missed != 1 }} flagged through Mutz so far, each a new test case.{% endif %}</p></div>
-<div><h2 style="margin:0 0 6px;font-size:18px">Cost and sovereignty</h2>
+<p style="margin:0;font-size:14px">The gold set was picked from the same pages we crawl. Real relevance shows only after company feedback, so the officer's accept rate is the metric that counts.{% if missed %} {{ missed }} missed expert{{ 's' if missed != 1 }} flagged through Bärner Mutz so far, each a new test case.{% endif %}</p></div>
+<div id="sovereignty"><h2 style="margin:0 0 6px;font-size:18px">Cost and sovereignty</h2>
 <p style="margin:0 0 6px;font-size:14px">{{ usage.calls|num }} gateway calls so far · {{ (usage.tin + usage.tout)|num }} tokens · {{ arch.total|num }} pages crawled{% if mt.get('latency_mean_s') %} · search {{ mt.latency_mean_s|round(1) }} s mean, {{ mt.latency_p95_s|round(1) }} s p95{% endif %}.</p>
-<p class="lb" style="margin:0">Confidential text only goes to Apertus on CSCS. Query embedding runs on this machine. Self hosted path: docker compose with a local Apertus.</p></div>
+<p class="lb" style="margin:0">Confidential figures and contact data are struck on this machine; the rest of a brief only goes to Apertus on CSCS. Query embedding runs on this machine. Self hosted path: docker compose with a local Apertus.</p></div>
 <div style="background:#F2F2F2;padding:14px;font-size:14px">The held out set is locked{% if ev and ev.heldout_lock %} (lock {{ ev.heldout_lock }}){% endif %} and runs once after the freeze. The number is reported as it comes out.</div>
 </aside>
 </main>

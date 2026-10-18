@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% set active_page = "leads" %}
-{% block title %}Review · {{ lead.title }}{% endblock %}
+{% block title %}Export · {{ lead.title }}{% endblock %}
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
+{% block viewclass %}panes{% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:1 1 360px;padding:32px;display:flex;flex-direction:column;gap:18px">
@@ -14,12 +15,15 @@
 </div>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="b p" href="/leads/{{ lead.id }}/after">After sending: timeline</a><a class="b" href="/">Back to Leads</a></div>
 {% else %}
+<div><p class="lb" style="margin:0 0 4px">Export, the last step</p>
 <h1 style="margin:0;font-size:28px;line-height:1.15">{% if problems or stats.nosource %}Not ready yet{% elif stats.unchecked %}{{ stats.unchecked }} card{{ 's' if stats.unchecked != 1 }} left to tick{% else %}Ready to send{% endif %}</h1>
-<dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 18px">
-<dt style="font-size:28px;font-weight:700">{{ stats.verified }}</dt><dd style="margin:0;align-self:center">claims with a verified quote</dd>
-<dt style="font-size:28px;font-weight:700">{{ stats.edited }}</dt><dd style="margin:0;align-self:center">edited by you, source attached</dd>
-<dt style="font-size:28px;font-weight:700">{{ stats.nosource }}</dt><dd style="margin:0;align-self:center">claims without a source</dd>
-</dl>
+<p style="margin:6px 0 0;font-size:14px">Nothing has left the agency yet. Read the evidence, choose the files, then export.</p></div>
+<div style="display:flex;flex-direction:column;gap:12px;max-width:420px">
+{{ ui.meter(stats.total - stats.unchecked, stats.total, "Cards checked") }}
+{{ ui.meter(stats.verified, stats.total, "Claims with a verified quote") }}
+{{ ui.meter(stats.edited, stats.total, "Edited by you, source attached") }}
+{{ ui.meter(stats.nosource, stats.total, "Claims without a source") }}
+</div>
 {% if err %}<div class="err" role="alert">{% if err == 'unchecked' %}<b>{{ stats.unchecked }} card{{ 's' if stats.unchecked != 1 }} not ticked as checked.</b> Tick them in the pitch, or export anyway below.{% else %}<b>Export refused.</b> {{ err }}{% endif %}</div>{% endif %}
 {% if problems %}<div class="err" role="alert"><b>Fix before export:</b><ul style="margin:6px 0 0;padding-left:18px">{% for p in problems %}<li>{{ p }}</li>{% endfor %}</ul></div>{% endif %}
 <form method="post" action="/leads/{{ lead.id }}/export" style="display:flex;flex-direction:column;gap:18px">
@@ -30,7 +34,7 @@
 <label class="ex"><input type="checkbox" name="pjson" value="1" checked style="margin-top:4px"><span><b>Pitch JSON</b><span class="lb" style="display:block">Reopen and edit from Leads later</span></span></label>
 {% if stats.unchecked %}<label class="lb"><input type="checkbox" name="override" value="1"> Export although {{ stats.unchecked }} card{{ 's are' if stats.unchecked != 1 else ' is' }} not ticked as checked</label>{% endif %}
 </fieldset>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b p" type="submit" {% if problems %}disabled{% endif %}>Export and mark as sent</button><a class="b" href="/leads/{{ lead.id }}/pitch">Back to pitch</a></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b p" type="submit" {% if problems %}disabled{% endif %}>Export and mark as sent</button><a class="b" href="/leads/{{ lead.id }}/pitch">Back to the pitch</a></div>
 </form>
 <p class="lb" style="margin:0">Saved as pitch v{{ (versions|length) + 1 }} and frozen. Later changes become v{{ (versions|length) + 2 }}; v{{ (versions|length) + 1 }} stays exactly as sent. The original PDF is deleted unless you keep it with the lead.</p>
 {% endif %}
