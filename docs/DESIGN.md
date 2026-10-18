@@ -11,4 +11,4 @@
 - Red: the manual defines it only as Pantone 032 C / CMYK 0 M100 Y100 K0 and gives no RGB or hex. `#E30613` is the usual sRGB rendering of CMYK 0/100/100/0, so the design red is consistent with the manual and is kept. (The playbook's `#EF3340` is the Pantone 032 C swatch approximation; we do not use it.)
 - Type: manual says Neue Helvetica 85 for titles, 45 for body, Arial as the office fallback. Matches the design stack.
 - Rule line: the manual prints the Linienelement **black, 0.15 mm**, red only on the Regierungsrat letterhead, and the coat of arms is always black. The designs use a red rule. We follow the designs on screen; the PDF teaser may use black. Flagged to the human.
-- The logo (`assets/private/Logo_SF_BE_EN.png`) is loaded from the gitignored folder and never committed; the organizers allow it only for this challenge.
+- The app loads the logo (`assets/private/Logo_SF_BE_EN.png`) from the gitignored folder. A copy is committed in `docs/brand/` for the README header only; the organizers allow it only for this challenge.
