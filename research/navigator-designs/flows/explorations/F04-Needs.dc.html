@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Edit needs</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:3px 6px;display:inline-flex;gap:4px;align-items:center;background:#fff}
+.side a{display:block;padding:12px 20px;text-decoration:none;font-size:14px;color:#fff}
+.nc{border:1px solid #111;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; display: flex; flex-wrap: wrap">
+<nav aria-label="Main" class="side" style="flex: 1 1 180px; max-width: 200px; background: #111111; padding: 20px 0; display: flex; flex-direction: column">
+<div style="padding: 0 20px 20px; color: #FFFFFF"><span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block; margin-right: 8px"></span><b>Navigator</b><span style="display: block; font-size: 11px; color: #C8C8C8; margin-top: 4px">Prototype, not an official Canton of Bern tool</span></div>
+<a href="F04-Needs.dc.html" style="background: #E30613; font-weight: 700">Brief</a>
+<a href="F04-Board.dc.html">Board</a>
+<a href="F04-Pitch.dc.html">Pitch</a>
+<a href="F08-Archives.dc.html">Archives</a>
+</nav>
+<main style="flex: 999 1 640px; min-width: 0; padding: 32px; display: flex; flex-direction: column; gap: 20px; max-width: 1080px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px"><h1 style="margin: 0; font-size: 28px">Four needs, four columns</h1><span class="lb">Read from the one pager by Apertus 70B on CSCS</span></div>
+<p style="margin: 0; max-width: 64ch; color: #5E5E5E">Skin patch that tracks glucose and lactate in women during endurance sport. <a href="F04-Needs.dc.html">Show full one pager</a></p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
+<div class="nc"><label class="lb" for="n1">Need 1</label><input id="n1" value="Clinical study with women who have type 1 diabetes" style="font: 700 15px 'Helvetica Neue', Helvetica, Arial, sans-serif; border: 0; border-bottom: 1px solid #111111; padding: 6px 0"><span class="lb">Search terms</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><label class="chip"><input type="checkbox" checked> Typ-1-Diabetes</label><label class="chip"><input type="checkbox" checked> menstrual cycle</label><label class="chip"><input type="checkbox" checked> exercise (MeSH)</label></div></div>
+<div class="nc"><label class="lb" for="n2">Need 2</label><input id="n2" value="Sensor and machine learning research" style="font: 700 15px 'Helvetica Neue', Helvetica, Arial, sans-serif; border: 0; border-bottom: 1px solid #111111; padding: 6px 0"><span class="lb">Search terms</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><label class="chip"><input type="checkbox" checked> CGM (MeSH)</label><label class="chip"><input type="checkbox" checked> Blutzuckermessung</label><label class="chip"><input type="checkbox"> lactate sensing</label></div></div>
+<div class="nc"><label class="lb" for="n3">Need 3</label><input id="n3" value="Manufacturing partner for a skin patch" style="font: 700 15px 'Helvetica Neue', Helvetica, Arial, sans-serif; border: 0; border-bottom: 1px solid #111111; padding: 6px 0"><span class="lb">Search terms</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><label class="chip"><input type="checkbox" checked> medical device manufacturing</label><label class="chip"><input type="checkbox" checked> Mikrofertigung</label></div></div>
+<div class="nc"><label class="lb" for="n4">Need 4</label><input id="n4" value="Clinical trial support" style="font: 700 15px 'Helvetica Neue', Helvetica, Arial, sans-serif; border: 0; border-bottom: 1px solid #111111; padding: 6px 0"><span class="lb">Search terms</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><label class="chip"><input type="checkbox" checked> clinical trials unit</label><label class="chip"><input type="checkbox" checked> essais cliniques</label></div></div>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap"><button class="b" style="border-style: dashed">Add a column</button><a class="b p" href="F04-Board.dc.html">Open board</a></div>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

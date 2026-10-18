@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brief</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.b.s{padding:6px 10px;min-height:36px;font-size:13px}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:2px 6px;display:inline-flex;gap:4px;align-items:center;background:#fff}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+.st{display:flex;gap:4px;flex-wrap:wrap}
+.st a{padding:8px 14px;font-size:14px;text-decoration:none;border-top:3px solid #D9D9D9;color:#5E5E5E}
+.st a.done{border-top-color:#111;color:#111}
+.st a.on{border-top-color:#E30613;color:#111;font-weight:700}
+.nd{padding:14px 0;border-bottom:1px solid #D9D9D9;display:flex;flex-direction:column;gap:8px}
+.tb{display:flex;border:1px solid #111;width:max-content;max-width:100%}
+.tb a{padding:9px 18px;font-size:14px;text-decoration:none;color:#111;min-height:40px;display:inline-flex;align-items:center}
+.tb a.on{background:#111;color:#fff;font-weight:700}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a class="on" href="X1-Home.dc.html">Leads</a><a href="X15-Gaps.dc.html">Insights</a><a href="X7-Archives.dc.html">Archives</a><a href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 10px 32px; border-bottom: 1px solid #D9D9D9; background: #FAFAFA">
+<a href="X1-Home.dc.html" style="font-size: 14px">Leads</a><span class="lb">/</span><b>Sport wearable lead</b><span class="chip">S-GE · confidential, stays on CSCS</span>
+<nav aria-label="Case steps" class="st" style="margin-left: auto"><a class="on" href="X2-Brief.dc.html">1 Brief</a><a href="X3-Matches.dc.html">2 Matches</a><a href="X4a-Map-Vertical.dc.html">3 Evidence map</a><a href="X5-Pitch.dc.html">4 Pitch</a><a href="X10-Lead.dc.html">5 After sending</a></nav>
+</div>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 1 1 400px; padding: 32px; display: flex; flex-direction: column; gap: 14px">
+<h1 style="margin: 0; font-size: 24px">The lead</h1>
+<nav aria-label="Input type" class="tb"><a class="on" href="X2-Brief.dc.html">Text</a><a href="X2b-Brief-Sources.dc.html">PDF</a><a href="X2b-Brief-Sources.dc.html">Website</a></nav>
+<label for="op" class="lb">Pasted from the S-GE email</label>
+<textarea id="op" rows="9" style="font: 15px/1.5 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 12px; border: 1px solid #111111; border-radius: 2px; resize: vertical">Founded 2023. We build a skin patch that tracks glucose and lactate in women during endurance sport. Over the next five years we need clinical validation with women who have type 1 diabetes, a manufacturing partner for the patch, and a European base close to research.</textarea>
+<label for="web" class="lb">Company website, optional</label>
+<input id="web" placeholder="https://" style="font: 15px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 10px 12px; border: 1px solid #111111; border-radius: 2px">
+<p class="lb" style="margin: 0">Public pages only. Used for needs and to personalise the pitch, never as evidence about Bern.</p>
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span class="lb">Pitch language</span><button class="b s" style="background: #111111; color: #FFFFFF">EN</button><button class="b s">DE</button><button class="b s">FR</button></div>
+<p class="lb" style="margin: 0">Read by Apertus 70B on CSCS. Never sent to a US cloud.</p>
+</section>
+<div aria-hidden="true" style="width: 1px; background: #E30613; align-self: stretch"></div>
+<section style="flex: 999 1 520px; min-width: 0; padding: 32px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px"><h2 style="margin: 0; font-size: 24px">4 needs found</h2><span class="lb">Edit, untick a term, or delete before searching</span></div>
+<div style="border-top: 1px solid #111111">
+<div class="nd"><div style="display: flex; gap: 10px; align-items: center"><span class="chip">Clinical study</span><b style="flex: 1">Study with women who have type 1 diabetes, during sport</b><button class="b s" aria-label="Delete need">Delete</button></div><div style="display: flex; gap: 6px; flex-wrap: wrap"><label class="chip"><input type="checkbox" checked> Typ-1-Diabetes</label><label class="chip"><input type="checkbox" checked> menstrual cycle</label><label class="chip"><input type="checkbox" checked> exercise (MeSH)</label></div></div>
+<div class="nd"><div style="display: flex; gap: 10px; align-items: center"><span class="chip">R&amp;D partner</span><b style="flex: 1">Sensor and machine learning research on glucose and lactate</b><button class="b s" aria-label="Delete need">Delete</button></div><div style="display: flex; gap: 6px; flex-wrap: wrap"><label class="chip"><input type="checkbox" checked> CGM (MeSH)</label><label class="chip"><input type="checkbox" checked> Blutzuckermessung</label><label class="chip"><input type="checkbox" checked> glycémie</label><label class="chip"><input type="checkbox"> fitness tracker</label></div></div>
+<div class="nd"><div style="display: flex; gap: 10px; align-items: center"><span class="chip">Supplier</span><b style="flex: 1">Manufacturing partner for a skin patch</b><button class="b s" aria-label="Delete need">Delete</button></div><div style="display: flex; gap: 6px; flex-wrap: wrap"><label class="chip"><input type="checkbox" checked> medical device manufacturing</label><label class="chip"><input type="checkbox" checked> Mikrofertigung</label></div></div>
+<div class="nd"><div style="display: flex; gap: 10px; align-items: center"><span class="chip">Infrastructure</span><b style="flex: 1">Clinical trial support for medtech</b><button class="b s" aria-label="Delete need">Delete</button></div><div style="display: flex; gap: 6px; flex-wrap: wrap"><label class="chip"><input type="checkbox" checked> clinical trials unit</label><label class="chip"><input type="checkbox" checked> essais cliniques</label></div></div>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 8px"><button class="b" style="border-style: dashed">Add a need</button><span style="flex: 1"></span><span class="lb">Searches 3 archives in DE, FR and EN</span><a class="b p" href="X3-Matches.dc.html">Find matches</a></div>
+</section>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

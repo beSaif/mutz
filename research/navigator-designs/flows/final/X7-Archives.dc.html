@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Archives</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.b.s{padding:6px 10px;min-height:36px;font-size:13px}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:680px}
+th{text-align:left;font-size:12px;font-weight:400;color:#5E5E5E;padding:10px 8px;border-bottom:1px solid #111}
+td{padding:14px 8px;border-bottom:1px solid #D9D9D9;vertical-align:top}
+pre{font:12.5px/1.55 ui-monospace,Menlo,monospace;background:#F2F2F2;padding:14px;margin:0;overflow-x:auto}
+.ok{display:flex;gap:8px;padding:5px 0;font-size:14px}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a href="X1-Home.dc.html">Leads</a><a href="X15-Gaps.dc.html">Insights</a><a class="on" href="X7-Archives.dc.html">Archives</a><a href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 999 1 600px; min-width: 0; padding: 32px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 16px">
+<div><h1 style="margin: 0; font-size: 28px; line-height: 1.15">Archives</h1><p class="lb" style="margin: 4px 0 0">Public pages only · robots.txt respected · recrawl by ETag and content hash</p></div>
+<button class="b">Recrawl all</button>
+</div>
+<div style="overflow-x: auto">
+<table>
+<thead><tr><th>Archive</th><th>Pages</th><th>People found</th><th>Languages</th><th>Last crawl</th><th>Skipped</th></tr></thead>
+<tbody>
+<tr><td><b>ARTORG Center</b><div class="lb">artorg.unibe.ch</div></td><td>410</td><td>[n]</td><td>EN, DE</td><td>Today 09:12</td><td>0</td></tr>
+<tr><td><b>Diabetes Center Berne</b><div class="lb">dcberne.com</div></td><td>180</td><td>[n]</td><td>EN, DE</td><td>Today 09:20</td><td>0</td></tr>
+<tr><td><b>University of Bern</b><div class="lb">15 life science subdomains</div></td><td>650</td><td>[n]</td><td>DE, EN, FR</td><td>Today 10:05</td><td>search, sitemap, print pages</td></tr>
+<tr><td><b>SNSF grants</b><div class="lb">opendata.swiss · filtered to Bern</div></td><td>1 file</td><td>[n] PIs</td><td>EN</td><td>Today 08:50</td><td>0</td></tr>
+<tr style="background: #FCE3E5"><td><b>sitem-insel</b><div class="lb">sitem-insel.ch · proposed by Mutz</div></td><td>[estimate]</td><td></td><td>DE, EN</td><td>Not yet</td><td>robots.txt allows</td></tr>
+</tbody>
+</table>
+</div>
+<p class="lb" style="margin: 12px 0 0">1,240 pages in total. The BORIS research portal is not crawled because it blocks our fetcher. People can ask to be removed through the agency.</p>
+</section>
+<aside style="flex: 1 1 380px; padding: 32px; border-left: 1px solid #E30613; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 18px">Add an archive</h2>
+<label for="url" class="lb">Public website</label>
+<input id="url" value="https://sitem-insel.ch/" style="font: 15px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 10px; border: 1px solid #111111; border-radius: 2px">
+<div><div class="ok"><b aria-hidden="true">✓</b>Public, no login wall</div><div class="ok"><b aria-hidden="true">✓</b>robots.txt allows crawling</div><div class="ok"><b aria-hidden="true">✓</b>German and English pages</div></div>
+<p class="lb" style="margin: 0">Saved as one entry in sources.yaml. No code changes.</p>
+<pre>- id: sitem
+  name: sitem-insel
+  seeds: [https://sitem-insel.ch/]
+  allow_domains: [sitem-insel.ch]
+  languages: [de, en]
+  max_pages: 400</pre>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b">Cancel</button><a class="b p" href="X7-Archives.dc.html">Add and crawl</a></div>
+<p class="lb" style="margin: 0">LinkedIn, social media and login pages are refused.</p>
+</aside>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0; display: flex; align-items: flex-end; gap: 12px">
+<p style="margin: 0 0 40px; max-width: 230px; background: #FFFFFF; border: 1px solid #111111; padding: 10px 12px; font-size: 13px">I checked sitem-insel.ch. It may fill the trial support gap. Shall I add it?</p>
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

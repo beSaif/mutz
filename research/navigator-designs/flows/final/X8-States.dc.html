@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Empty, loading, no match, error</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+.pn{border:1px solid #111;padding:24px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.pn .k{font-size:12px;color:#5E5E5E;border-bottom:1px solid #D9D9D9;padding-bottom:8px}
+.sl{display:flex;gap:10px;font-size:14px;padding:4px 0}
+.sl b{width:56px;flex:none;font-weight:400;color:#5E5E5E;font-size:12px;padding-top:2px}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 1000px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a class="on" href="X1-Home.dc.html">Leads</a><a href="X15-Gaps.dc.html">Insights</a><a href="X7-Archives.dc.html">Archives</a><a href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<main style="max-width: 1280px; padding: 32px; display: flex; flex-direction: column; gap: 20px">
+<div><h1 style="margin: 0; font-size: 28px; line-height: 1.15">The states around the happy path</h1><p class="lb" style="margin: 4px 0 0">Each one says what happened and what to do next. Mutz changes pose, nothing else moves.</p></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+
+<section class="pn" aria-label="Empty state">
+<span class="k">1 · First visit, no leads yet</span>
+<div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap">
+<svg viewBox="0 0 64 60" width="80" height="75" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+<div style="flex: 1 1 220px; min-width: 0">
+<h2 style="margin: 0 0 6px; font-size: 21px">Paste a company description, upload the PDF, or try the demo case.</h2>
+<p class="lb" style="margin: 0">Grüessech! Bärner si gmüetlech. I bi d Usnahm.<br>Hello! Bernese people take it slow. I'm the exception.</p>
+</div>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><a class="b p" href="X2-Brief.dc.html">New lead</a><a class="b" href="X2-Brief.dc.html">Load the sport wearable demo</a></div>
+<p class="lb" style="margin: 0">3 archives ready · 1,240 pages · last crawl today 10:05</p>
+</section>
+
+<section class="pn" aria-label="Searching">
+<span class="k">2 · Searching</span>
+<div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap">
+<svg viewBox="0 0 76 64" width="88" height="74" aria-hidden="true"><circle cx="14" cy="18" r="10" fill="#111"/><circle cx="50" cy="18" r="10" fill="#111"/><circle cx="14" cy="18" r="4" fill="#fff"/><circle cx="50" cy="18" r="4" fill="#fff"/><ellipse cx="32" cy="37" rx="24" ry="22" fill="#111"/><ellipse cx="34" cy="46" rx="10" ry="7" fill="#fff"/><ellipse cx="36" cy="43" rx="4" ry="2.6" fill="#111"/><path d="M20 33h6M38 33h6" stroke="#fff" stroke-width="2.4"/><circle cx="60" cy="48" r="9" fill="#fff" stroke="#E30613" stroke-width="3"/><path d="M66 55l7 7" stroke="#E30613" stroke-width="3.5"/></svg>
+<div style="flex: 1 1 220px; min-width: 0" role="status" aria-live="polite">
+<h2 style="margin: 0 0 6px; font-size: 21px">Bear with me…</h2>
+<p style="margin: 0; font-size: 14px">Searching 3 archives, 1,240 pages. Need 2 of 4: sensor and machine learning research.</p>
+</div>
+</div>
+<div style="border-top: 1px solid #D9D9D9; padding-top: 8px">
+<div class="sl"><b>Done</b><span>Needs and expansions in DE, FR, EN</span></div>
+<div class="sl"><b>Done</b><span>Keyword and meaning search across chunks</span></div>
+<div class="sl"><b style="color: #111111; font-weight: 700">Now</b><span>Grouping pages into people and units</span></div>
+<div class="sl"><b>Next</b><span>Reranking and writing a reason per match</span></div>
+</div>
+<p class="lb" style="margin: 0">You can keep editing the needs. Results appear need by need.</p>
+</section>
+
+<section class="pn" aria-label="No match">
+<span class="k">3 · No match for a need</span>
+<div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap">
+<svg viewBox="0 0 20 22" width="64" height="70" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.2"/></svg>
+<div style="flex: 1 1 220px; min-width: 0">
+<h2 style="margin: 0 0 6px; font-size: 21px">Kei Hung im Topf.</h2>
+<p class="lb" style="margin: 0 0 8px">No honey in the pot.</p>
+<p style="margin: 0; font-size: 14px">Infrastructure: clinical trial support for medtech. No unit in Bern with real evidence. Better not to pitch this need.</p>
+</div>
+</div>
+<div style="border-top: 1px solid #D9D9D9; padding-top: 8px; font-size: 14px">
+<div class="sl"><b>Searched</b><span>ARTORG, Diabetes Center Berne, University of Bern</span></div>
+<div class="sl"><b>Terms</b><span>clinical trials unit, essais cliniques, klinische Studien</span></div>
+<div class="sl"><b>Closest</b><span>1 page mentioning trials, below the evidence bar</span></div>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><a class="b" href="X2-Brief.dc.html">Rephrase the need</a><a class="b" href="X7-Archives.dc.html">Add an archive</a><a class="b" href="X3-Matches.dc.html">Leave out of the pitch</a></div>
+<p class="lb" style="margin: 0">Logged anonymously for the <a href="X15-Gaps.dc.html">gap report</a>: field and coverage only, no company name.</p>
+</section>
+
+<section class="pn" aria-label="Error">
+<span class="k">4 · The model gateway does not answer</span>
+<div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap">
+<svg viewBox="0 0 64 60" width="80" height="75" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><path d="M20 29h6M38 29h6" stroke="#fff" stroke-width="2.4"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+<div style="flex: 1 1 220px; min-width: 0" role="alert">
+<h2 style="margin: 0 0 6px; font-size: 21px">The Apertus gateway did not answer.</h2>
+<p style="margin: 0; font-size: 14px">Your brief and needs are saved. Try again in a minute. Matches already found stay on screen.</p>
+</div>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b p">Try again</button><a class="b" href="X3-Matches.dc.html">Open the cached demo case</a></div>
+<p class="lb" style="margin: 0">Nothing is sent to another model as a fallback. Confidential text only goes to CSCS.</p>
+</section>
+
+</div>
+<section style="border-top: 1px solid #111111; padding-top: 16px; display: flex; gap: 24px; flex-wrap: wrap">
+<div style="flex: 1 1 360px; min-width: 0"><span class="lb">Long names stress test</span><p lang="de" style="margin: 4px 0 0; font-size: 18px; font-weight: 700; hyphens: auto; overflow-wrap: anywhere">Universitätsklinik für Diabetologie, Endokrinologie, Ernährungsmedizin und Metabolismus</p></div>
+<div style="flex: 1 1 300px"><span class="lb">Interface language</span><div style="display: flex; gap: 6px; margin-top: 6px"><button class="b" style="background: #111111; color: #FFFFFF">EN</button><button class="b">DE</button><button class="b">FR</button></div></div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

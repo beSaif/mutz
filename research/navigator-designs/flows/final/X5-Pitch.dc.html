@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pitch builder</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.b.s{padding:6px 10px;min-height:36px;font-size:13px}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:2px 6px;display:inline-flex;gap:4px;align-items:center;background:#fff}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+.st{display:flex;gap:4px;flex-wrap:wrap}
+.st a{padding:8px 14px;font-size:14px;text-decoration:none;border-top:3px solid #D9D9D9;color:#5E5E5E}
+.st a.done{border-top-color:#111;color:#111}
+.st a.on{border-top-color:#E30613;color:#111;font-weight:700}
+.ol{display:flex;gap:8px;align-items:center;padding:10px 8px;border-bottom:1px solid #D9D9D9;font-size:14px}
+.card{border:1px solid #111;padding:14px 16px}
+.ic{border:0;background:none;padding:0;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a class="on" href="X1-Home.dc.html">Leads</a><a href="X15-Gaps.dc.html">Insights</a><a href="X7-Archives.dc.html">Archives</a><a href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 10px 32px; border-bottom: 1px solid #D9D9D9; background: #FAFAFA">
+<a href="X1-Home.dc.html" style="font-size: 14px">Leads</a><span class="lb">/</span><b>Sport wearable lead</b><span class="chip">Draft saved 13:24</span>
+<nav aria-label="Case steps" class="st" style="margin-left: auto"><a class="done" href="X2-Brief.dc.html">1 Brief</a><a class="done" href="X3-Matches.dc.html">2 Matches</a><a class="done" href="X4a-Map-Vertical.dc.html">3 Evidence map</a><a class="on" href="X5-Pitch.dc.html">4 Pitch</a><a href="X10-Lead.dc.html">5 After sending</a></nav>
+</div>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<aside style="flex: 1 1 210px; max-width: 240px; padding: 24px; border-right: 1px solid #D9D9D9">
+<p class="lb" style="margin: 0 0 8px">Outline, drag to reorder</p>
+<div class="ol"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Cover</span><button class="ic" aria-label="Hide Cover"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="#111" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" fill="#111"/></svg></button><button class="ic" aria-label="Delete Cover"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 5h14M8 5V3h4v2M5 5l1 12h8l1-12" fill="none" stroke="#111" stroke-width="1.5"/></svg></button></div>
+<div class="ol" style="background: #F2F2F2"><span aria-hidden="true">⋮⋮</span><b style="flex: 1">Why Bern for you</b><button class="ic" aria-label="Hide Why Bern for you"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="#111" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" fill="#111"/></svg></button><button class="ic" aria-label="Delete Why Bern for you"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 5h14M8 5V3h4v2M5 5l1 12h8l1-12" fill="none" stroke="#111" stroke-width="1.5"/></svg></button></div>
+<div class="ol"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Matches (3)</span><button class="ic" aria-label="Hide Matches"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="#111" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" fill="#111"/></svg></button><button class="ic" aria-label="Delete Matches"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 5h14M8 5V3h4v2M5 5l1 12h8l1-12" fill="none" stroke="#111" stroke-width="1.5"/></svg></button></div>
+<div class="ol" style="color: #5E5E5E"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Infrastructure</span><button class="ic" aria-label="Show Infrastructure"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="#9A9A9A" stroke-width="1.5"/><path d="M3 17L17 3" stroke="#111" stroke-width="1.5"/></svg></button><button class="ic" aria-label="Delete Infrastructure"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 5h14M8 5V3h4v2M5 5l1 12h8l1-12" fill="none" stroke="#111" stroke-width="1.5"/></svg></button></div>
+<div class="ol"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Suggested visit day</span><button class="ic" aria-label="Hide Suggested visit day"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="#111" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" fill="#111"/></svg></button><button class="ic" aria-label="Delete Suggested visit day"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 5h14M8 5V3h4v2M5 5l1 12h8l1-12" fill="none" stroke="#111" stroke-width="1.5"/></svg></button></div>
+<div class="ol"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Sources</span><span class="lb">auto</span></div>
+<div role="status" style="margin-top: 14px; padding: 8px 10px; background: #111111; color: #FFFFFF; font-size: 13px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span style="flex: 1">Card “Adjacent opportunity” deleted</span><button class="b s" style="background: #111111; color: #FFFFFF; border-color: #FFFFFF">Undo</button></div>
+<p class="lb" style="margin: 16px 0 0">6 of 8 cards checked</p>
+</aside>
+<section style="flex: 999 1 400px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<h1 style="margin: 0; font-size: 21px">Why Bern for you</h1>
+<div class="card"><div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><span class="lb">Point 1 · verified quote</span><label class="lb"><input type="checkbox" checked> Checked</label></div>
+<p style="margin: 6px 0 10px">A Bern research group combines sensors and machine learning for diabetes, the core of your patch [1].</p>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center"><button class="b s">Shorter</button><button class="b s">Less jargon</button><button class="b s">In German</button><button class="b s">Lock</button><button class="b s">Delete</button><span style="flex: 1"></span><span class="lb">1 source</span><a href="X4a-Map-Vertical.dc.html" style="font-size: 13px">Show in map</a></div></div>
+<div class="card"><div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><span class="lb">Point 2 · verified quote</span><label class="lb"><input type="checkbox" checked> Checked</label></div>
+<p style="margin: 6px 0 10px">Diabetes Center Berne already studies type 1 diabetes across the menstrual cycle [3].</p>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center"><button class="b s">Shorter</button><button class="b s">Less jargon</button><button class="b s">In German</button><button class="b s">Lock</button><button class="b s">Delete</button><span style="flex: 1"></span><span class="lb">1 source</span><a href="X4a-Map-Vertical.dc.html" style="font-size: 13px">Show in map</a></div></div>
+<div class="card" style="border-width: 2px"><div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><span class="lb">Point 3 · edited by you</span><label class="lb"><input type="checkbox"> Checked</label></div>
+<p style="margin: 6px 0 10px">Diabetes Center Berne runs an innovation challenge that is open to companies like yours [4].</p>
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0 0 10px"><span class="chip">[4] dcberne.com · added by you</span><label for="src3" class="lb">Add a source URL</label><input id="src3" placeholder="https://" style="font: 13px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 6px 8px; border: 1px solid #111111; border-radius: 2px; width: 200px"></div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center"><button class="b s">Shorter</button><button class="b s">Less jargon</button><button class="b s">In German</button><button class="b s">Lock</button><button class="b s">Delete</button><span style="flex: 1"></span><span class="lb">1 source</span><a href="X4a-Map-Vertical.dc.html" style="font-size: 13px">Show in map</a></div></div>
+</section>
+<section style="flex: 1 1 380px; padding: 24px; background: #F2F2F2; display: flex; flex-direction: column; gap: 12px; align-items: center">
+<span class="lb" style="align-self: flex-start">A4 preview · page 2 of 5</span>
+<div style="width: 340px; height: 481px; background: #FFFFFF; position: relative; padding: 28px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 9px; line-height: 1.45; align-content: start; box-shadow: 0 1px 2px rgba(0,0,0,0.15)">
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #E30613"></div>
+<div><b style="font-size: 11px">Why Bern for you</b><p style="margin: 6px 0 0; color: #5E5E5E">Three reasons, each with a source.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><p style="margin: 0">A Bern research group combines sensors and machine learning for diabetes, the core of your patch [1].</p><p style="margin: 0">Diabetes Center Berne already studies type 1 diabetes across the menstrual cycle [3].</p><p style="margin: 0; background: #FCE3E5">Diabetes Center Berne runs an innovation challenge open to companies like yours [4].</p><a href="X9-Mutz.dc.html" style="align-self: flex-start; font-size: 9px; border: 1px solid #111111; padding: 2px 5px; text-decoration: none; background: #FFFFFF">Ask Mutz: is this backed?</a></div>
+</div>
+<a class="b p" href="X6-Review.dc.html">Review and export</a>
+</section>
+</main>
+<div style="position: absolute; left: 24px; bottom: 0; display: flex; align-items: flex-end; gap: 12px">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+<p style="margin: 0 0 36px; background: #FFFFFF; border: 1px solid #111111; padding: 8px 12px; font-size: 13px">Ask Mutz about this pitch</p>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

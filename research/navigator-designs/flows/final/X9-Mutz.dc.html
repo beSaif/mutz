@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mutz open on Matches</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.b.s{padding:6px 10px;min-height:36px;font-size:13px}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:2px 6px;display:inline-flex;gap:4px;align-items:center;background:#fff;text-decoration:none}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+.st{display:flex;gap:4px;flex-wrap:wrap}
+.st a{padding:8px 14px;font-size:14px;text-decoration:none;border-top:3px solid #D9D9D9;color:#5E5E5E}
+.st a.done{border-top-color:#111;color:#111}
+.st a.on{border-top-color:#E30613;color:#111;font-weight:700}
+.res{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;padding:16px 0;border-top:1px solid #D9D9D9}
+.m{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.m .w{font-size:11px;color:#5E5E5E}
+.m.me{align-items:flex-end}
+.m.me p{background:#F2F2F2;padding:8px 10px;margin:0;max-width:85%}
+.m.bot p{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a class="on" href="X1-Home.dc.html">Leads</a><a href="X15-Gaps.dc.html">Insights</a><a href="X7-Archives.dc.html">Archives</a><a href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 10px 32px; border-bottom: 1px solid #D9D9D9; background: #FAFAFA">
+<a href="X1-Home.dc.html" style="font-size: 14px">Leads</a><span class="lb">/</span><b>Sport wearable lead</b><span class="chip">S-GE · confidential, stays on CSCS</span>
+<nav aria-label="Case steps" class="st" style="margin-left: auto"><a class="done" href="X2-Brief.dc.html">1 Brief</a><a class="on" href="X3-Matches.dc.html">2 Matches</a><a href="X4a-Map-Vertical.dc.html">3 Evidence map</a><a href="X5-Pitch.dc.html">4 Pitch</a><a href="X10-Lead.dc.html">5 After sending</a></nav>
+</div>
+<main style="max-width: 1280px; padding: 24px 440px 24px 32px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px"><h1 style="margin: 0; font-size: 24px">Clinical study</h1><span class="lb">The page stays usable while Mutz is open</span></div>
+<article class="res" style="border-top-color: #111111; background: #FCE3E5; padding-left: 8px; padding-right: 8px"><div class="lb">Person<br>ARTORG</div><div>
+<h2 style="margin: 0; font-size: 18px">Prof. Dr. Lilian Witthauer</h2>
+<p style="margin: 4px 0 8px">Works on sensors and machine learning for diabetes, which fits the patch's glucose tracking [1].</p>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="lb" style="align-self: center">Selected · Ask Mutz:</span><button class="b s">Is this claim backed?</button><button class="b s">Make this shorter</button></div>
+</div></article>
+<article class="res"><div class="lb">Study<br>DCB</div><div><h2 style="margin: 0; font-size: 18px">TIMES study</h2><p style="margin: 4px 0 0">Studies type 1 diabetes across the menstrual cycle [3].</p></div></article>
+<article class="res"><div class="lb">Unit<br>Inselspital</div><div><h2 lang="de" style="margin: 0; font-size: 18px; hyphens: auto; overflow-wrap: anywhere">Universitätsklinik für Diabetologie, Endokrinologie, Ernährungsmedizin und Metabolismus</h2><p style="margin: 4px 0 0">A possible site for recruiting participants [5].</p></div></article>
+</main>
+<div role="dialog" aria-modal="false" aria-label="Mutz" style="position: absolute; right: 24px; bottom: 72px; width: 380px; height: 520px; background: #FFFFFF; border: 2px solid #111111; display: flex; flex-direction: column; box-shadow: 0 2px 0 #111111">
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #111111; cursor: move">
+<svg viewBox="0 0 10 16" width="10" height="16" aria-hidden="true"><circle cx="2" cy="3" r="1.4" fill="#111"/><circle cx="8" cy="3" r="1.4" fill="#111"/><circle cx="2" cy="8" r="1.4" fill="#111"/><circle cx="8" cy="8" r="1.4" fill="#111"/><circle cx="2" cy="13" r="1.4" fill="#111"/><circle cx="8" cy="13" r="1.4" fill="#111"/></svg>
+<div style="flex: 1; min-width: 0"><b style="display: block; font-size: 15px">Mutz</b><span class="lb">Knows: Sport wearable lead · Matches · 1 selected</span></div>
+<span title="Coverage for this screen" style="display: inline-flex; align-items: center; gap: 4px" class="lb"><svg viewBox="0 0 20 22" width="16" height="18" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="8" width="11" height="11.5" fill="#111"/></svg>Strong</span>
+<a aria-label="Close Mutz, Esc" href="X3-Matches.dc.html" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="#111" stroke-width="1.8"/></svg></a>
+</div>
+<div aria-live="polite" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 14px">
+<div class="m bot"><span class="w">Mutz</span><p>Grüessech! Bärner si gmüetlech. I bi d Usnahm.</p><span class="lb">Hello! Bernese people take it slow. I'm the exception.</span></div>
+<div class="m me"><span class="w">You</span><p>Who in Bern works on glucose sensors for women in sport?</p></div>
+<div class="m bot"><span class="w">Mutz</span><p>Two strong leads. Diabetes Center Berne runs the TIMES study on type 1 diabetes across the menstrual cycle [3]. ARTORG lists an affiliated group on diabetes, machine learning and sensor technology led by Prof. Lilian Witthauer [1].</p>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><a class="chip" href="X4a-Map-Vertical.dc.html">[1] artorg.unibe.ch</a><a class="chip" href="X4a-Map-Vertical.dc.html">[3] dcberne.com</a></div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><a class="b s p" href="X5-Pitch.dc.html">Add both to pitch</a><a class="b s" href="X4a-Map-Vertical.dc.html">Show sources</a></div></div>
+<div class="m me"><span class="w">You</span><p>Also add sitem-insel.ch as an archive.</p></div>
+<div class="m bot"><span class="w">Mutz</span><p>Checked it: public, robots.txt allows crawling, German and English, about [n] pages. Shall I add it?</p>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><a class="b s p" href="X7-Archives.dc.html">Add archive</a><button class="b s">Cancel</button></div></div>
+</div>
+<form style="display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid #111111; align-items: flex-end">
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><label for="ask" class="lb">Ask in German, French or English</label><input id="ask" placeholder="Is the TIMES study still recruiting?" style="font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 9px 10px; border: 1px solid #111111; border-radius: 2px"></div>
+<button class="b" type="button">Ask</button>
+</form>
+</div>
+<div style="position: absolute; right: 24px; bottom: 0">
+<a aria-label="Collapse Mutz" href="X3-Matches.dc.html" style="display: block">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

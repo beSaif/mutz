@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Review and export</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:2px 6px;display:inline-block;text-decoration:none;background:#fff;color:#111}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px; padding: 16px 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b><span class="lb">Prototype, not an official Canton of Bern tool</span></div>
+<nav aria-label="Steps" style="display: flex; gap: 28px; font-size: 14px; margin-left: auto">
+<a href="Main.dc.html" style="text-decoration: none; color: #5E5E5E">1 Brief</a>
+<a href="F01-Matches.dc.html" style="text-decoration: none; color: #5E5E5E">2 Matches</a>
+<a href="F01-Pitch.dc.html" style="text-decoration: none; font-weight: 700; border-bottom: 3px solid #E30613; padding-bottom: 4px">3 Pitch</a>
+</nav>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 1 1 340px; padding: 40px 32px; display: flex; flex-direction: column; gap: 20px">
+<h1 style="margin: 0; font-size: 28px; line-height: 1.15">Ready to export</h1>
+<dl style="margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 20px">
+<dt style="font-size: 28px; font-weight: 700">7</dt><dd style="margin: 0; align-self: center">claims with a verified quote</dd>
+<dt style="font-size: 28px; font-weight: 700">1</dt><dd style="margin: 0; align-self: center">edited by you, source attached</dd>
+<dt style="font-size: 28px; font-weight: 700">0</dt><dd style="margin: 0; align-self: center">claims without a source</dd>
+</dl>
+<p class="lb" style="margin: 0">All 8 cards are ticked as checked. The clean PDF is unlocked.</p>
+<fieldset style="border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px">
+<legend class="lb" style="margin-bottom: 8px">Export</legend>
+<label style="display: flex; gap: 10px; align-items: flex-start; border: 1px solid #111111; padding: 12px"><input type="checkbox" checked style="margin-top: 4px"><span><b>Review PDF</b><span class="lb" style="display: block">For you. Every [n] jumps to its quote; every source opens at the exact sentence.</span></span></label>
+<label style="display: flex; gap: 10px; align-items: flex-start; border: 1px solid #111111; padding: 12px"><input type="checkbox" checked style="margin-top: 4px"><span><b>Clean PDF for the CEO</b><span class="lb" style="display: block">5 pages, numbered source list, company logo on the cover.</span></span></label>
+<label style="display: flex; gap: 10px; align-items: flex-start; border: 1px solid #111111; padding: 12px"><input type="checkbox" style="margin-top: 4px"><span><b>Pitch JSON</b><span class="lb" style="display: block">Reopen and edit this pitch later.</span></span></label>
+</fieldset>
+<a class="b p" href="F01-Review.dc.html" style="align-self: flex-start">Export 2 files</a>
+</section>
+<div aria-hidden="true" style="width: 1px; background: #E30613; align-self: stretch"></div>
+<section style="flex: 999 1 520px; min-width: 0; padding: 40px 32px; background: #F2F2F2">
+<p class="lb" style="margin: 0 0 12px">Review PDF, evidence appendix</p>
+<div style="background: #FFFFFF; padding: 28px; display: flex; flex-direction: column; gap: 0">
+<div style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-bottom: 1px solid #D9D9D9">
+<b>[1]</b>
+<div><p style="margin: 0; font-style: italic">“Diabetes, Machine Learning &amp; Sensor Technology”</p><p class="lb" style="margin: 4px 0">ARTORG affiliated groups · artorg.unibe.ch · fetched 18 Oct 2026 · EN</p><div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="chip">Verified quote</span><a class="chip" href="F01-Review.dc.html">Open at quote</a><a class="chip" href="F01-Pitch.dc.html">Back to claim</a></div></div>
+</div>
+<div style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-bottom: 1px solid #D9D9D9">
+<b>[3]</b>
+<div><p style="margin: 0; font-style: italic">“TIMES study”</p><p class="lb" style="margin: 4px 0">Diabetes Center Berne · dcberne.com · fetched 18 Oct 2026 · EN</p><div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="chip">Verified quote</span><a class="chip" href="F01-Review.dc.html">Open at quote</a><a class="chip" href="F01-Pitch.dc.html">Back to claim</a></div></div>
+</div>
+<div style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 14px 0">
+<b>[5]</b>
+<div><p style="margin: 0">Point added by the officer</p><p class="lb" style="margin: 4px 0">Source URL entered manually · insel.ch</p><div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="chip" style="border-style: dashed">Edited by you</span><a class="chip" href="F01-Review.dc.html">Open page</a></div></div>
+</div>
+</div>
+<p class="lb" style="margin: 12px 0 0">Deep links use URL text fragments. If a page changed, the browser simply opens it at the top.</p>
+</section>
+</main>
+<div style="position: absolute; left: 24px; bottom: 0; display: flex; align-items: flex-end; gap: 12px">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+<p style="margin: 0 0 36px; background: #FFFFFF; border: 1px solid #111111; padding: 8px 12px; font-size: 13px">Every card has a source. Good to send.</p>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

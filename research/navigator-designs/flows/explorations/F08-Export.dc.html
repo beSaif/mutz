@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Export selection</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 13px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:10px 14px;min-height:40px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.op{display:flex;gap:12px;align-items:flex-start;border:1px solid #111;padding:14px;font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:560px}
+th{text-align:left;font-weight:700;padding:6px 8px;border-bottom:1px solid #111;font-size:11px}
+td{padding:6px 8px;border-bottom:1px solid #E3E3E3}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.45">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 20px; border-bottom: 1px solid #111111">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Navigator</b>
+<a href="F08-Table.dc.html" style="font-size: 13px">Results</a><span class="lb">/</span><span style="font-size: 13px">Export</span>
+<span style="flex: 1"></span><a href="F08-Archives.dc.html" style="font-size: 13px">Archives</a>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 1 1 400px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<h1 style="margin: 0; font-size: 24px">Export 4 selected</h1>
+<p class="lb" style="margin: 0">Witthauer, Koch, TIMES study, DCB innovation challenge</p>
+<fieldset style="border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px">
+<legend class="lb" style="margin-bottom: 6px">As</legend>
+<label class="op"><input type="radio" name="ex" checked><span><b>New pitch</b><span class="lb" style="display: block">Opens the pitch builder with these 4 as cards</span></span></label>
+<label class="op"><input type="radio" name="ex"><span><b>Add to an open pitch</b><span class="lb" style="display: block">Sport wearable lead, draft v2</span></span></label>
+<label class="op"><input type="radio" name="ex"><span><b>CSV for the CRM</b><span class="lb" style="display: block">Professional contact data only, with source URL per row</span></span></label>
+<label class="op"><input type="radio" name="ex"><span><b>Contact sheet for meetings</b><span class="lb" style="display: block">One line each, for the officer's phone calls</span></span></label>
+</fieldset>
+<a class="b p" href="F01-Pitch.dc.html" style="align-self: flex-start; min-height: 44px">Open pitch builder</a>
+</section>
+<div aria-hidden="true" style="width: 1px; background: #E30613; align-self: stretch"></div>
+<section style="flex: 1 1 460px; padding: 24px; min-width: 0">
+<p class="lb" style="margin: 0 0 8px">CSV preview</p>
+<div style="overflow-x: auto">
+<table>
+<thead><tr><th>name</th><th>type</th><th>unit</th><th>reason</th><th>source_url</th></tr></thead>
+<tbody>
+<tr><td>Lilian Witthauer</td><td>person</td><td>ARTORG affiliated</td><td>sensors and ML for diabetes</td><td>artorg.unibe.ch/…</td></tr>
+<tr><td>Lisa Koch</td><td>person</td><td>ARTORG, DCB</td><td>[pending]</td><td>dcberne.com/…</td></tr>
+<tr><td>TIMES study</td><td>study</td><td>DCB</td><td>T1D across the cycle</td><td>dcberne.com/…</td></tr>
+<tr><td>DCB innovation challenge</td><td>programme</td><td>DCB</td><td>open to companies</td><td>dcberne.com/…</td></tr>
+</tbody>
+</table>
+</div>
+<p class="lb" style="margin: 12px 0 0">No private data, no photos. People can ask to be removed through the agency.</p>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

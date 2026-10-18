@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Filled pitch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.b.s{padding:6px 10px;min-height:32px;font-size:13px}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.sec{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;padding:18px 0;border-top:1px solid #D9D9D9}
+.cl{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;align-items:start}
+.mk{font-size:11px;padding:2px 4px;border:1px solid #111;text-align:center}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #EDEDED; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 12px 24px; background: #FFFFFF; border-bottom: 1px solid #111111">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span>
+<b>Pitch: sport wearable lead</b><span class="lb">Draft · Prototype, not an official Canton of Bern tool</span>
+<span style="flex: 1"></span>
+<a class="b" href="F03-Draft.dc.html">Brief</a><a class="b" href="F03-Draft.dc.html">DE · FR · EN</a><a class="b p" href="F03-Gate.dc.html">Review</a>
+</header>
+<main style="padding: 24px; max-width: 1280px">
+<article style="max-width: 920px; margin: 0 auto; background: #FFFFFF; padding: 40px 48px; position: relative">
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #E30613"></div>
+<div class="sec" style="border-top: 0; padding-top: 0"><span></span><h1 style="margin: 0; font-size: 24px; line-height: 1.15">Bern for your sport wearable</h1></div>
+<div class="sec"><b>Why Bern for you</b><div style="display: flex; flex-direction: column; gap: 12px">
+<div class="cl"><span class="mk">Verified</span><p style="margin: 0; background: #FCE3E5; outline: 1px solid #E30613">Diabetes Center Berne already studies type 1 diabetes across the menstrual cycle [3].</p></div>
+<div class="cl"><span class="mk">Verified</span><p style="margin: 0">A Bern group combines sensors and machine learning for diabetes, the core of your patch [1].</p></div>
+<div class="cl"><span class="mk" style="border-style: dashed">Edited</span><p style="margin: 0">DCB runs an innovation challenge that is open to companies like yours [4].</p></div>
+</div></div>
+<div class="sec"><b>People and groups</b><div style="display: flex; flex-direction: column; gap: 12px">
+<div class="cl"><span class="mk">Verified</span><p style="margin: 0"><b>Prof. Dr. Lilian Witthauer</b>, head of the ARTORG affiliated group Diabetes, Machine Learning &amp; Sensor Technology [1][2].</p></div>
+<div class="cl"><span class="mk" style="background: #111111; color: #FFFFFF">Check</span><p style="margin: 0">A manufacturing partner for skin patches: one weak page found [5].</p></div>
+</div></div>
+<div class="sec"><b>Sources</b><p class="lb" style="margin: 0">[1] artorg.unibe.ch [2] insel.ch [3] dcberne.com [4] dcberne.com [5] unibe.ch</p></div>
+<div style="position: absolute; left: 52%; top: 132px; display: flex; gap: 6px; background: #111111; padding: 6px">
+<a class="b s" href="F03-Filled.dc.html">Is this claim backed?</a><a class="b s" href="F03-Filled.dc.html">Make this shorter</a>
+</div>
+</article>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

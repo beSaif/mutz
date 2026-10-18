@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Queue done</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.b.s{padding:6px 10px;min-height:36px;font-size:13px}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.sg{flex:1;height:6px;background:#111}
+.r{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #D9D9D9}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 14px 32px">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Expertise Navigator</b>
+<span style="margin-left: auto; font-size: 14px"><b>9 of 9</b> reviewed</span>
+</header>
+<div aria-hidden="true" style="display: flex; gap: 4px; padding: 0 32px"><span class="sg"></span><span class="sg"></span><span class="sg"></span><span class="sg"></span><span class="sg"></span><span class="sg"></span><span class="sg"></span><span class="sg"></span><span class="sg"></span></div>
+<main style="display: flex; flex-wrap: wrap; gap: 48px; max-width: 1280px; padding: 40px 32px">
+<section style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 12px">
+<h1 style="margin: 0; font-size: 40px; line-height: 1.1">Queue done</h1>
+<dl style="margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: 18px">
+<dt style="font-weight: 700">4</dt><dd style="margin: 0">accepted</dd>
+<dt style="font-weight: 700">4</dt><dd style="margin: 0">rejected, with a reason</dd>
+<dt style="font-weight: 700">1</dt><dd style="margin: 0">skipped</dd>
+</dl>
+<p class="lb" style="margin: 8px 0 0">Your answers are kept as labels, so ranking learns what you accept.</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px"><a class="b" href="F07-Card.dc.html">Review the skipped one</a><a class="b p" href="F07-Pitch.dc.html">Write pitch from 4</a></div>
+</section>
+<section style="flex: 999 1 520px; min-width: 0">
+<h2 style="margin: 0 0 8px; font-size: 18px">Accepted</h2>
+<div style="border-top: 1px solid #111111">
+<div class="r"><div><b>Prof. Dr. Lilian Witthauer</b><div class="lb">R&amp;D partner, Clinical study · ARTORG</div></div><button class="b s">Undo</button></div>
+<div class="r"><div><b>TIMES study</b><div class="lb">Clinical study · Diabetes Center Berne</div></div><button class="b s">Undo</button></div>
+<div class="r"><div><b>DCB innovation challenge</b><div class="lb">Clinical study · open to companies</div></div><button class="b s">Undo</button></div>
+<div class="r"><div><b>ARTORG Center</b><div class="lb">R&amp;D partner · 13 research groups</div></div><button class="b s">Undo</button></div>
+</div>
+<h2 style="margin: 24px 0 8px; font-size: 18px">Rejected</h2>
+<div style="border-top: 1px solid #111111; color: #5E5E5E">
+<div class="r"><div><span lang="de">Universitätsklinik für Diabetologie, Endokrinologie, Ernährungsmedizin und Metabolismus</span><div class="lb">Too general</div></div><button class="b s">Undo</button></div>
+<div class="r"><div>[Unit on unibe.ch]<div class="lb">Weak evidence</div></div><button class="b s">Undo</button></div>
+</div>
+</section>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0; display: flex; align-items: flex-end; gap: 12px">
+<p style="margin: 0 0 40px; max-width: 220px; background: #FFFFFF; border: 1px solid #111111; padding: 10px 12px; font-size: 13px">Nine in a row. Bärner si gmüetlech, du nid.<span class="lb" style="display: block">Bernese take it slow. You don't.</span></p>
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

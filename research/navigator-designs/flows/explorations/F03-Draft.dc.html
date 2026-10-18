@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Draft from brief</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.sec{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;padding:20px 0;border-top:1px solid #D9D9D9}
+.slot{border:1px dashed #5E5E5E;padding:12px;color:#5E5E5E;font-size:14px;text-decoration:none;display:block}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #EDEDED; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 12px 24px; background: #FFFFFF; border-bottom: 1px solid #111111">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span>
+<b>Pitch: sport wearable lead</b><span class="lb">Draft · Prototype, not an official Canton of Bern tool</span>
+<span style="flex: 1"></span>
+<a class="b" href="F03-Draft.dc.html">Brief</a><a class="b" href="F03-Draft.dc.html">DE · FR · EN</a><a class="b" href="F03-Gate.dc.html">Review</a>
+</header>
+<main style="display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; max-width: 1280px">
+<aside style="flex: 1 1 260px; background: #FFFFFF; padding: 20px; display: flex; flex-direction: column; gap: 12px; align-self: flex-start">
+<p class="lb" style="margin: 0">From the one pager</p>
+<p style="margin: 0; font-size: 14px">Skin patch that tracks glucose and lactate in women during endurance sport.</p>
+<p class="lb" style="margin: 8px 0 0">Needs became sections</p>
+<ol style="margin: 0; padding-left: 18px; font-size: 14px">
+<li>Clinical study partner</li><li>Sensor and ML research</li><li>Patch manufacturing</li><li>Clinical trial support</li>
+</ol>
+<p class="lb" style="margin: 0">Each empty slot asks for evidence. Nothing is written without a source.</p>
+</aside>
+<article style="flex: 999 1 640px; min-width: 0; background: #FFFFFF; padding: 48px 56px; position: relative">
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #E30613"></div>
+<div class="sec" style="border-top: 0; padding-top: 0">
+<div><div style="width: 56px; height: 56px; border: 1px dashed #5E5E5E; display: flex; align-items: center; justify-content: center" class="lb">logo</div></div>
+<div><h1 style="margin: 0; font-size: 28px; line-height: 1.15">Bern for your sport wearable</h1><p class="lb" style="margin: 6px 0 0">Prepared by [officer name], Bern Economic Development Agency · 18 Oct 2026</p></div>
+</div>
+<div class="sec"><b>Why Bern for you</b><div style="display: flex; flex-direction: column; gap: 8px"><a class="slot" href="F03-Slot.dc.html">Point 1 · find evidence for the clinical study need</a><a class="slot" href="F03-Slot.dc.html">Point 2 · find evidence for sensor research</a><a class="slot" href="F03-Slot.dc.html">Point 3 · find evidence for manufacturing</a></div></div>
+<div class="sec"><b>People and groups</b><a class="slot" href="F03-Slot.dc.html">Add matches from accepted evidence</a></div>
+<div class="sec"><b>Infrastructure</b><a class="slot" href="F03-Slot.dc.html">Clinical trial support · find evidence</a></div>
+<div class="sec"><b>Sources</b><span class="lb">Filled automatically</span></div>
+</article>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0; display: flex; align-items: flex-end; gap: 12px">
+<p style="margin: 0 0 40px; max-width: 240px; background: #FFFFFF; border: 1px solid #111111; padding: 10px 12px; font-size: 13px">I sketched the pitch from your brief. Click a slot and I'll show what Bern has.</p>
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

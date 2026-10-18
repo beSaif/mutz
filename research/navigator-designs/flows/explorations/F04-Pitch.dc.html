@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pitch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.side a{display:block;padding:12px 20px;text-decoration:none;font-size:14px;color:#fff}
+.a4{flex:0 0 360px;height:509px;background:#fff;position:relative;padding:32px 24px;display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:10px;line-height:1.45;align-content:start;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.a4::before{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px solid #E30613}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; display: flex; flex-wrap: wrap">
+<nav aria-label="Main" class="side" style="flex: 1 1 180px; max-width: 200px; background: #111111; padding: 20px 0; display: flex; flex-direction: column">
+<div style="padding: 0 20px 20px; color: #FFFFFF"><span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block; margin-right: 8px"></span><b>Navigator</b><span style="display: block; font-size: 11px; color: #C8C8C8; margin-top: 4px">Prototype, not an official Canton of Bern tool</span></div>
+<a href="F04-Needs.dc.html">Brief</a>
+<a href="F04-Board.dc.html">Board</a>
+<a href="F04-Pitch.dc.html" style="background: #E30613; font-weight: 700">Pitch</a>
+<a href="F08-Archives.dc.html">Archives</a>
+</nav>
+<main style="flex: 999 1 640px; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; background: #F2F2F2">
+<div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px"><h1 style="margin: 0; font-size: 24px">One page per strong need</h1><span class="lb">Order follows the board. Click text to edit.</span></div>
+<div style="display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px">
+<div class="a4"><b style="font-size: 12px">Clinical study</b><div style="display: flex; flex-direction: column; gap: 10px"><p style="margin: 0">Diabetes Center Berne studies type 1 diabetes across the menstrual cycle in the TIMES study [3].</p><p style="margin: 0">Bern also offers an innovation challenge open to companies [4].</p><span style="color: #5E5E5E">Contact via the agency</span></div></div>
+<div class="a4"><b style="font-size: 12px">Sensor and ML research</b><div style="display: flex; flex-direction: column; gap: 10px"><p style="margin: 0"><b>Prof. Dr. Lilian Witthauer</b> heads the ARTORG affiliated group Diabetes, Machine Learning &amp; Sensor Technology [1][2].</p><p style="margin: 0">ARTORG hosts 13 research groups in biomedical engineering [5].</p></div></div>
+<div class="a4" style="opacity: 0.55"><b style="font-size: 12px">Sources</b><div style="display: flex; flex-direction: column; gap: 4px"><span>[1] artorg.unibe.ch</span><span>[2] insel.ch</span><span>[3] dcberne.com</span><span>[4] dcberne.com</span><span>[5] artorg.unibe.ch</span></div></div>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: #FFFFFF; padding: 16px; border-top: 2px solid #111111">
+<span class="lb" style="flex: 1">2 needs offered, 1 left out as thin, 1 as Kei Hung. Noted on the cover for the officer only.</span>
+<a class="b" href="F04-Board.dc.html">Back to board</a><a class="b" href="F04-Pitch.dc.html">Review PDF</a><a class="b p" href="F04-Pitch.dc.html">Export clean PDF</a>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

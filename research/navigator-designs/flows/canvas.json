@@ -1,0 +1,827 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "F01-Matches.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "1.2 Matches",
+      "w": 1280,
+      "x": 1360,
+      "y": 0
+    },
+    "F01-Pitch.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "1.3 Pitch builder",
+      "w": 1280,
+      "x": 2720,
+      "y": 0
+    },
+    "F01-Review.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "1.4 Review and export",
+      "w": 1280,
+      "x": 4080,
+      "y": 0
+    },
+    "F02-Empty.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "2.1 Empty workspace",
+      "w": 1280,
+      "x": 0,
+      "y": 1340
+    },
+    "F02-Export.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "2.4 Ready to export",
+      "w": 1280,
+      "x": 4080,
+      "y": 1340
+    },
+    "F02-Searching.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "2.2 Searching",
+      "w": 1280,
+      "x": 1360,
+      "y": 1340
+    },
+    "F02-Triaged.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "2.3 Triaged",
+      "w": 1280,
+      "x": 2720,
+      "y": 1340
+    },
+    "F03-Draft.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "3.1 Draft from brief",
+      "w": 1280,
+      "x": 0,
+      "y": 2680
+    },
+    "F03-Filled.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "3.3 Filled pitch",
+      "w": 1280,
+      "x": 2720,
+      "y": 2680
+    },
+    "F03-Gate.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "3.4 Review gate",
+      "w": 1280,
+      "x": 4080,
+      "y": 2680
+    },
+    "F03-Slot.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "3.2 Fill a section",
+      "w": 1280,
+      "x": 1360,
+      "y": 2680
+    },
+    "F04-Board.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "4.2 Needs board",
+      "w": 1280,
+      "x": 1360,
+      "y": 4020
+    },
+    "F04-Coverage.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "4.3 Coverage check",
+      "w": 1280,
+      "x": 2720,
+      "y": 4020
+    },
+    "F04-Needs.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "4.1 Edit needs",
+      "w": 1280,
+      "x": 0,
+      "y": 4020
+    },
+    "F04-Pitch.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "4.4 Pitch",
+      "w": 1280,
+      "x": 4080,
+      "y": 4020
+    },
+    "F05-Brief.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "5.1 Brief",
+      "w": 1280,
+      "x": 0,
+      "y": 5360
+    },
+    "F05-Linked.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "5.4 Map linked to A4",
+      "w": 1280,
+      "x": 4080,
+      "y": 5360
+    },
+    "F05-Map.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "5.2 Evidence map",
+      "w": 1280,
+      "x": 1360,
+      "y": 5360
+    },
+    "F05-Node.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "5.3 Node detail",
+      "w": 1280,
+      "x": 2720,
+      "y": 5360
+    },
+    "F06-Case.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "6.2 Case and bid decision",
+      "w": 1280,
+      "x": 1360,
+      "y": 6700
+    },
+    "F06-Inbox.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "6.1 Case inbox",
+      "w": 1280,
+      "x": 0,
+      "y": 6700
+    },
+    "F06-Outbox.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "6.4 Sent and versions",
+      "w": 1280,
+      "x": 4080,
+      "y": 6700
+    },
+    "F06-Triage.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "6.3 Triage",
+      "w": 1280,
+      "x": 2720,
+      "y": 6700
+    },
+    "F07-Brief.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "7.1 Brief",
+      "w": 1280,
+      "x": 0,
+      "y": 8040
+    },
+    "F07-Card.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "7.2 One match",
+      "w": 1280,
+      "x": 1360,
+      "y": 8040
+    },
+    "F07-Done.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "7.3 Queue done",
+      "w": 1280,
+      "x": 2720,
+      "y": 8040
+    },
+    "F07-Pitch.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "7.4 Pitch",
+      "w": 1280,
+      "x": 4080,
+      "y": 8040
+    },
+    "F08-Archives.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "8.3 Archives",
+      "w": 1280,
+      "x": 2720,
+      "y": 9380
+    },
+    "F08-Compare.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "8.2 Compare",
+      "w": 1280,
+      "x": 1360,
+      "y": 9380
+    },
+    "F08-Export.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "8.4 Export selection",
+      "w": 1280,
+      "x": 4080,
+      "y": 9380
+    },
+    "F08-Table.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "8.1 Query and table",
+      "w": 1280,
+      "x": 0,
+      "y": 9380
+    },
+    "F09-Brief.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "9.1 Brief",
+      "w": 1280,
+      "x": 0,
+      "y": 10720
+    },
+    "F09-Decline.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "9.4 Honest decline",
+      "w": 1280,
+      "x": 4080,
+      "y": 10720
+    },
+    "F09-Matches.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "9.3 Strong needs only",
+      "w": 1280,
+      "x": 2720,
+      "y": 10720
+    },
+    "F09-Matrix.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "9.2 Should Bern bid?",
+      "w": 1280,
+      "x": 1360,
+      "y": 10720
+    },
+    "F10-Brief.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "10.1 Brief",
+      "w": 1280,
+      "x": 0,
+      "y": 12060
+    },
+    "F10-Day.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "10.3 Visit day",
+      "w": 1280,
+      "x": 2720,
+      "y": 12060
+    },
+    "F10-Matches.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "10.2 Matches with openness",
+      "w": 1280,
+      "x": 1360,
+      "y": 12060
+    },
+    "F10-Teaser.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "10.4 Teaser with itinerary",
+      "w": 1280,
+      "x": 4080,
+      "y": 12060
+    },
+    "Main.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "1.1 Brief",
+      "w": 1280,
+      "x": 0,
+      "y": 0
+    },
+    "X1-Home.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "1 Home: leads and drafts",
+      "w": 1280,
+      "x": 0,
+      "y": 0
+    },
+    "X2-Brief.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "2 Brief",
+      "w": 1280,
+      "x": 1360,
+      "y": 0
+    },
+    "X3-Matches.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "3 Matches",
+      "w": 1280,
+      "x": 2720,
+      "y": 0
+    },
+    "X4a-Map-Vertical.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "4a Evidence map: vertical",
+      "w": 1280,
+      "x": 4080,
+      "y": 0
+    },
+    "X5-Pitch.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "5 Pitch builder",
+      "w": 1280,
+      "x": 0,
+      "y": 1340
+    },
+    "X6-Review.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "6 Review and export",
+      "w": 1280,
+      "x": 1360,
+      "y": 1340
+    },
+    "X7-Archives.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "7 Archives",
+      "w": 1280,
+      "x": 2720,
+      "y": 1340
+    },
+    "X12-Eval.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "final",
+      "title": "8 Evaluation",
+      "w": 1280,
+      "x": 4080,
+      "y": 1340
+    },
+    "X2b-Brief-Sources.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "final",
+      "title": "2b Brief from PDF and website",
+      "w": 1280,
+      "x": 0,
+      "y": 2680
+    },
+    "X8-States.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "final",
+      "title": "9 Empty, searching, no match, error",
+      "w": 1280,
+      "x": 1360,
+      "y": 2680
+    },
+    "X9-Mutz.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "10 Mutz open with tools",
+      "w": 1280,
+      "x": 2720,
+      "y": 2680
+    },
+    "X10-Lead.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "final",
+      "title": "11 After sending: timeline and pitch v2",
+      "w": 1280,
+      "x": 4080,
+      "y": 2680
+    },
+    "X11-Follow.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "final",
+      "title": "12 Visit accepted: contact researchers",
+      "w": 1280,
+      "x": 5440,
+      "y": 2680
+    },
+    "X13-WhyNot.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "13 Why not X? Mutz explains a ranking",
+      "w": 1280,
+      "x": 0,
+      "y": 4140
+    },
+    "X14-Pipeline.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "final",
+      "title": "14 Case pipeline",
+      "w": 1280,
+      "x": 1360,
+      "y": 4140
+    },
+    "X15-Gaps.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "final",
+      "title": "15 Insights: gap report",
+      "w": 1280,
+      "x": 2720,
+      "y": 4140
+    },
+    "X16-Capability.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "final",
+      "title": "16 Insights: Bern capability map",
+      "w": 1280,
+      "x": 4080,
+      "y": 4140
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-18T10:55:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "page": "final",
+    "view": "canvas"
+  },
+  "notes": {
+    "fs1": {
+      "fill": "gray",
+      "page": "final",
+      "text": "Home holds every lead and draft. Each case runs Brief, Matches, Evidence map, Pitch. Archives sits next to Home in the top bar. Press Play on Home to click through.",
+      "w": 380,
+      "x": -460,
+      "y": 0
+    },
+    "fs3": {
+      "fill": "gray",
+      "page": "final",
+      "text": "PDF and website input with used, ignored and struck passages. The states around the happy path. Mutz open with sourced answers and confirm buttons. After sending: timeline, re-evaluate, pitch v2, then intro drafts and the visit day.",
+      "w": 380,
+      "x": -460,
+      "y": 2680
+    },
+    "fs4": {
+      "fill": "gray",
+      "page": "final",
+      "text": "Why not X makes the ranking inspectable. Pipeline is a second view of Leads. Every triaged lead leaves an anonymous trace that feeds the gap report and the capability map under Insights.",
+      "w": 380,
+      "x": -460,
+      "y": 4140
+    },
+    "ft4": {
+      "kind": "title1",
+      "maxW": 5360,
+      "page": "final",
+      "text": "Final flow: inspectable ranking, pipeline, learning",
+      "w": 240,
+      "x": 0,
+      "y": 3860
+    },
+    "ft1": {
+      "kind": "title1",
+      "maxW": 5360,
+      "page": "final",
+      "text": "Final flow: from lead to evidence",
+      "w": 240,
+      "x": 0,
+      "y": -280
+    },
+    "ft2": {
+      "kind": "title1",
+      "maxW": 5360,
+      "page": "final",
+      "text": "Final flow: pitch, export, archives, evaluation",
+      "w": 240,
+      "x": 0,
+      "y": 1060
+    },
+    "ft3": {
+      "kind": "title1",
+      "maxW": 6720,
+      "page": "final",
+      "text": "Final flow: inputs, states, Mutz, after sending",
+      "w": 240,
+      "x": 0,
+      "y": 2400
+    },
+    "s1": {
+      "fill": "gray",
+      "text": "The playbook baseline. A stepper across the top, one job per screen. Mutz floats on every screen. Safest to build tonight.",
+      "w": 380,
+      "x": -460,
+      "y": 0
+    },
+    "s10": {
+      "fill": "gray",
+      "text": "Matches are ranked with industry openness signals, then dropped into a draft meeting schedule. The teaser ends with the proposed day.",
+      "w": 380,
+      "x": -460,
+      "y": 12060
+    },
+    "s2": {
+      "fill": "gray",
+      "text": "No page changes. Three columns that fill left to right as the officer works. The four frames are states of the same screen.",
+      "w": 380,
+      "x": -460,
+      "y": 1340
+    },
+    "s3": {
+      "fill": "gray",
+      "text": "The brief instantly becomes an A4 draft with empty slots. Each slot asks for evidence and opens a drawer of candidates. Matches only exist in service of a sentence.",
+      "w": 380,
+      "x": -460,
+      "y": 2680
+    },
+    "s4": {
+      "fill": "gray",
+      "text": "Kanban by need. Accepting moves a row into the Pitch column. Coverage pots sit in each column header, so weak needs are obvious before writing.",
+      "w": 380,
+      "x": -460,
+      "y": 4020
+    },
+    "s5": {
+      "fill": "gray",
+      "text": "The left to right tree is the main navigation. Read, Derived, Assumed and Missing edges make trust visible. Clicking a sentence in the A4 lights its path.",
+      "w": 380,
+      "x": -460,
+      "y": 5360
+    },
+    "s6": {
+      "fill": "gray",
+      "text": "Built around the officer's queue, not a single search. Each S-GE lead gets a status, a bid decision, triage and a sent version history.",
+      "w": 380,
+      "x": -460,
+      "y": 6700
+    },
+    "s7": {
+      "fill": "gray",
+      "text": "Like the last winner's single item tree. One match fills the screen with its provenance tree and detail strip. A to accept, R to reject, S to skip.",
+      "w": 380,
+      "x": -460,
+      "y": 8040
+    },
+    "s8": {
+      "fill": "gray",
+      "text": "For the officer who wants density. Facets, sorting, side by side compare, and the Archives page that proves new sites come from config.",
+      "w": 380,
+      "x": -460,
+      "y": 9380
+    },
+    "s9": {
+      "fill": "gray",
+      "text": "We cannot oversell. The first answer is a needs by archive matrix of honey pots. Only strong needs go forward; weak leads get an honest decline note.",
+      "w": 380,
+      "x": -460,
+      "y": 10720
+    },
+    "t1": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "1  Three steps: Brief, Matches, Pitch",
+      "w": 240,
+      "x": 0,
+      "y": -280
+    },
+    "t10": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "10  Visit day: the CEO's day in Bern is the goal",
+      "w": 240,
+      "x": 0,
+      "y": 11780
+    },
+    "t2": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "2  One workspace: needs, matches and live A4 side by side",
+      "w": 240,
+      "x": 0,
+      "y": 1060
+    },
+    "t3": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "3  Document first: the pitch is the canvas",
+      "w": 240,
+      "x": 0,
+      "y": 2400
+    },
+    "t4": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "4  Needs board: one column per need",
+      "w": 240,
+      "x": 0,
+      "y": 3740
+    },
+    "t5": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "5  Evidence map first: need, match, fact, source",
+      "w": 240,
+      "x": 0,
+      "y": 5080
+    },
+    "t6": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "6  Case desk: 300 leads a year",
+      "w": 240,
+      "x": 0,
+      "y": 6420
+    },
+    "t7": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "7  One at a time: keyboard triage",
+      "w": 240,
+      "x": 0,
+      "y": 7760
+    },
+    "t8": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "8  Power table: every entity, every column",
+      "w": 240,
+      "x": 0,
+      "y": 9100
+    },
+    "t9": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "9  Coverage first: decide whether Bern should bid",
+      "w": 240,
+      "x": 0,
+      "y": 10440
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "F01-Matches.dc.html",
+    "F01-Pitch.dc.html",
+    "F01-Review.dc.html",
+    "F02-Empty.dc.html",
+    "F02-Searching.dc.html",
+    "F02-Triaged.dc.html",
+    "F02-Export.dc.html",
+    "F03-Draft.dc.html",
+    "F03-Slot.dc.html",
+    "F03-Filled.dc.html",
+    "F03-Gate.dc.html",
+    "F04-Needs.dc.html",
+    "F04-Board.dc.html",
+    "F04-Coverage.dc.html",
+    "F04-Pitch.dc.html",
+    "F05-Brief.dc.html",
+    "F05-Map.dc.html",
+    "F05-Node.dc.html",
+    "F05-Linked.dc.html",
+    "F06-Inbox.dc.html",
+    "F06-Case.dc.html",
+    "F06-Triage.dc.html",
+    "F06-Outbox.dc.html",
+    "F07-Brief.dc.html",
+    "F07-Card.dc.html",
+    "F07-Done.dc.html",
+    "F07-Pitch.dc.html",
+    "F08-Table.dc.html",
+    "F08-Compare.dc.html",
+    "F08-Archives.dc.html",
+    "F08-Export.dc.html",
+    "F09-Brief.dc.html",
+    "F09-Matrix.dc.html",
+    "F09-Matches.dc.html",
+    "F09-Decline.dc.html",
+    "F10-Brief.dc.html",
+    "F10-Matches.dc.html",
+    "F10-Day.dc.html",
+    "F10-Teaser.dc.html",
+    "X1-Home.dc.html",
+    "X2-Brief.dc.html",
+    "X3-Matches.dc.html",
+    "X5-Pitch.dc.html",
+    "X6-Review.dc.html",
+    "X7-Archives.dc.html",
+    "X4a-Map-Vertical.dc.html",
+    "X12-Eval.dc.html",
+    "X2b-Brief-Sources.dc.html",
+    "X8-States.dc.html",
+    "X9-Mutz.dc.html",
+    "X10-Lead.dc.html",
+    "X11-Follow.dc.html",
+    "X13-WhyNot.dc.html",
+    "X14-Pipeline.dc.html",
+    "X15-Gaps.dc.html",
+    "X16-Capability.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "explore",
+      "name": "10 flows"
+    },
+    {
+      "id": "final",
+      "name": "Final flow"
+    }
+  ],
+  "title": "Bern Expertise Navigator: 10 Flows"
+}

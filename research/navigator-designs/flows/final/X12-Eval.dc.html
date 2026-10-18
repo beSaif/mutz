@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Evaluation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+.cr{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 90px;gap:16px;align-items:baseline;padding:12px 0;border-bottom:1px solid #D9D9D9}
+.cr .v{font-size:24px;font-weight:700;line-height:1.1}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:420px}
+th{text-align:left;font-size:12px;font-weight:400;color:#5E5E5E;padding:8px;border-bottom:1px solid #111}
+td{padding:10px 8px;border-bottom:1px solid #D9D9D9}
+.tc{display:flex;gap:10px;padding:7px 0;font-size:14px;border-bottom:1px solid #D9D9D9}
+.tc b{width:44px;flex:none;font-size:12px;padding-top:2px}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 1000px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a href="X1-Home.dc.html">Leads</a><a href="X15-Gaps.dc.html">Insights</a><a href="X7-Archives.dc.html">Archives</a><a class="on" href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 999 1 620px; min-width: 0; padding: 32px; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px">
+<div><h1 style="margin: 0; font-size: 28px; line-height: 1.15">Evaluation</h1><p class="lb" style="margin: 4px 0 0">Measured on cases we did not tune on. Last run [time] · [n] queries</p></div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b">Run dev set</button><button class="b p">Run held out set</button></div>
+</div>
+<div>
+<div class="cr lb" style="border-bottom-color: #111111"><span>Criterion</span><span>Held out · synthetic · dev</span><span>Target</span></div>
+<div class="cr"><span><b>Expected experts in top 10</b><span class="lb" style="display: block">Recall@10 on the gold set</span></span><span><span class="v">[n]%</span><span class="lb" style="display: block">[n]% synthetic · [n]% dev</span></span><span class="lb">≥ 80%</span></div>
+<div class="cr"><span><b>Lay terms find the same experts</b><span class="lb" style="display: block">Overlap of top 10, “glucose sensors” vs “CGM” and [n] more pairs</span></span><span class="v">[n]%</span><span class="lb">high</span></div>
+<div class="cr"><span><b>Facts without a verified quote</b><span class="lb" style="display: block">[n] facts extracted · [n] dropped by the verifier</span></span><span class="v">0</span><span class="lb">0</span></div>
+<div class="cr"><span><b>Required fields filled</b><span class="lb" style="display: block">Filled where the source has them</span></span><span class="v">[n]%</span><span class="lb">high</span></div>
+<div class="cr"><span><b>New site through config</b><span class="lb" style="display: block">sitem-insel added from sources.yaml, no code change</span></span><span class="v">[n] min</span><span class="lb">yes</span></div>
+<div class="cr" style="background: #FCE3E5; padding-left: 8px; padding-right: 8px"><span><b>Weakest category</b><span class="lb" style="display: block">Shown on purpose</span></span><span><b>[category]</b><span class="lb" style="display: block">[n]% Recall@10</span></span><span class="lb">fix next</span></div>
+</div>
+<div>
+<h2 style="margin: 0 0 6px; font-size: 18px">Coverage per source</h2>
+<div style="overflow-x: auto"><table>
+<thead><tr><th>Source</th><th>Pages</th><th>Entities</th><th>Gold queries</th><th>Recall@10</th></tr></thead>
+<tbody>
+<tr><td>ARTORG Center</td><td>410</td><td>[n]</td><td>[n]</td><td>[n]%</td></tr>
+<tr><td>Diabetes Center Berne</td><td>180</td><td>[n]</td><td>[n]</td><td>[n]%</td></tr>
+<tr><td>University of Bern, 15 subdomains</td><td>650</td><td>[n]</td><td>[n]</td><td>[n]%</td></tr>
+</tbody>
+</table></div>
+</div>
+<div>
+<h2 style="margin: 0 0 6px; font-size: 18px">Model bake off, same 30 pages</h2>
+<div style="overflow-x: auto"><table>
+<thead><tr><th>Model</th><th>Where</th><th>Verified quote rate</th><th>Field accuracy</th></tr></thead>
+<tbody>
+<tr><td>Apertus v1.5 8B</td><td>CSCS</td><td>[n]%</td><td>[n]%</td></tr>
+<tr><td>Apertus v1.5 70B</td><td>CSCS</td><td>[n]%</td><td>[n]%</td></tr>
+<tr><td>[HF model]</td><td>Hugging Face, public text only</td><td>[n]%</td><td>[n]%</td></tr>
+</tbody>
+</table></div>
+</div>
+</section>
+<aside style="flex: 1 1 340px; padding: 32px; border-left: 1px solid #E30613; display: flex; flex-direction: column; gap: 20px">
+<div>
+<h2 style="margin: 0 0 6px; font-size: 18px">Pipeline tests</h2>
+<div class="tc"><b>Pass</b><span>Planted fake quote is dropped</span></div>
+<div class="tc"><b>Pass</b><span>Obfuscated unibe email is decoded</span></div>
+<div class="tc"><b>Pass</b><span>robots.txt disallowed URL never fetched</span></div>
+<div class="tc"><b>Pass</b><span>DE, EN, FR page becomes one entity</span></div>
+<div class="tc"><b>Pass</b><span>Prompt injection page is ignored</span></div>
+<div class="tc"><b>Pass</b><span>Export fails if a card has no source</span></div>
+<div class="tc"><b style="color: #B8000F">Fail</b><span>Banned word in a generated card [n]</span></div>
+</div>
+<div>
+<h2 style="margin: 0 0 6px; font-size: 18px">Fair discoverability</h2>
+<p style="margin: 0; font-size: 14px">Top 10 slots going to small units: <b>[n]%</b> before, <b>[n]%</b> after normalisation.</p>
+</div>
+<div>
+<h2 style="margin: 0 0 6px; font-size: 18px">Cost and sovereignty</h2>
+<p style="margin: 0 0 6px; font-size: 14px">[n] tokens per case · [n] gateway calls · 1,240 pages crawled. Recrawl by ETag and content hash.</p>
+<p class="lb" style="margin: 0">Confidential text only goes to Apertus on CSCS. Hugging Face only sees public web text. Self hosted path: docker compose on one GPU box.</p>
+</div>
+<div style="background: #F2F2F2; padding: 14px; font-size: 14px">The held out set is locked and runs once after the freeze. The number is reported as it comes out.</div>
+</aside>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

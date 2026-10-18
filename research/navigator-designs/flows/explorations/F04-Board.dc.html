@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Needs board</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 13px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:6px 10px;min-height:32px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.side a{display:block;padding:12px 20px;text-decoration:none;font-size:14px;color:#fff}
+.colm{flex:0 0 228px;display:flex;flex-direction:column;gap:8px}
+.ch{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:2px solid #111}
+.cd{background:#fff;border:1px solid #111;padding:10px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; display: flex; flex-wrap: wrap">
+<nav aria-label="Main" class="side" style="flex: 1 1 180px; max-width: 200px; background: #111111; padding: 20px 0; display: flex; flex-direction: column">
+<div style="padding: 0 20px 20px; color: #FFFFFF"><span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block; margin-right: 8px"></span><b>Navigator</b><span style="display: block; font-size: 11px; color: #C8C8C8; margin-top: 4px">Prototype, not an official Canton of Bern tool</span></div>
+<a href="F04-Needs.dc.html">Brief</a>
+<a href="F04-Board.dc.html" style="background: #E30613; font-weight: 700">Board</a>
+<a href="F04-Pitch.dc.html">Pitch</a>
+<a href="F08-Archives.dc.html">Archives</a>
+</nav>
+<main style="flex: 999 1 640px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: #F5F5F5">
+<div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px"><h1 style="margin: 0; font-size: 24px">Sport wearable lead</h1><span class="lb">Drag a card into Pitch, or press Accept</span></div>
+<div style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 12px; align-items: flex-start">
+<section class="colm">
+<div class="ch"><svg viewBox="0 0 20 22" width="20" height="22" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="8" width="11" height="11.5" fill="#111"/></svg><b style="flex: 1">Clinical study</b><span class="lb">Strong</span></div>
+<div class="cd"><b>TIMES study</b><span>Type 1 diabetes across the menstrual cycle</span><span class="lb">dcberne.com</span><div style="display: flex; gap: 6px"><button class="b">Reject</button><button class="b p">Accept</button></div></div>
+<div class="cd"><b lang="de" style="hyphens: auto; overflow-wrap: anywhere">Universitätsklinik für Diabetologie, Endokrinologie, Ernährungsmedizin und Metabolismus</b><span>Clinical diabetes care, possible recruiting site</span><span class="lb">insel.ch</span><div style="display: flex; gap: 6px"><button class="b">Reject</button><button class="b p">Accept</button></div></div>
+</section>
+<section class="colm">
+<div class="ch"><svg viewBox="0 0 20 22" width="20" height="22" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="8" width="11" height="11.5" fill="#111"/></svg><b style="flex: 1">R&amp;D partner</b><span class="lb">Strong</span></div>
+<div class="cd" style="opacity: 0.5; border-style: dashed"><b>Prof. Dr. Lilian Witthauer</b><span class="lb">Moved to Pitch</span></div>
+<div class="cd"><b>ARTORG Center</b><span>13 research groups in biomedical engineering</span><span class="lb">artorg.unibe.ch</span><div style="display: flex; gap: 6px"><button class="b">Reject</button><button class="b p">Accept</button></div></div>
+</section>
+<section class="colm">
+<div class="ch"><svg viewBox="0 0 20 22" width="20" height="22" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="15" width="11" height="4.5" fill="#111"/></svg><b style="flex: 1">Supplier</b><span class="lb">Thin</span></div>
+<div class="cd"><b>[Unit from unibe.ch]</b><span>One page mentions patch materials</span><span class="lb">1 weak source</span><div style="display: flex; gap: 6px"><button class="b">Reject</button><button class="b">Keep, flag</button></div></div>
+<a class="cd" href="F04-Board.dc.html" style="text-decoration: none; border-style: dashed"><b>Add sitem-insel.ch as archive?</b><span class="lb">Mutz checked: robots.txt allows it</span></a>
+</section>
+<section class="colm">
+<div class="ch"><svg viewBox="0 0 20 22" width="20" height="22" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/></svg><b style="flex: 1">Infrastructure</b><span class="lb">Kei Hung</span></div>
+<div class="cd" style="border-style: dashed; color: #5E5E5E">No source with real evidence in 3 archives. Better not to pitch this need.</div>
+</section>
+<section class="colm" style="background: #FFFFFF; padding: 0 10px 10px; border-top: 4px solid #E30613">
+<div class="ch"><b style="flex: 1">Pitch</b><span class="lb">2 cards</span></div>
+<div class="cd"><b>Prof. Dr. Lilian Witthauer</b><span>Sensors and ML for diabetes [1]</span><span class="lb">2 sources</span></div>
+<div class="cd"><b>DCB innovation challenge</b><span>Open to companies [4]</span><span class="lb">dcberne.com</span></div>
+<a class="b p" href="F04-Coverage.dc.html" style="justify-content: center; min-height: 44px">Check coverage</a>
+</section>
+</div>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

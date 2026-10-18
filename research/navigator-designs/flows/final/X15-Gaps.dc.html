@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gap report</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.b.s{padding:6px 10px;min-height:36px;font-size:13px}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+.tb{display:flex;border:1px solid #111;width:max-content;max-width:100%}
+.tb a{padding:9px 18px;font-size:14px;text-decoration:none;color:#111;min-height:40px;display:inline-flex;align-items:center}
+.tb a.on{background:#111;color:#fff;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:760px}
+th{text-align:left;font-size:12px;font-weight:400;color:#5E5E5E;padding:10px 8px;border-bottom:1px solid #111}
+td{padding:12px 8px;border-bottom:1px solid #D9D9D9;vertical-align:top}
+.pot{display:inline-flex;gap:6px;align-items:center}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 1000px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a href="X1-Home.dc.html">Leads</a><a class="on" href="X15-Gaps.dc.html">Insights</a><a href="X7-Archives.dc.html">Archives</a><a href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 999 1 680px; min-width: 0; padding: 32px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px">
+<div><h1 style="margin: 0; font-size: 28px; line-height: 1.15">What leads asked for, and Bern could not answer</h1><p class="lb" style="margin: 4px 0 0">Every empty honey pot is logged. Demo data, seeded from closed test cases.</p></div>
+<div style="display: flex; gap: 8px; align-items: center"><label for="yr" class="lb">Year</label><select id="yr" style="font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 9px; border: 1px solid #111111; border-radius: 2px; background: #FFFFFF"><option>2026</option><option>2025</option></select></div>
+</div>
+<nav aria-label="Insights" class="tb"><a class="on" href="X15-Gaps.dc.html">Gap report</a><a href="X16-Capability.dc.html">Capability map</a></nav>
+<div style="border-left: 4px solid #E30613; padding: 8px 0 8px 16px">
+<p style="margin: 0; font-size: 21px; font-weight: 700; line-height: 1.3">[n]% of leads this year asked for battery technology, and Bern had no group with evidence.</p>
+<p class="lb" style="margin: 4px 0 0">[n] of [n] leads · 3 archives searched · biggest gap this year</p>
+</div>
+<div style="overflow-x: auto">
+<table>
+<thead><tr><th>Field asked for</th><th>Leads</th><th>Share</th><th>Bern coverage</th><th>Searched</th><th>Outcome of those leads</th></tr></thead>
+<tbody>
+<tr><td><b>Battery technology</b><div class="lb">recycling, cell chemistry</div></td><td>[n]</td><td>[n]%</td><td><span class="pot"><svg viewBox="0 0 20 22" width="18" height="20" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/></svg>Kei Hung</span></td><td>3 archives</td><td>All declined, no Bern strength</td></tr>
+<tr><td><b>Cosmetics and packaging</b><div class="lb">filling, packaging lines</div></td><td>[n]</td><td>[n]%</td><td><span class="pot"><svg viewBox="0 0 20 22" width="18" height="20" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/></svg>Kei Hung</span></td><td>3 archives</td><td>All declined</td></tr>
+<tr><td><b>Clinical trial support for medtech</b><div class="lb">trial units, recruiting</div></td><td>[n]</td><td>[n]%</td><td><span class="pot"><svg viewBox="0 0 20 22" width="18" height="20" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/></svg>Kei Hung</span><div class="lb" style="margin-top: 4px; color: #B8000F">Maybe an archive gap</div></td><td>3 archives<div><a class="b s" href="X7-Archives.dc.html" style="margin-top: 6px">Add an archive to check</a></div></td><td>Pitched without this need</td></tr>
+<tr><td><b>Small batch manufacturing</b><div class="lb">medical devices</div></td><td>[n]</td><td>[n]%</td><td><span class="pot"><svg viewBox="0 0 20 22" width="18" height="20" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="15" width="11" height="4.5" fill="#111"/></svg>Thin</span></td><td>3 archives</td><td>Mixed</td></tr>
+<tr style="color: #5E5E5E"><td colspan="6">Fields asked for by fewer than 5 leads are grouped as “Other” so no company can be recognised · [n] leads</td></tr>
+</tbody>
+</table>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b p">Export for economic policy (PDF)</button><button class="b">Download CSV</button></div>
+</section>
+<aside style="flex: 1 1 320px; padding: 32px; border-left: 1px solid #E30613; display: flex; flex-direction: column; gap: 20px">
+<div>
+<h2 style="margin: 0 0 6px; font-size: 18px">How a lead becomes a data point</h2>
+<p style="margin: 0; font-size: 14px">At triage, each need is saved as a field, its coverage and the archives searched. When the lead closes, its outcome is added.</p>
+</div>
+<div>
+<h2 style="margin: 0 0 6px; font-size: 18px">What is never logged</h2>
+<p style="margin: 0; font-size: 14px">Company names, the one pager text, the CEO's emails. Only the field, the coverage and the outcome.</p>
+</div>
+<div>
+<h2 style="margin: 0 0 6px; font-size: 18px">Archive gap or Bern gap?</h2>
+<p style="margin: 0; font-size: 14px">An empty pot can mean the expertise sits on a site we do not crawl. Check the archives before anyone draws a policy conclusion.</p>
+</div>
+<div style="background: #F2F2F2; padding: 14px; font-size: 14px">Share = leads with an empty pot for a field ÷ all leads that year. The count is always shown next to the percentage.</div>
+</aside>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<a aria-label="Ask Mutz" href="X9-Mutz.dc.html" style="display: block">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

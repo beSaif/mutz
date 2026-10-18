@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Visit accepted, follow up</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.b.s{padding:6px 10px;min-height:36px;font-size:13px}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:2px 6px;display:inline-flex;gap:4px;align-items:center;background:#fff}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+.st{display:flex;gap:4px;flex-wrap:wrap}
+.st a{padding:8px 14px;font-size:14px;text-decoration:none;border-top:3px solid #D9D9D9;color:#5E5E5E}
+.st a.done{border-top-color:#111;color:#111}
+.st a.on{border-top-color:#E30613;color:#111;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th{text-align:left;font-size:12px;font-weight:400;color:#5E5E5E;padding:8px;border-bottom:1px solid #111}
+td{padding:12px 8px;border-bottom:1px solid #D9D9D9;vertical-align:top}
+.sl{display:grid;grid-template-columns:60px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 1000px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a class="on" href="X1-Home.dc.html">Leads</a><a href="X15-Gaps.dc.html">Insights</a><a href="X7-Archives.dc.html">Archives</a><a href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 10px 32px; border-bottom: 1px solid #D9D9D9; background: #FAFAFA">
+<a href="X1-Home.dc.html" style="font-size: 14px">Leads</a><span class="lb">/</span><b>Sport wearable lead</b>
+<label for="status" class="lb">Status</label>
+<select id="status" style="font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 8px; border: 1px solid #111111; border-radius: 2px; background: #FFFFFF"><option>New</option><option>Pitch sent</option><option>In discussion</option><option selected>Visit accepted</option><option>Visit day</option><option>Closed</option></select>
+<nav aria-label="Case steps" class="st" style="margin-left: auto"><a class="done" href="X2-Brief.dc.html">1 Brief</a><a class="done" href="X3-Matches.dc.html">2 Matches</a><a class="done" href="X4a-Map-Vertical.dc.html">3 Evidence map</a><a class="done" href="X5-Pitch.dc.html">4 Pitch</a><a class="on" href="X10-Lead.dc.html">5 After sending</a></nav>
+</div>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 999 1 640px; min-width: 0; padding: 32px; display: flex; flex-direction: column; gap: 20px">
+<div><h1 style="margin: 0; font-size: 24px">Contact the researchers</h1><p class="lb" style="margin: 4px 0 0">One row per accepted match. Nothing is sent automatically; these are the agency's relationships.</p></div>
+<div style="overflow-x: auto">
+<table>
+<thead><tr><th>Researcher</th><th>Language</th><th>Why them</th><th>Status</th></tr></thead>
+<tbody>
+<tr style="background: #F2F2F2"><td><b>Prof. Dr. Lilian Witthauer</b><div class="lb">ARTORG affiliated group</div></td><td>DE</td><td>Sensors and ML for diabetes [1]</td><td><b>Agreed</b><div class="lb">Thu 10:00</div></td></tr>
+<tr><td><b>TIMES study team</b><div class="lb">Diabetes Center Berne</div></td><td>EN</td><td>Type 1 diabetes across the cycle [3]</td><td>Sent<div class="lb">No reply yet · reminder in 2 days</div></td></tr>
+<tr><td><b lang="de" style="hyphens: auto">Universitätsklinik für Diabetologie</b><div class="lb">Inselspital</div></td><td>DE</td><td>Recruiting site [5]</td><td>Drafted</td></tr>
+<tr><td><b>[Manufacturing match]</b><div class="lb">from pitch v2</div></td><td>DE</td><td>Small batch manufacturing [7]</td><td>Declined<div class="lb">“No capacity this year”</div></td></tr>
+</tbody>
+</table>
+</div>
+<div style="border: 1px solid #111111; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline"><b>Intro draft for the Inselspital clinic</b><span class="lb">German · written from shareable needs only</span></div>
+<label for="draft" class="lb">Edit before sending</label>
+<textarea id="draft" lang="de" rows="8" style="font: 14px/1.55 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 12px; border: 1px solid #111111; border-radius: 2px; resize: vertical">Sehr geehrte Damen und Herren
+
+Ein junges Medtech-Unternehmen entwickelt ein Hautpflaster, das Glukose und Laktat bei Frauen im Ausdauersport misst. Es sucht in Bern einen Ort für eine klinische Studie mit Frauen mit Typ-1-Diabetes.
+
+Hätten Sie am [Datum] 45 Minuten Zeit für ein Gespräch mit der Geschäftsleitung?
+
+Freundliche Grüsse
+[Officer name], Wirtschaftsförderung Kanton Bern</textarea>
+<p class="lb" style="margin: 0">The confidential one pager and the CEO's email are not used. Only needs marked shareable.</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b s">Copy</button><button class="b s">Open in mail</button><button class="b s">Rewrite shorter</button><button class="b s">Mark as sent</button></div>
+</div>
+</section>
+<div aria-hidden="true" style="width: 1px; background: #E30613; align-self: stretch"></div>
+<aside style="flex: 1 1 340px; padding: 32px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 21px">Visit day, Thursday</h2>
+<p class="lb" style="margin: 0">Fills as researchers agree. Same schedule as the last page of the pitch.</p>
+<div style="border-top: 1px solid #111111">
+<div class="sl"><b>09:00</b><span>Welcome at the agency<span class="lb" style="display: block">[Officer name]</span></span></div>
+<div class="sl"><b>10:00</b><span>Prof. Dr. Lilian Witthauer<span class="lb" style="display: block">Confirmed</span></span></div>
+<div class="sl"><b>11:30</b><span style="color: #5E5E5E">TIMES study team<span class="lb" style="display: block">Waiting for reply</span></span></div>
+<div class="sl"><b>14:00</b><span style="color: #5E5E5E">Inselspital clinic<span class="lb" style="display: block">Draft not sent</span></span></div>
+</div>
+<button class="b" style="align-self: flex-start">Export calendar file (.ics)</button>
+<div style="background: #F2F2F2; padding: 14px; font-size: 14px">Who agrees or declines feeds a weak “responsive to industry” signal into future matches. It never hides anyone.</div>
+</aside>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<a aria-label="Ask Mutz" href="X9-Mutz.dc.html" style="display: block">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

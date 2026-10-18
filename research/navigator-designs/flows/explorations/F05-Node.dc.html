@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Match graph and node detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.tab{text-decoration:none;font-size:14px;padding:16px 0;color:#5E5E5E}
+.n{position:absolute;height:52px;border:1.5px solid #111;background:#fff;padding:6px 10px;font-size:13px;line-height:1.3;text-decoration:none;color:#111;display:flex;flex-direction:column;justify-content:center}
+.n small{font-size:11px;color:#5E5E5E}
+.e{position:absolute}
+.badge{position:absolute;right:-10px;top:-10px;width:20px;height:20px;border-radius:50%;background:#111;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center}
+dt{font-size:12px;color:#5E5E5E}
+dd{margin:0 0 12px}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 28px; padding: 0 32px; border-bottom: 1px solid #111111">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Expertise Navigator</b>
+<nav aria-label="Views" style="display: flex; gap: 28px; margin-left: auto">
+<a class="tab" href="F05-Brief.dc.html">Brief</a>
+<a class="tab" href="F05-Map.dc.html" style="color: #111111; font-weight: 700; box-shadow: inset 0 -3px 0 #E30613">Map</a>
+<a class="tab" href="F05-Linked.dc.html">Pitch</a>
+</nav>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 999 1 640px; min-width: 0; padding: 20px 32px">
+<p style="margin: 0 0 12px; font-size: 14px"><a href="F05-Map.dc.html">Map</a> <span class="lb">/</span> Prof. Dr. Lilian Witthauer</p>
+<div style="overflow-x: auto">
+<div style="position: relative; width: 620px; height: 600px">
+<div class="e" style="left: 244px; top: 291px; width: 40px; border-top: 2px solid #111111"></div>
+<div class="e" style="left: 284px; top: 66px; height: 480px; border-left: 2px solid #111111"></div>
+<div class="e" style="left: 284px; top: 65px; width: 36px; border-top: 2px solid #111111"></div>
+<div class="e" style="left: 284px; top: 145px; width: 36px; border-top: 2px solid #111111"></div>
+<div class="e" style="left: 284px; top: 225px; width: 36px; border-top: 2px solid #111111"></div>
+<div class="e" style="left: 284px; top: 305px; width: 36px; border-top: 2px solid #111111"></div>
+<div class="e" style="left: 284px; top: 385px; width: 36px; border-top: 3px dashed #E30613"></div>
+<div class="e" style="left: 284px; top: 465px; width: 36px; border-top: 2px dotted #9A9A9A"></div>
+<div class="e" style="left: 284px; top: 545px; width: 36px; border-top: 2px dotted #9A9A9A"></div>
+<div class="n" style="left: 24px; top: 260px; width: 220px; height: 64px; background: #111111; color: #FFFFFF"><small style="color: #D0D0D0">Person · ARTORG</small><b>Prof. Dr. Lilian Witthauer</b></div>
+<a class="n" href="F05-Node.dc.html" style="left: 320px; top: 40px; width: 280px"><small>Function · Read</small>Head of the group</a>
+<a class="n" href="F05-Node.dc.html" style="left: 320px; top: 120px; width: 280px"><small>Unit · Read</small>Diabetes, Machine Learning &amp; Sensor Technology</a>
+<a class="n" href="F05-Node.dc.html" style="left: 320px; top: 200px; width: 280px"><small>Affiliations · Read</small>ARTORG affiliated group, Insel<span class="badge" aria-label="2 values">2</span></a>
+<a class="n" href="F05-Node.dc.html" style="left: 320px; top: 280px; width: 280px"><small>Contact · Read</small>Listed on the person page</a>
+<a class="n" href="F05-Node.dc.html" style="left: 320px; top: 360px; width: 280px; border: 3px solid #E30613"><small>Expertise · Derived</small>Sensors and machine learning for diabetes</a>
+<a class="n" href="F05-Node.dc.html" style="left: 320px; top: 440px; width: 280px; border: 1.5px dashed #9A9A9A; color: #5E5E5E"><small>Grants · Missing</small>No SNSF grant matched</a>
+<a class="n" href="F05-Node.dc.html" style="left: 320px; top: 520px; width: 280px; border: 1.5px dashed #9A9A9A; color: #5E5E5E"><small>ORCID · Missing</small>Not stated on any source</a>
+</div>
+</div>
+</section>
+<aside role="region" aria-label="Node detail" style="flex: 1 1 380px; border-left: 1px solid #111111; padding: 28px; display: flex; flex-direction: column">
+<p class="lb" style="margin: 0">Expertise</p>
+<h1 style="margin: 4px 0 16px; font-size: 21px">Sensors and machine learning for diabetes</h1>
+<dl style="margin: 0">
+<dt>Provenance</dt><dd><b>Derived</b>, from the group she heads, not her own page</dd>
+<dt>Location</dt><dd>ARTORG affiliated groups page · artorg.unibe.ch · fetched 18 Oct 2026</dd>
+<dt>Exact quote</dt><dd style="font-style: italic; border-left: 2px solid #E30613; padding-left: 12px">“Diabetes, Machine Learning &amp; Sensor Technology”</dd>
+<dt>Used in pitch</dt><dd>Why Bern for you, point 1</dd>
+</dl>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px"><a class="b" href="F05-Node.dc.html">Open at quote</a><button class="b">Remove</button><a class="b p" href="F05-Linked.dc.html">Add to pitch</a></div>
+</aside>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Compare two matches</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 13px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:10px 14px;min-height:40px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.cr{display:grid;grid-template-columns:180px minmax(0,1fr) minmax(0,1fr);gap:0;border-bottom:1px solid #D9D9D9}
+.cr>*{padding:12px 14px;min-width:0}
+.cr>:first-child{color:#5E5E5E;font-size:12px}
+.cr>:nth-child(2){border-right:1px solid #E30613}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.45">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 20px; border-bottom: 1px solid #111111">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Navigator</b>
+<a href="F08-Table.dc.html" style="font-size: 13px">Results</a><span class="lb">/</span><span style="font-size: 13px">Compare</span>
+<span style="flex: 1"></span><a href="F08-Archives.dc.html" style="font-size: 13px">Archives</a>
+</header>
+<main style="padding: 20px; max-width: 1280px">
+<div style="overflow-x: auto">
+<div style="min-width: 760px">
+<div class="cr" style="border-bottom: 2px solid #111111"><span>For need</span><div><h1 style="margin: 0; font-size: 21px">Prof. Dr. Lilian Witthauer</h1><span class="lb">Person · ARTORG</span></div><div><h2 style="margin: 0; font-size: 21px">Lisa Koch</h2><span class="lb">Person · merged from 2 records</span></div></div>
+<div class="cr"><span>Affiliations</span><div>ARTORG affiliated group head; linked to Insel</div><div>ARTORG affiliated group head; Diabetes Center Berne team</div></div>
+<div class="cr"><span>Expertise</span><div>Sensors and machine learning for diabetes <span class="lb">Derived</span></div><div>[From the crawl] <span class="lb">pending extraction</span></div></div>
+<div class="cr"><span>Plain reason</span><div>Fits the patch's glucose tracking [1].</div><div style="color: #5E5E5E">[Grounded reason, written once expertise is extracted]</div></div>
+<div class="cr"><span>Evidence</span><div>2 pages · artorg.unibe.ch, insel.ch</div><div>2 pages · artorg.unibe.ch, dcberne.com</div></div>
+<div class="cr"><span>Openness to industry</span><div style="color: #5E5E5E">Not stated</div><div style="color: #5E5E5E">Not stated</div></div>
+<div class="cr"><span>SNSF grants</span><div style="color: #5E5E5E">None matched</div><div style="color: #5E5E5E">None matched</div></div>
+<div class="cr"><span>Merge log</span><div style="color: #5E5E5E">No variants</div><div>ARTORG and DCB records joined by name and shared affiliation. <a href="F08-Compare.dc.html">Show log</a></div></div>
+<div class="cr" style="border-bottom: 0"><span></span><div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b">Reject</button><a class="b p" href="F08-Export.dc.html">Keep in selection</a></div><div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b">Reject</button><a class="b p" href="F08-Export.dc.html">Keep in selection</a></div></div>
+</div>
+</div>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="56" height="52" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brief</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:2px 6px;display:inline-block;text-decoration:none;background:#fff;color:#111}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px; padding: 16px 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b><span class="lb">Prototype, not an official Canton of Bern tool</span></div>
+<nav aria-label="Steps" style="display: flex; gap: 28px; font-size: 14px; margin-left: auto">
+<a href="Main.dc.html" style="text-decoration: none; font-weight: 700; border-bottom: 3px solid #E30613; padding-bottom: 4px">1 Brief</a>
+<a href="F01-Matches.dc.html" style="text-decoration: none; color: #5E5E5E">2 Matches</a>
+<a href="F01-Pitch.dc.html" style="text-decoration: none; color: #5E5E5E">3 Pitch</a>
+</nav>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 1 1 320px; padding: 48px 32px; display: flex; flex-direction: column; gap: 16px">
+<h1 style="margin: 0; font-size: 28px; line-height: 1.15">New case</h1>
+<p style="margin: 0; max-width: 40ch">Paste the company one pager or type one sentence. The text goes only to Apertus on CSCS, in Switzerland.</p>
+<p class="lb" style="margin: 0">Source: S-GE lead, received today</p>
+<a href="Main.dc.html" style="font-size: 14px">Load the demo case</a>
+</section>
+<div aria-hidden="true" style="width: 1px; background: #E30613; align-self: stretch"></div>
+<section style="flex: 999 1 560px; min-width: 0; padding: 48px 32px; display: flex; flex-direction: column; gap: 20px">
+<label for="brief" class="lb">Company one pager</label>
+<textarea id="brief" rows="6" style="font: 15px/1.5 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 12px; border: 1px solid #111111; border-radius: 2px; resize: vertical">Founded 2023. We build a skin patch that tracks glucose and lactate in women during endurance sport. Over the next five years we need clinical validation with women who have type 1 diabetes, a manufacturing partner for the patch, and a European base close to research.</textarea>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap">
+<h2 style="margin: 0; font-size: 21px">Needs found</h2>
+<span class="lb">Edit or delete before searching</span>
+</div>
+<ul style="list-style: none; margin: 0; padding: 0; border-top: 1px solid #D9D9D9">
+<li style="display: flex; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid #D9D9D9"><span class="chip">Clinical study</span><span style="flex: 1">Partner for a study with women who have type 1 diabetes, during sport</span><button class="b" aria-label="Delete need" style="padding: 8px 12px">Delete</button></li>
+<li style="display: flex; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid #D9D9D9"><span class="chip">R&amp;D partner</span><span style="flex: 1">Sensor and machine learning research on glucose and lactate</span><button class="b" aria-label="Delete need" style="padding: 8px 12px">Delete</button></li>
+<li style="display: flex; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid #D9D9D9"><span class="chip">Supplier</span><span style="flex: 1">Manufacturing partner for a skin patch</span><button class="b" aria-label="Delete need" style="padding: 8px 12px">Delete</button></li>
+<li style="display: flex; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid #D9D9D9"><span class="chip">Infrastructure</span><span style="flex: 1">Clinical trial support and regulatory guidance for medtech</span><button class="b" aria-label="Delete need" style="padding: 8px 12px">Delete</button></li>
+</ul>
+<button class="b" style="align-self: flex-start; border-style: dashed">Add a need</button>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center">
+<a class="b p" href="F01-Matches.dc.html">Find matches</a>
+<span class="lb">Searches 3 archives in DE, FR and EN</span>
+</div>
+</section>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0; display: flex; align-items: flex-end; gap: 12px">
+<p style="margin: 0 0 40px; max-width: 260px; background: #FFFFFF; border: 1px solid #111111; padding: 10px 12px; font-size: 13px">Grüessech! Paste a one pager and I go find Bern's people.<span class="lb" style="display: block">Hello! (Bernese German)</span></p>
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="72" height="68" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

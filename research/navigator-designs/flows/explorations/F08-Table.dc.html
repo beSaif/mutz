@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Query and table</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 13px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:10px 14px;min-height:40px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:3px 6px;display:inline-flex;gap:4px;align-items:center;background:#fff}
+.fc{display:flex;gap:8px;align-items:center;font-size:13px;padding:4px 0}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:820px}
+th{text-align:left;font-size:11px;font-weight:400;color:#5E5E5E;padding:8px;border-bottom:1px solid #111;white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid #E3E3E3;vertical-align:top}
+tr.sel td{background:#FCE3E5}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.45">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 20px; border-bottom: 1px solid #111111">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Navigator</b>
+<label for="q8" class="lb">Query</label>
+<input id="q8" value="glucose sensor women sport" style="flex: 1 1 320px; font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 10px; border: 1px solid #111111; border-radius: 2px">
+<a class="b p" href="F08-Table.dc.html">Search</a>
+<a href="F08-Archives.dc.html" style="font-size: 13px">Archives</a>
+</header>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px 20px; border-bottom: 1px solid #D9D9D9">
+<span class="lb">Also searched</span>
+<label class="chip"><input type="checkbox" checked> CGM (MeSH)</label><label class="chip"><input type="checkbox" checked> Blutzuckermessung</label><label class="chip"><input type="checkbox" checked> glycémie</label><label class="chip"><input type="checkbox" checked> Menstruationszyklus</label><label class="chip"><input type="checkbox"> fitness tracker</label>
+</div>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<aside style="flex: 1 1 180px; max-width: 200px; padding: 16px 20px; border-right: 1px solid #D9D9D9">
+<p class="lb" style="margin: 0 0 4px">Type</p>
+<label class="fc"><input type="checkbox" checked>Person 3</label><label class="fc"><input type="checkbox" checked>Unit 2</label><label class="fc"><input type="checkbox" checked>Study 1</label><label class="fc"><input type="checkbox" checked>Programme 1</label><label class="fc"><input type="checkbox" checked>Grant 1</label>
+<p class="lb" style="margin: 14px 0 4px">Source</p>
+<label class="fc"><input type="checkbox" checked>ARTORG</label><label class="fc"><input type="checkbox" checked>DCB</label><label class="fc"><input type="checkbox" checked>unibe.ch</label><label class="fc"><input type="checkbox" checked>SNSF</label>
+<p class="lb" style="margin: 14px 0 4px">Evidence</p>
+<label class="fc"><input type="radio" name="ev" checked>Any</label><label class="fc"><input type="radio" name="ev">2 or more sources</label>
+<p class="lb" style="margin: 14px 0 4px">Fairness</p>
+<label class="fc"><input type="checkbox" checked>Max 2 per unit in top 10</label>
+</aside>
+<section style="flex: 999 1 640px; min-width: 0; padding: 12px 20px">
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px"><span class="lb">8 results · sorted by evidence · 2 selected</span><div style="display: flex; gap: 8px"><a class="b" href="F08-Compare.dc.html">Compare 2</a><a class="b p" href="F08-Export.dc.html">Export selection</a></div></div>
+<div style="overflow-x: auto">
+<table>
+<thead><tr><th><span class="lb">Select</span></th><th>Name</th><th>Type</th><th>Unit</th><th>Source</th><th>Evidence</th><th>Matched on</th><th>Coverage</th></tr></thead>
+<tbody>
+<tr class="sel"><td><input type="checkbox" checked aria-label="Select Witthauer"></td><td><b>Prof. Dr. Lilian Witthauer</b></td><td>Person</td><td>ARTORG affiliated group</td><td>ARTORG, Insel</td><td>2 pages</td><td>CGM, diabetes, sensor</td><td>Strong</td></tr>
+<tr><td><input type="checkbox" aria-label="Select TIMES"></td><td><b>TIMES study</b></td><td>Study</td><td>Diabetes Center Berne</td><td>DCB</td><td>1 page</td><td>menstrual cycle, type 1</td><td>Strong</td></tr>
+<tr class="sel"><td><input type="checkbox" checked aria-label="Select Koch"></td><td><b>Lisa Koch</b> <span class="lb">merged from 2</span></td><td>Person</td><td>ARTORG affiliated group, DCB team</td><td>ARTORG, DCB</td><td>2 pages</td><td>diabetes</td><td>Strong</td></tr>
+<tr><td><input type="checkbox" aria-label="Select challenge"></td><td><b>DCB innovation challenge</b></td><td>Programme</td><td>Diabetes Center Berne</td><td>DCB</td><td>1 page</td><td>companies, diabetes</td><td>Thin</td></tr>
+<tr><td><input type="checkbox" aria-label="Select ARTORG"></td><td><b>ARTORG Center</b></td><td>Unit</td><td>University of Bern</td><td>ARTORG</td><td>3 pages</td><td>sensor, biomedical</td><td>Strong</td></tr>
+<tr><td><input type="checkbox" aria-label="Select clinic"></td><td lang="de" style="max-width: 220px"><b>Universitätsklinik für Diabetologie, Endokrinologie, Ernährungsmedizin und Metabolismus</b></td><td>Unit</td><td>Inselspital</td><td>unibe.ch</td><td>1 page</td><td>Diabetologie</td><td>Thin</td></tr>
+<tr><td><input type="checkbox" aria-label="Select grant"></td><td><b>[SNSF grant title]</b></td><td>Grant</td><td>University of Bern</td><td>SNSF</td><td>1 record</td><td>glucose</td><td>Thin</td></tr>
+<tr><td><input type="checkbox" aria-label="Select unit"></td><td><b>[Unit on unibe.ch]</b></td><td>Unit</td><td>University of Bern</td><td>unibe.ch</td><td>1 page</td><td>sensor</td><td>Thin</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="56" height="52" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

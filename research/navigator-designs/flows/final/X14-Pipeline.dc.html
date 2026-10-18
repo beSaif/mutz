@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Case pipeline</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+.col{min-width:0;display:flex;flex-direction:column;gap:8px}
+.ch{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #111;padding-bottom:6px}
+.ch b{font-size:15px}
+.cd{border:1px solid #111;padding:10px;font-size:13px;line-height:1.4;text-decoration:none;display:block;background:#fff}
+.cd b{display:block;font-size:14px}
+.kp{display:flex;flex-direction:column;gap:2px;padding:12px 16px 12px 0;border-right:1px solid #D9D9D9;min-width:150px}
+.kp b{font-size:28px;line-height:1.1}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a class="on" href="X1-Home.dc.html">Leads</a><a href="X15-Gaps.dc.html">Insights</a><a href="X7-Archives.dc.html">Archives</a><a href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<main style="max-width: 1280px; padding: 32px; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px">
+<div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap"><h1 style="margin: 0; font-size: 28px; line-height: 1.15">Leads</h1><nav aria-label="Leads view" style="display: flex; border: 1px solid #111111"><a href="X1-Home.dc.html" style="padding: 7px 14px; font-size: 14px; text-decoration: none">List</a><a href="X14-Pipeline.dc.html" style="padding: 7px 14px; font-size: 14px; text-decoration: none; background: #111111; color: #FFFFFF; font-weight: 700">Pipeline</a></nav></div>
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><label for="yr" class="lb">Year</label><select id="yr" style="font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 9px; border: 1px solid #111111; border-radius: 2px; background: #FFFFFF"><option>2026</option><option>2025</option></select><a class="b p" href="X2-Brief.dc.html">New lead</a></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<div class="kp"><b>[n]</b><span class="lb">leads this year</span></div>
+<div class="kp"><b>[n] days</b><span class="lb">median, lead to pitch</span></div>
+<div class="kp"><b>[n]%</b><span class="lb">visit rate · visits ÷ pitched</span></div>
+<div class="kp" style="border-right: 0"><b>[n]%</b><span class="lb">win rate · won ÷ visits</span></div>
+</div>
+<div style="overflow-x: auto">
+<div style="display: grid; grid-template-columns: repeat(6, minmax(170px, 1fr)); gap: 16px; min-width: 1060px">
+<section class="col" aria-label="New"><div class="ch"><b>New</b><span class="lb">2</span></div>
+<a class="cd" href="X2-Brief.dc.html"><b>Imaging tools for tumour surgery</b>GGBa · today<span class="lb" style="display: block">Not opened</span></a>
+<a class="cd" href="X2-Brief.dc.html"><b>Hearing implant software</b>S-GE · Fri<span class="lb" style="display: block">Not opened</span></a>
+</section>
+<section class="col" aria-label="Triaged"><div class="ch"><b>Triaged</b><span class="lb">1</span></div>
+<a class="cd" href="X3-Matches.dc.html"><b>Wearable ECG patch</b>Own contact · Thu<span class="lb" style="display: block">Bid · 2 of 3 needs strong</span></a>
+</section>
+<section class="col" aria-label="Pitched"><div class="ch"><b>Pitched</b><span class="lb">2</span></div>
+<a class="cd" href="X10-Lead.dc.html" style="border-width: 2px"><b>Sport wearable lead</b>S-GE · v1 sent 18 Oct<span class="lb" style="display: block">CEO replied · v2 to review</span></a>
+<a class="cd" href="X6-Review.dc.html"><b>Insulin pump firmware</b>S-GE · v2 sent 2 Oct<span class="lb" style="display: block">Waiting for the CEO · 16 days</span></a>
+</section>
+<section class="col" aria-label="Visit"><div class="ch"><b>Visit</b><span class="lb">1</span></div>
+<a class="cd" href="X11-Follow.dc.html"><b>[Lead name]</b>Visit day [date]<span class="lb" style="display: block">2 of 4 researchers agreed</span></a>
+</section>
+<section class="col" aria-label="Won"><div class="ch"><b>Won</b><span class="lb">1</span></div>
+<div class="cd"><b>[Lead name]</b>Settled in Bern<span class="lb" style="display: block">From lead to decision: [n] days</span></div>
+</section>
+<section class="col" aria-label="Lost"><div class="ch"><b>Lost</b><span class="lb">3</span></div>
+<div class="cd" style="color: #5E5E5E"><b style="color: #111111">Cosmetics packaging plant</b>No Bern strength<span class="lb" style="display: block">Logged to gap report</span></div>
+<div class="cd" style="color: #5E5E5E"><b style="color: #111111">Lithium battery recycling plant</b>No Bern strength<span class="lb" style="display: block">Logged to gap report</span></div>
+<div class="cd" style="color: #5E5E5E"><b style="color: #111111">[Lead name]</b>Chose another canton<span class="lb" style="display: block">After visit</span></div>
+</section>
+</div>
+</div>
+<section style="border-top: 1px solid #111111; padding-top: 16px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+<div style="flex: 1 1 360px; min-width: 0">
+<h2 style="margin: 0 0 4px; font-size: 18px">Did better pitches bring more visits?</h2>
+<p class="lb" style="margin: 0">Compared with the agency's baseline from before the tool. Ask for last year's numbers.</p>
+</div>
+<div style="flex: 2 1 520px; min-width: 0; overflow-x: auto">
+<table style="border-collapse: collapse; width: 100%; font-size: 14px; min-width: 460px">
+<thead><tr><th style="text-align: left; font-weight: 400; font-size: 12px; color: #5E5E5E; padding: 6px 8px; border-bottom: 1px solid #111111"></th><th style="text-align: left; font-weight: 400; font-size: 12px; color: #5E5E5E; padding: 6px 8px; border-bottom: 1px solid #111111">Days to pitch</th><th style="text-align: left; font-weight: 400; font-size: 12px; color: #5E5E5E; padding: 6px 8px; border-bottom: 1px solid #111111">Hours per pitch</th><th style="text-align: left; font-weight: 400; font-size: 12px; color: #5E5E5E; padding: 6px 8px; border-bottom: 1px solid #111111">Visit rate</th></tr></thead>
+<tbody>
+<tr><td style="padding: 8px; border-bottom: 1px solid #D9D9D9">Before, agency baseline</td><td style="padding: 8px; border-bottom: 1px solid #D9D9D9">[n]</td><td style="padding: 8px; border-bottom: 1px solid #D9D9D9">[n]</td><td style="padding: 8px; border-bottom: 1px solid #D9D9D9">[n]%</td></tr>
+<tr><td style="padding: 8px; border-bottom: 1px solid #D9D9D9"><b>With the navigator</b></td><td style="padding: 8px; border-bottom: 1px solid #D9D9D9">[n]</td><td style="padding: 8px; border-bottom: 1px solid #D9D9D9">[n]</td><td style="padding: 8px; border-bottom: 1px solid #D9D9D9">[n]%</td></tr>
+</tbody>
+</table>
+<p class="lb" style="margin: 8px 0 0">Hours saved per year = hours saved per pitch × leads per year. Every lost lead needs a reason.</p>
+</div>
+</section>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<a aria-label="Ask Mutz" href="X9-Mutz.dc.html" style="display: block">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

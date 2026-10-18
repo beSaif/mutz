@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ready to export</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.rail{width:56px;border-right:1px solid #D9D9D9;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:8px}
+.rail a{writing-mode:vertical-rl;transform:rotate(180deg);font-size:13px;text-decoration:none;padding:12px 8px}
+.pg{width:160px;height:226px;background:#fff;position:relative;padding:12px 10px;font-size:6px;line-height:1.4;flex:none}
+.pg::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px solid #E30613}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 12px 24px; background: #111111; color: #FFFFFF">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Expertise Navigator</b><span style="font-size: 12px; color: #C8C8C8">Prototype, not an official Canton of Bern tool</span><span style="margin-left: auto; font-size: 13px">Sport wearable lead · S-GE</span>
+</header>
+<main style="flex: 1; display: flex; max-width: 1280px; width: 100%">
+<nav aria-label="Panels" class="rail"><a href="F02-Triaged.dc.html">Needs (4)</a></nav>
+<nav aria-label="Panels" class="rail"><a href="F02-Triaged.dc.html">Matches (5 accepted)</a></nav>
+<section style="flex: 1; min-width: 0; background: #F2F2F2; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: baseline"><h1 style="margin: 0; font-size: 21px">Pitch, 5 pages</h1><span class="lb">Click any page to edit it</span></div>
+<div style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px">
+<div class="pg"><div style="position: absolute; left: 10px; top: 12px; width: 18px; height: 18px; border: 1px dashed #5E5E5E; font-size: 5px; display: flex; align-items: center; justify-content: center">logo</div><b style="position: absolute; left: 86px; top: 60px; font-size: 9px; width: 64px">Bern for your sport wearable</b></div>
+<div class="pg"><b style="font-size: 7px">Why Bern for you</b><p style="margin: 6px 0 0 72px">Sensors and ML for diabetes [1]. TIMES study on the menstrual cycle [3]. Innovation challenge open to companies [4].</p></div>
+<div class="pg"><b style="font-size: 7px">Matches</b><p style="margin: 6px 0 0 72px">Prof. Dr. Lilian Witthauer [1]<br>TIMES study [3]<br>DCB innovation challenge [4]</p></div>
+<div class="pg"><b style="font-size: 7px">Suggested visit day</b><p style="margin: 6px 0 0 72px">09:30 ARTORG<br>11:00 Diabetes Center Berne<br>14:00 [Supplier]</p></div>
+<div class="pg"><b style="font-size: 7px">Sources</b><p style="margin: 6px 0 0 72px">[1] artorg.unibe.ch<br>[2] insel.ch<br>[3] dcberne.com<br>[4] dcberne.com</p></div>
+</div>
+</section>
+</main>
+<footer style="position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; padding: 16px 24px; border-top: 2px solid #111111; background: #FFFFFF">
+<b>All 8 cards checked</b><span class="lb">0 claims without a source · 6 sources · DE version available</span>
+<span style="flex: 1"></span>
+<a class="b" href="F02-Export.dc.html">Review PDF</a><a class="b" href="F02-Export.dc.html">Pitch JSON</a><a class="b p" href="F02-Export.dc.html">Export clean PDF</a>
+</footer>
+<div style="position: absolute; right: 24px; bottom: 76px">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="56" height="52" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

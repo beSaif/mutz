@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Archives</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 13px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:10px 14px;min-height:40px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:620px}
+th{text-align:left;font-size:11px;font-weight:400;color:#5E5E5E;padding:8px;border-bottom:1px solid #111}
+td{padding:12px 8px;border-bottom:1px solid #E3E3E3;vertical-align:top}
+pre{font:12.5px/1.55 ui-monospace,Menlo,monospace;background:#F2F2F2;padding:14px;margin:0;overflow-x:auto}
+.ok{display:flex;gap:8px;padding:6px 0;font-size:14px}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.45">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 20px; border-bottom: 1px solid #111111">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Navigator</b>
+<a href="F08-Table.dc.html" style="font-size: 13px">Results</a>
+<span style="flex: 1"></span><a href="F08-Archives.dc.html" style="font-size: 13px; font-weight: 700">Archives</a>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 999 1 560px; min-width: 0; padding: 24px">
+<h1 style="margin: 0 0 4px; font-size: 24px">Archives</h1>
+<p class="lb" style="margin: 0 0 16px">Public pages only. robots.txt respected. Recrawl uses ETag and content hash.</p>
+<div style="overflow-x: auto">
+<table>
+<thead><tr><th>Archive</th><th>Pages</th><th>Languages</th><th>Last crawl</th><th>Skipped by robots.txt</th></tr></thead>
+<tbody>
+<tr><td><b>ARTORG Center</b><div class="lb">artorg.unibe.ch</div></td><td>410</td><td>EN, DE</td><td>Today 09:12</td><td>0</td></tr>
+<tr><td><b>Diabetes Center Berne</b><div class="lb">dcberne.com</div></td><td>180</td><td>EN, DE</td><td>Today 09:20</td><td>0</td></tr>
+<tr><td><b>University of Bern</b><div class="lb">15 life science subdomains</div></td><td>650</td><td>DE, EN, FR</td><td>Today 10:05</td><td>search, sitemap, print</td></tr>
+<tr style="background: #FCE3E5"><td><b>sitem-insel</b><div class="lb">sitem-insel.ch · proposed</div></td><td>[estimate]</td><td>DE, EN</td><td>Not yet</td><td>Checked: allowed</td></tr>
+</tbody>
+</table>
+</div>
+<p class="lb" style="margin: 12px 0 0">1,240 pages in total · BORIS portal not crawled, it blocks our fetcher</p>
+</section>
+<aside style="flex: 1 1 400px; padding: 24px; border-left: 1px solid #E30613; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 18px">Add sitem-insel</h2>
+<div><div class="ok"><b aria-hidden="true">✓</b>Public, no login wall</div><div class="ok"><b aria-hidden="true">✓</b>robots.txt allows crawling</div><div class="ok"><b aria-hidden="true">✓</b>German and English pages found</div></div>
+<p class="lb" style="margin: 0">This entry goes into sources.yaml. No code changes.</p>
+<pre>- id: sitem
+  name: sitem-insel
+  seeds: [https://sitem-insel.ch/]
+  allow_domains: [sitem-insel.ch]
+  languages: [de, en]
+  max_pages: 400</pre>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b">Cancel</button><a class="b p" href="F08-Archives.dc.html">Add and crawl</a></div>
+</aside>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0; display: flex; align-items: flex-end; gap: 12px">
+<p style="margin: 0 0 36px; max-width: 220px; background: #FFFFFF; border: 1px solid #111111; padding: 10px 12px; font-size: 13px">I checked sitem-insel.ch. Shall I add it?</p>
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="56" height="52" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

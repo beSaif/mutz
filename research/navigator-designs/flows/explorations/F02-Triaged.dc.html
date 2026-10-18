@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Triaged</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.b.s{padding:6px 10px;min-height:32px;font-size:13px}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.col{padding:24px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.nd{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px}
+.m{padding:12px 0;border-bottom:1px solid #D9D9D9}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 12px 24px; background: #111111; color: #FFFFFF">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Expertise Navigator</b><span style="font-size: 12px; color: #C8C8C8">Prototype, not an official Canton of Bern tool</span><span style="margin-left: auto; font-size: 13px">Sport wearable lead · S-GE</span>
+</header>
+<main style="flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 1280px; width: 100%">
+<section class="col" style="border-right: 1px solid #D9D9D9">
+<h1 style="margin: 0; font-size: 18px">Needs</h1>
+<div style="border-top: 1px solid #111111">
+<div class="nd" style="font-weight: 700"><svg viewBox="0 0 20 22" width="20" height="22" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="8" width="11" height="11.5" fill="#111"/></svg><span style="flex: 1">Clinical study</span><span>2 of 3 accepted</span></div>
+<div class="nd"><svg viewBox="0 0 20 22" width="20" height="22" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="8" width="11" height="11.5" fill="#111"/></svg><span style="flex: 1">R&amp;D partner</span><span>1 of 2</span></div>
+<div class="nd"><svg viewBox="0 0 20 22" width="20" height="22" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="15" width="11" height="4.5" fill="#111"/></svg><span style="flex: 1">Supplier</span><span>Thin</span></div>
+<div class="nd" style="color: #5E5E5E"><svg viewBox="0 0 20 22" width="20" height="22" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/></svg><span style="flex: 1">Infrastructure</span><span>Kei Hung</span></div>
+</div>
+</section>
+<section class="col" style="border-right: 1px solid #D9D9D9; background: #FAFAFA">
+<h2 style="margin: 0; font-size: 18px">Clinical study</h2>
+<div style="border-top: 1px solid #111111">
+<div class="m"><div style="display: flex; justify-content: space-between; gap: 8px"><b>Prof. Dr. Lilian Witthauer</b><span style="font-size: 13px; font-weight: 700">Accepted</span></div><p style="margin: 4px 0; font-size: 14px">Sensors and machine learning for diabetes [1]</p><span class="lb">artorg.unibe.ch · insel.ch</span></div>
+<div class="m"><div style="display: flex; justify-content: space-between; gap: 8px"><b>TIMES study</b><span style="font-size: 13px; font-weight: 700">Accepted</span></div><p style="margin: 4px 0; font-size: 14px">Type 1 diabetes across the menstrual cycle [3]</p><span class="lb">dcberne.com</span></div>
+<div class="m" style="color: #5E5E5E"><div style="display: flex; justify-content: space-between; gap: 8px"><s lang="de">Universitätsklinik für Diabetologie, Endokrinologie, Ernährungsmedizin und Metabolismus</s><span style="font-size: 13px">Rejected</span></div><button class="b s" style="margin-top: 6px">Undo</button></div>
+</div>
+</section>
+<section class="col" style="background: #F2F2F2; align-items: center">
+<h2 style="margin: 0; font-size: 18px; align-self: flex-start">Pitch, live A4</h2>
+<div style="width: 300px; height: 424px; background: #FFFFFF; position: relative; padding: 24px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 8.5px; line-height: 1.45; align-content: start">
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #E30613"></div>
+<b style="font-size: 10px">Matches</b>
+<div style="display: flex; flex-direction: column; gap: 10px"><div><b>Prof. Dr. Lilian Witthauer</b><br>Head of an ARTORG affiliated group on diabetes, machine learning and sensors. Fits your glucose tracking [1].</div><div><b>TIMES study</b><br>Diabetes Center Berne studies type 1 diabetes across the menstrual cycle [3].</div></div>
+</div>
+</section>
+</main>
+<div role="dialog" aria-label="Mutz" style="position: absolute; right: 24px; bottom: 24px; width: 340px; background: #FFFFFF; border: 1px solid #111111; box-shadow: 0 2px 8px rgba(0,0,0,0.12)">
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #111111">
+<svg viewBox="0 0 64 60" width="28" height="26" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+<b style="flex: 1">Mutz</b><button class="b s" aria-label="Close Mutz">Close</button>
+</div>
+<div style="padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+<p style="margin: 0; align-self: flex-end; background: #F2F2F2; padding: 8px 10px">Is the TIMES claim backed?</p>
+<p style="margin: 0">Yes. The Diabetes Center Berne page names the TIMES study on type 1 diabetes and the menstrual cycle [3].</p>
+<div style="display: flex; gap: 8px"><a class="b s" href="F02-Triaged.dc.html">Show source</a><a class="b s p" href="F02-Export.dc.html">Mark checked</a></div>
+<label for="mz" class="lb">Ask Mutz</label>
+<input id="mz" placeholder="Make the Witthauer card shorter" style="font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 10px; border: 1px solid #111111; border-radius: 2px">
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

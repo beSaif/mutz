@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Case inbox</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.f{display:flex;justify-content:space-between;padding:10px 16px;text-decoration:none;font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:760px}
+th{text-align:left;font-size:12px;font-weight:400;color:#5E5E5E;padding:10px 12px;border-bottom:1px solid #111}
+td{padding:14px 12px;border-bottom:1px solid #D9D9D9;vertical-align:top}
+.st{font-size:12px;border:1px solid #111;padding:2px 6px;white-space:nowrap}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 14px 24px; border-bottom: 1px solid #111111">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Case desk</b><span class="lb">Prototype, not an official Canton of Bern tool</span>
+<label for="s6" class="lb" style="margin-left: auto">Search cases</label><input id="s6" placeholder="company, sector, expert" style="font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 10px; border: 1px solid #111111; border-radius: 2px; width: 260px">
+<span style="font-size: 14px">[Officer name]</span>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<nav aria-label="Filters" style="flex: 1 1 200px; max-width: 220px; padding: 16px 0; border-right: 1px solid #D9D9D9">
+<a class="f" href="F06-Inbox.dc.html" style="background: #F2F2F2; font-weight: 700"><span>New</span><span>3</span></a>
+<a class="f" href="F06-Inbox.dc.html"><span>Bid decision</span><span>2</span></a>
+<a class="f" href="F06-Inbox.dc.html"><span>In triage</span><span>1</span></a>
+<a class="f" href="F06-Inbox.dc.html"><span>Sent</span><span>14</span></a>
+<a class="f" href="F06-Inbox.dc.html"><span>Declined</span><span>4</span></a>
+<p class="lb" style="padding: 16px 16px 0; margin: 0">Source</p>
+<a class="f" href="F06-Inbox.dc.html"><span>S-GE</span></a>
+<a class="f" href="F06-Inbox.dc.html"><span>GGBa</span></a>
+<a class="f" href="F06-Inbox.dc.html"><span>Own contact</span></a>
+</nav>
+<section style="flex: 999 1 640px; min-width: 0; padding: 24px">
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px"><h1 style="margin: 0; font-size: 24px">New leads</h1><a class="b p" href="F06-Case.dc.html">Add a lead</a></div>
+<div style="overflow-x: auto">
+<table>
+<thead><tr><th>Lead</th><th>From</th><th>Received</th><th>Bern coverage</th><th>Status</th></tr></thead>
+<tbody>
+<tr style="background: #FCE3E5"><td><a href="F06-Case.dc.html" style="font-weight: 700">Sport wearable lead</a><div class="lb">Skin patch for glucose and lactate, women in sport</div></td><td>S-GE</td><td>Today</td><td><span style="display: inline-flex; gap: 6px; align-items: center"><svg viewBox="0 0 20 22" width="18" height="20" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="8" width="11" height="11.5" fill="#111"/></svg>Strong</span></td><td><span class="st">New</span></td></tr>
+<tr><td><a href="F06-Case.dc.html" style="font-weight: 700">Imaging tools for tumour surgery</a><div class="lb">Intraoperative detection, medtech</div></td><td>GGBa</td><td>Thu</td><td><span style="display: inline-flex; gap: 6px; align-items: center"><svg viewBox="0 0 20 22" width="18" height="20" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/><rect x="4.5" y="8" width="11" height="11.5" fill="#111"/></svg>Strong</span></td><td><span class="st">New</span></td></tr>
+<tr><td><a href="F06-Case.dc.html" style="font-weight: 700">Lithium battery recycling plant</a><div class="lb">Cleantech, industrial site</div></td><td>S-GE</td><td>Wed</td><td><span style="display: inline-flex; gap: 6px; align-items: center"><svg viewBox="0 0 20 22" width="18" height="20" aria-hidden="true"><rect x="5" y="1" width="10" height="3" fill="#111"/><path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="1.5"/></svg>Kei Hung</span></td><td><span class="st">New</span></td></tr>
+</tbody>
+</table>
+</div>
+<p class="lb" style="margin: 16px 0 0">Coverage is a first estimate from the one pager. It runs on CSCS as soon as a lead arrives.</p>
+</section>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0; display: flex; align-items: flex-end; gap: 12px">
+<p style="margin: 0 0 40px; max-width: 240px; background: #FFFFFF; border: 1px solid #111111; padding: 10px 12px; font-size: 13px">Three new leads. The battery one has no honey in the pot.</p>
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

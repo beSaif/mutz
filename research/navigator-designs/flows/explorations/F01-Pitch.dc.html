@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pitch builder</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:2px 6px;display:inline-block;text-decoration:none;background:#fff;color:#111}
+.ol{display:flex;gap:8px;align-items:center;padding:10px 8px;border-bottom:1px solid #D9D9D9;font-size:14px}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px; padding: 16px 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b><span class="lb">Prototype, not an official Canton of Bern tool</span></div>
+<nav aria-label="Steps" style="display: flex; gap: 28px; font-size: 14px; margin-left: auto">
+<a href="Main.dc.html" style="text-decoration: none; color: #5E5E5E">1 Brief</a>
+<a href="F01-Matches.dc.html" style="text-decoration: none; color: #5E5E5E">2 Matches</a>
+<a href="F01-Pitch.dc.html" style="text-decoration: none; font-weight: 700; border-bottom: 3px solid #E30613; padding-bottom: 4px">3 Pitch</a>
+</nav>
+</header>
+<main style="display: flex; flex-wrap: wrap; gap: 0; max-width: 1280px">
+<aside style="flex: 1 1 220px; padding: 24px; border-right: 1px solid #D9D9D9">
+<p class="lb" style="margin: 0 0 8px">Outline, drag to reorder</p>
+<div class="ol"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Cover</span><span class="lb">shown</span></div>
+<div class="ol" style="background: #F2F2F2"><span aria-hidden="true">⋮⋮</span><b style="flex: 1">Why Bern for you</b><span class="lb">shown</span></div>
+<div class="ol"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Matches (2)</span><span class="lb">shown</span></div>
+<div class="ol"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Infrastructure</span><span class="lb">hidden</span></div>
+<div class="ol"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Suggested visit day</span><span class="lb">shown</span></div>
+<div class="ol"><span aria-hidden="true">⋮⋮</span><span style="flex: 1">Sources</span><span class="lb">auto</span></div>
+</aside>
+<section style="flex: 999 1 420px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<h1 style="margin: 0; font-size: 21px">Why Bern for you</h1>
+<div style="border: 1px solid #111111; padding: 16px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><span class="lb">Point 1 · verified quote</span><label class="lb"><input type="checkbox" checked> Checked</label></div>
+<p style="margin: 6px 0 10px">A Bern research group combines sensors and machine learning for diabetes, the core of your patch <a href="F01-Pitch.dc.html">[1]</a>.</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b">Shorter</button><button class="b">Less jargon</button><button class="b">In German</button><button class="b">Lock</button></div>
+</div>
+<div style="border: 1px solid #111111; padding: 16px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><span class="lb">Point 2 · edited by you</span><label class="lb"><input type="checkbox"> Checked</label></div>
+<p style="margin: 6px 0 10px">Diabetes Center Berne already studies type 1 diabetes across the menstrual cycle <a href="F01-Pitch.dc.html">[3]</a>.</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b">Shorter</button><button class="b">Less jargon</button><button class="b">In German</button><button class="b">Lock</button></div>
+</div>
+<div style="border: 1px dashed #5E5E5E; padding: 16px">
+<span class="lb">Point 3 · needs a source</span>
+<p style="margin: 6px 0 0; color: #5E5E5E">Click to write, or ask Mutz to draft from accepted matches. A point without a source cannot be exported.</p>
+</div>
+</section>
+<section style="flex: 1 1 380px; padding: 24px; background: #F2F2F2; display: flex; flex-direction: column; gap: 12px; align-items: center">
+<span class="lb" style="align-self: flex-start">A4 preview, page 2 of 5</span>
+<div style="width: 340px; height: 481px; background: #FFFFFF; position: relative; padding: 28px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 9px; line-height: 1.45; box-shadow: 0 1px 2px rgba(0,0,0,0.15)">
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #E30613"></div>
+<div><b style="font-size: 11px">Why Bern for you</b><p style="margin: 6px 0 0; color: #5E5E5E">Three reasons, each with a source.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><p style="margin: 0; background: #FCE3E5">A Bern research group combines sensors and machine learning for diabetes, the core of your patch [1].</p><p style="margin: 0">Diabetes Center Berne already studies type 1 diabetes across the menstrual cycle [3].</p><p style="margin: 0; color: #5E5E5E">[Point 3]</p></div>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center"><a class="b" href="F01-Review.dc.html">Review PDF</a><a class="b p" href="F01-Review.dc.html">Export for CEO</a></div>
+<span class="lb">1 of 3 points checked</span>
+</section>
+</main>
+<div style="position: absolute; left: 24px; bottom: 0; display: flex; align-items: flex-end; gap: 12px">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+<p style="margin: 0 0 36px; background: #FFFFFF; border: 1px solid #111111; padding: 8px 12px; font-size: 13px">Ask Mutz about this pitch</p>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Evidence map, vertical</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.chip{font-size:12px;border:1px solid #111;padding:2px 6px;display:inline-flex;gap:4px;align-items:center;background:#fff}
+.gn{display:flex;gap:24px;font-size:14px}
+.gn a{text-decoration:none;padding:18px 0;color:#5E5E5E}
+.gn a.on{color:#111;font-weight:700;box-shadow:inset 0 -3px 0 #E30613}
+.st{display:flex;gap:4px;flex-wrap:wrap}
+.st a{padding:8px 14px;font-size:14px;text-decoration:none;border-top:3px solid #D9D9D9;color:#5E5E5E}
+.st a.done{border-top-color:#111;color:#111}
+.st a.on{border-top-color:#E30613;color:#111;font-weight:700}
+.n{position:absolute;height:56px;border:1.5px solid #111;background:#fff;padding:5px 9px;font-size:12px;line-height:1.3;text-decoration:none;color:#111;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.n small{font-size:11px;color:#5E5E5E}
+.nd{background:#111;color:#fff}
+.nd small{color:#D0D0D0}
+.ns{background:#F2F2F2}
+.e{position:absolute}
+.rl{position:absolute;left:0;width:70px;font-size:12px;color:#5E5E5E;padding-top:20px}
+.k{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.k i{display:inline-block;width:28px}
+.badge{position:absolute;right:-10px;top:-10px;width:20px;height:20px;border-radius:50%;background:#111;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 32px; padding: 0 32px; border-bottom: 1px solid #111111">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span aria-hidden="true" style="width: 14px; height: 14px; background: #E30613; display: inline-block"></span><b style="font-size: 16px">Expertise Navigator</b></div>
+<nav aria-label="Main" class="gn"><a class="on" href="X1-Home.dc.html">Leads</a><a href="X15-Gaps.dc.html">Insights</a><a href="X7-Archives.dc.html">Archives</a><a href="X12-Eval.dc.html">Evaluation</a></nav>
+<span style="margin-left: auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+</header>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 10px 32px; border-bottom: 1px solid #D9D9D9; background: #FAFAFA">
+<a href="X1-Home.dc.html" style="font-size: 14px">Leads</a><span class="lb">/</span><b>Sport wearable lead</b><span class="chip">S-GE · confidential, stays on CSCS</span>
+<nav aria-label="Case steps" class="st" style="margin-left: auto"><a class="done" href="X2-Brief.dc.html">1 Brief</a><a class="done" href="X3-Matches.dc.html">2 Matches</a><a class="on" href="X4a-Map-Vertical.dc.html">3 Evidence map</a><a href="X5-Pitch.dc.html">4 Pitch</a><a href="X10-Lead.dc.html">5 After sending</a></nav>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; padding: 14px 32px">
+<h1 style="margin: 0; font-size: 21px">Every claim, traced to its page</h1>
+<span class="k"><i style="border-top: 2px solid #111111"></i>Read</span>
+<span class="k"><i style="border-top: 2px dashed #111111"></i>Derived</span>
+<span class="k"><i style="border-top: 2px dotted #E30613"></i>Assumed</span>
+<span class="k"><i style="border-top: 2px dotted #9A9A9A"></i>Missing</span>
+<span class="k"><i style="border-top: 3px solid #E30613"></i>Selected</span>
+<label class="lb" style="margin-left: auto"><input type="checkbox" checked> Accepted matches only</label>
+</div>
+<div style="overflow-x: auto; padding: 0 32px">
+<div style="position: relative; width: 1200px; height: 490px">
+<span class="rl" style="top: 0">Need</span>
+<span class="rl" style="top: 140px">Match</span>
+<span class="rl" style="top: 280px">Fact</span>
+<span class="rl" style="top: 420px">Source</span>
+<div class="e" style="left: 354px; top: 56px; height: 43px; border-left: 3px solid #E30613"></div>
+<div class="e" style="left: 165px; top: 97px; width: 190px; border-top: 2px solid #111111"></div>
+<div class="e" style="left: 354px; top: 97px; width: 192px; border-top: 3px solid #E30613"></div>
+<div class="e" style="left: 165px; top: 97px; height: 43px; border-left: 2px solid #111111"></div>
+<div class="e" style="left: 544px; top: 97px; height: 43px; border-left: 3px solid #E30613"></div>
+<div class="e" style="left: 925px; top: 56px; height: 84px; border-left: 2px solid #111111"></div>
+<div class="e" style="left: 1115px; top: 56px; height: 84px; border-left: 2px solid #111111"></div>
+<div class="e" style="left: 165px; top: 196px; height: 84px; border-left: 2px solid #111111"></div>
+<div class="e" style="left: 544px; top: 196px; height: 43px; border-left: 3px solid #E30613"></div>
+<div class="e" style="left: 355px; top: 237px; width: 190px; border-top: 2px solid #111111"></div>
+<div class="e" style="left: 545px; top: 237px; width: 190px; border-top: 2px dotted #9A9A9A"></div>
+<div class="e" style="left: 355px; top: 237px; height: 43px; border-left: 2px solid #111111"></div>
+<div class="e" style="left: 544px; top: 237px; height: 43px; border-left: 3px dashed #E30613"></div>
+<div class="e" style="left: 735px; top: 237px; height: 43px; border-left: 2px dotted #9A9A9A"></div>
+<div class="e" style="left: 925px; top: 196px; height: 84px; border-left: 2px dotted #E30613"></div>
+<div class="e" style="left: 1115px; top: 196px; height: 84px; border-left: 2px solid #111111"></div>
+<div class="e" style="left: 165px; top: 336px; height: 84px; border-left: 2px solid #111111"></div>
+<div class="e" style="left: 355px; top: 336px; height: 84px; border-left: 2px solid #111111"></div>
+<div class="e" style="left: 544px; top: 336px; height: 84px; border-left: 3px solid #E30613"></div>
+<div class="e" style="left: 735px; top: 336px; height: 28px; border-left: 2px dotted #9A9A9A"></div>
+<div class="e" style="left: 925px; top: 336px; height: 84px; border-left: 2px dotted #9A9A9A"></div>
+<div class="e" style="left: 1115px; top: 336px; height: 84px; border-left: 2px solid #111111"></div>
+<a class="n nd" href="X3-Matches.dc.html" style="left: 245px; top: 0; width: 220px"><small>Need 1 · Strong</small>Clinical study</a>
+<a class="n nd" href="X3-Matches.dc.html" style="left: 815px; top: 0; width: 220px"><small>Need 2 · Strong</small>R&amp;D partner</a>
+<a class="n nd" href="X3-Matches.dc.html" style="left: 1030px; top: 0; width: 170px"><small>Need 3 · Thin</small>Supplier</a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 80px; top: 140px; width: 170px; border-width: 2.5px"><small>Study</small>TIMES study</a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 435px; top: 140px; width: 220px; border: 3px solid #E30613"><small>Person</small>Prof. Dr. Lilian Witthauer<span class="badge" aria-label="In 2 needs">2</span></a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 815px; top: 140px; width: 220px; border-width: 2.5px"><small>Person</small>Prof. Dr. Lilian Witthauer<span class="badge" aria-label="In 2 needs">2</span></a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 1030px; top: 140px; width: 170px; border-width: 2.5px"><small>Unit</small>[Unit on unibe.ch]</a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 80px; top: 280px; width: 170px"><small>Fact · Read</small>Type 1 diabetes across the cycle</a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 270px; top: 280px; width: 170px"><small>Function · Read</small>Group head</a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 460px; top: 280px; width: 170px; border: 3px solid #E30613"><small>Expertise · Derived</small>Sensors and ML for diabetes</a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 650px; top: 280px; width: 170px; border: 1.5px dashed #9A9A9A; color: #5E5E5E"><small>ORCID · Missing</small>Not stated on any source</a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 840px; top: 280px; width: 170px; border: 2px dotted #E30613"><small>Assumed</small>Open to industry projects</a>
+<a class="n" href="X4a-Map-Vertical.dc.html" style="left: 1030px; top: 280px; width: 170px"><small>Fact · Read</small>Mentions patch materials</a>
+<a class="n ns" href="X4a-Map-Vertical.dc.html" style="left: 80px; top: 420px; width: 170px"><small>Source</small>dcberne.com · TIMES</a>
+<a class="n ns" href="X4a-Map-Vertical.dc.html" style="left: 270px; top: 420px; width: 170px"><small>Source</small>artorg.unibe.ch · person</a>
+<a class="n ns" href="X4a-Map-Vertical.dc.html" style="left: 460px; top: 420px; width: 170px; border: 3px solid #E30613"><small>Source</small>artorg.unibe.ch · group</a>
+<span class="lb" style="position: absolute; left: 650px; top: 372px; width: 170px; text-align: center">no source</span>
+<div class="n" style="left: 840px; top: 420px; width: 170px; border: 1.5px dashed #9A9A9A; color: #5E5E5E"><small>Source</small>None. Check before use</div>
+<a class="n ns" href="X4a-Map-Vertical.dc.html" style="left: 1030px; top: 420px; width: 170px"><small>Source</small>unibe.ch</a>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 14px 32px; margin-top: 12px; border-top: 2px solid #111111; font-size: 14px">
+<b>Expertise: sensors and machine learning for diabetes</b><span>Derived</span><span class="lb">from the ARTORG group page she heads · quote “Diabetes, Machine Learning &amp; Sensor Technology”</span><a href="X4a-Map-Vertical.dc.html">Open at quote</a><a href="X5-Pitch.dc.html">Used in pitch: Why Bern, point 1</a><span style="flex: 1"></span><button class="b">Remove from pitch</button><a class="b p" href="X5-Pitch.dc.html">Go to pitch</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

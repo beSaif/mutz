@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Map linked to A4</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#111}a:hover{color:#B8000F}
+.b{font:700 14px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:12px 16px;min-height:44px;border:1px solid #111;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.b.p{background:#E30613;border-color:#E30613;color:#fff}
+.lb{font-size:12px;line-height:1.4;color:#5E5E5E}
+.tab{text-decoration:none;font-size:14px;padding:16px 0;color:#5E5E5E}
+.pn{border:1.5px solid #111;padding:8px 12px;font-size:14px;background:#fff;text-decoration:none;color:#111;display:block}
+.pn small{display:block;font-size:11px;color:#5E5E5E}
+.ln{width:0;height:24px;border-left:3px solid #E30613;margin-left:24px}
+</style>
+</helmet>
+<div style="position: relative; width: 100%; min-height: 900px; background: #FFFFFF; color: #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 28px; padding: 0 32px; border-bottom: 1px solid #111111">
+<span aria-hidden="true" style="width: 12px; height: 12px; background: #E30613; display: inline-block"></span><b>Expertise Navigator</b>
+<nav aria-label="Views" style="display: flex; gap: 28px; margin-left: auto">
+<a class="tab" href="F05-Brief.dc.html">Brief</a>
+<a class="tab" href="F05-Map.dc.html">Map</a>
+<a class="tab" href="F05-Linked.dc.html" style="color: #111111; font-weight: 700; box-shadow: inset 0 -3px 0 #E30613">Pitch</a>
+</nav>
+</header>
+<main style="display: flex; flex-wrap: wrap; max-width: 1280px">
+<section style="flex: 999 1 600px; min-width: 0; padding: 24px 32px; background: #F2F2F2; display: flex; flex-direction: column; align-items: center; gap: 12px">
+<span class="lb" style="align-self: flex-start">A4 preview · page 2 · click a sentence to trace it</span>
+<div style="width: 520px; max-width: 100%; min-height: 700px; background: #FFFFFF; position: relative; padding: 48px 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; font-size: 13px; line-height: 1.5; align-content: start">
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #E30613"></div>
+<b style="font-size: 16px">Why Bern for you</b>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; background: #FCE3E5; outline: 2px solid #E30613; outline-offset: 2px">A Bern group combines sensors and machine learning for diabetes, the core of your patch [1].</p>
+<p style="margin: 0">Diabetes Center Berne already studies type 1 diabetes across the menstrual cycle [3].</p>
+<p style="margin: 0">DCB runs an innovation challenge open to companies [4].</p>
+</div>
+<b style="font-size: 16px">Matches</b>
+<div style="display: flex; flex-direction: column; gap: 12px"><p style="margin: 0"><b>Prof. Dr. Lilian Witthauer</b><br>Head, Diabetes, Machine Learning &amp; Sensor Technology [1][2]</p><p style="margin: 0"><b>TIMES study</b><br>Diabetes Center Berne [3]</p></div>
+</div>
+</section>
+<aside style="flex: 1 1 380px; padding: 24px 28px; display: flex; flex-direction: column">
+<h1 style="margin: 0 0 4px; font-size: 21px">Where can I check that?</h1>
+<p class="lb" style="margin: 0 0 20px">The selected sentence traced to its source</p>
+<div class="pn" style="background: #FCE3E5"><small>Sentence</small>Sensors and ML for diabetes [1]</div>
+<div class="ln"></div>
+<a class="pn" href="F05-Map.dc.html" style="background: #111111; color: #FFFFFF"><small style="color: #D0D0D0">Need 1</small>Clinical study</a>
+<div class="ln"></div>
+<a class="pn" href="F05-Node.dc.html"><small>Person</small>Prof. Dr. Lilian Witthauer</a>
+<div class="ln" style="border-left-style: dashed"></div>
+<a class="pn" href="F05-Node.dc.html"><small>Expertise · Derived</small>Sensors and machine learning for diabetes</a>
+<div class="ln"></div>
+<a class="pn" href="F05-Node.dc.html" style="background: #F2F2F2"><small>Source</small>artorg.unibe.ch · group page · fetched 18 Oct 2026</a>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px"><a class="b" href="F05-Linked.dc.html">Open at quote</a><a class="b" href="F05-Linked.dc.html">Review PDF</a><a class="b p" href="F05-Linked.dc.html">Export clean PDF</a></div>
+</aside>
+</main>
+<div style="position: absolute; right: 24px; bottom: 0">
+<button aria-label="Ask Mutz" style="border: 0; background: none; padding: 0; cursor: pointer">
+<svg viewBox="0 0 64 60" width="64" height="60" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
