@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Expertise Navigator{% endblock %} · Bern</title>
 <link rel="stylesheet" href="/static/app.css">
+<script>try{if(/[?&]intro=1/.test(location.search)||!localStorage.getItem("mutz-intro"))document.documentElement.classList.add("intro")}catch(e){}</script>
 </head>
 <body{% if (mutz or {}).corner == 'left' %} class="mzl"{% endif %}>
 <div class="wrap">
@@ -24,6 +25,7 @@
 <span>Public web pages only · confidential text goes only to Apertus on CSCS</span>
 {% if stubbed %}<span class="stub" title="These contracts are served by app/stubs.py over the crawled pages until the real module answers">stub: {{ stubbed|join(", ") }}</span>{% endif %}
 <a href="/states">States</a>
+<a href="/?intro=1">Replay intro</a>
 </footer>
 {% set m = mutz or {} %}
 <div id="mutz" class="{% if m.corner == 'left' %}left{% endif %}" data-screen="{{ m.screen or '' }}" data-lead="{{ m.lead or '' }}" data-need="{{ m.need or '' }}" data-pot="{{ m.pot or '' }}">
@@ -43,8 +45,10 @@
 <button class="b" type="submit">Ask</button>
 </form>
 </div>
+{% include "_splash.html" %}
 <template id="tpl-search">{{ ui.mutz("search", 64, 54) }}</template>
 <script src="/static/app.js"></script>
+<script src="/static/intro.js"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

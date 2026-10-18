@@ -1,10 +1,10 @@
 # DESIGN.md (paste into every UI prompt)
 
-1. **Palette with roles.** Red `#E30613` for actions, the vertical rule and the active tab only (hover `#B8000F`, tint `#FCE3E5`). Black `#111111` text, grey `#5E5E5E` secondary text, hairlines `#D9D9D9`, panel `#FAFAFA`, paper `#FFFFFF`. No other hues, no gradients, no yellow (not a Bernese colour).
+1. **Palette with roles.** Red `#E30613` for actions, the vertical rule and the active tab only (hover `#B8000F`, tint `#FCE3E5`). Black `#111111` text, grey `#5E5E5E` secondary text, hairlines `#D9D9D9`, panel `#FAFAFA`, paper `#FFFFFF`. Bern yellow `#FFCC00` (the yellow band of the Bern flag) only for honey: the honey pots and the opening splash. No other hues, no gradients.
 2. **Type with roles.** `"Helvetica Neue", Helvetica, Arial, sans-serif`. Bold (Neue Helvetica 85) for titles and emphasis, regular (45) for text. Scale 28 / 24 / 21 / 18 / 15 / 13 / 12 px.
 3. **Layout concept.** Swiss two column grid: labels left, content right, flush left, generous white space. Rows and tables, not cards. Square corners (2 px on inputs only), buttons 44 px tall.
 4. **Signature element.** One thin vertical red rule dividing the two columns (the Canton's Linienelement), on every main screen and down the A4 teaser PDF.
-5. **One place for personality.** Mutz, the black bear head with white ear centres and a red scarf bar, inline SVG bottom right. Everything else is quiet. Footer: "Prototype, not an official Canton of Bern tool".
+5. **One place for personality.** Mutz, the black bear head with white ear centres and a red scarf bar, inline SVG bottom right, plus a one-time opening splash where he claws through a hive of pages and grabs a full honey pot. The honey pot is the rounded jar from the pitch deck: thick black outline, black lid, yellow honey with a wavy surface. Everything else is quiet. Footer: "Prototype, not an official Canton of Bern tool".
 
 ## Checked against the Canton of Bern manual (kanton-bern-grundlagen-visuelles-erscheinungsbild.pdf, §2.1 to 2.3)
 
