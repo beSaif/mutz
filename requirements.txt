@@ -1,0 +1,20 @@
+# torch (CPU build) is installed separately in the Dockerfile
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+jinja2==3.1.5
+weasyprint==63.1
+httpx==0.28.1
+selectolax==0.3.27
+trafilatura==2.0.0
+py3langid==0.3.0
+openai==1.59.7
+python-dotenv==1.0.1
+pydantic==2.10.5
+rapidfuzz==3.11.0
+rank-bm25==0.2.2
+numpy==2.2.1
+sentence-transformers==3.3.1
+pypdf==5.1.0
+openpyxl==3.1.5
+pytest==8.3.4

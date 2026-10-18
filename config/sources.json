@@ -1,0 +1,50 @@
+[
+  {
+    "id": "artorg",
+    "seeds": [
+      "https://www.artorg.unibe.ch/research/index_eng.html"
+    ],
+    "allow": [
+      "www.artorg.unibe.ch"
+    ],
+    "include": [
+      "/research/"
+    ],
+    "exclude": [
+      "/news/",
+      "/open_positions/"
+    ],
+    "max_pages": 800
+  },
+  {
+    "id": "dcb",
+    "seeds": [
+      "https://www.dcberne.com/en/"
+    ],
+    "allow": [
+      "www.dcberne.com",
+      "dcberne.com"
+    ],
+    "include": [],
+    "exclude": [
+      "/news/",
+      "/blog/",
+      "/jobs?/"
+    ],
+    "max_pages": 600
+  },
+  {
+    "id": "unibe",
+    "seeds_file": "inventory/unibe_seeds.txt",
+    "include": [],
+    "exclude": [
+      "/news/",
+      "/suche",
+      "/search",
+      "/print",
+      "/veranstaltungen/",
+      "/events/"
+    ],
+    "max_pages": 200
+  }
+]

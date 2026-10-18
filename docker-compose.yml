@@ -1,0 +1,20 @@
+services:
+  app:
+    build: .
+    ports: ["8000:8000"]
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./assets/private:/app/assets/private:ro
+      - models:/root/.cache/huggingface     # BGE M3 and reranker download once
+  # vllm:                                  # self hosted Apertus, profile "sovereign", not run tonight
+  #   image: vllm/vllm-openai
+  #   profiles: ["sovereign"]
+  #   command: ["--model", "swiss-ai/Apertus-v1.5-70B", "--tensor-parallel-size", "2", "--tool-call-parser", "hermes", "--enable-auto-tool-choice"]
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices: [{driver: nvidia, count: 2, capabilities: [gpu]}]
+volumes:
+  models:
