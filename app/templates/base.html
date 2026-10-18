@@ -7,24 +7,66 @@
 <link rel="stylesheet" href="/static/app.css">
 </head>
 <body{% if (mutz or {}).corner == 'left' %} class="mzl"{% endif %}>
+{% set nav = active_page|default('leads') %}{% set sub = active_sub|default('') %}{% set nc = navc or {} %}
+{% set icons = {
+ 'plus': '<path d="M5 12h14M12 5v14"/>',
+ 'inbox': '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+ 'pen': '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+ 'send': '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+ 'chart': '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',
+ 'grid': '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+ 'gauge': '<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
+ 'db': '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
+ 'folder': '<path d="M12 10v6M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+ 'target': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+ 'shield': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+ 'file': '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+ 'search': '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+ 'buoy': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/>',
+} %}
+{% macro ico(name, s=18) %}<svg class="ico" viewBox="0 0 24 24" width="{{ s }}" height="{{ s }}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ icons[name]|safe }}</svg>{% endmacro %}
+{% macro grp(key, label, href, items) %}
+<div class="sg{% if nav == key %} on{% endif %}">
+<a class="sh" href="{{ href }}">{{ label }}</a>
+{% for k, l, h, n, ic in items %}<a class="si{% if nav == key and sub == k %} on{% endif %}" href="{{ h }}"{% if nav == key and sub == k %} aria-current="page"{% endif %}>{{ ico(ic) }}<span>{{ l }}</span>{% if n %}<i>{{ n }}</i>{% endif %}</a>{% endfor %}
+{{ caller() if caller }}
+</div>
+{% endmacro %}
+<div class="shell">
+<nav class="rail" aria-label="Workspace">
+<a class="rl-mz" href="/" title="Bärner Mutz">{{ ui.mutz("idle", 30, 28) }}</a>
+<hr>
+<a class="rl-ws" href="/" title="Bern Economic Development Agency">BE</a>
+<a class="rl-t on" href="/" title="Leads and insights" aria-current="true">{{ ico('grid', 20) }}</a>
+<div class="rl-ft">
+<a class="rl-t" href="/" title="Search leads" onclick="var s=document.querySelector('.ab .srch input');if(s){s.focus();return false}">{{ ico('search', 20) }}</a>
+<a class="rl-t" href="/states" title="States and help">{{ ico('buoy', 20) }}</a>
+<span class="rl-av" title="[Officer name]">ON</span>
+</div>
+</nav>
+<aside class="sb" aria-label="Main">
+<a class="brand" href="/">{% if logo %}<img src="/logo.png" alt="Bern Economic Development Agency">{% endif %}<b lang="de">Bärner Mutz</b></a>
+<form method="post" action="/leads/new"><button class="si cmp" type="submit">{{ ico('plus') }}<span>New lead</span></button></form>
+<nav class="sbn" aria-label="Main">
+{% call grp('leads', 'Leads', '/', [('all','All leads','/',nc.all,'inbox'),('drafts','Drafts','/?f=drafts',nc.drafts,'pen'),('closed','Sent and closed','/?f=closed',nc.closed,'send')]) %}{% if lead %}<a class="si on cur" href="/leads/{{ lead.id }}" aria-current="page" lang="de">{{ ico('file', 16) }}<span>{{ lead.title }}</span></a>{% endif %}{% endcall %}
+{{ grp('insights', 'Insights', '/insights', [('gaps','Gap report','/insights',none,'chart'),('capability','Capability map','/insights/capability',none,'grid'),('pipeline','Pipeline','/pipeline',none,'gauge')]) }}
+{{ grp('archives', 'Archives', '/archives', [('sources','Sources','/archives',nc.archives,'db'),('add','Add an archive','/archives/add',none,'folder')]) }}
+{{ grp('eval', 'Evaluation', '/eval', [('quality','Search quality','/eval',none,'target'),('checks','Checks and cost','/eval/checks',none,'shield')]) }}
+</nav>
+<div class="sbf">
+<a class="sov" href="/eval/checks#sovereignty" title="Briefs are read by Apertus 70B on CSCS in Switzerland. Confidential figures and contact data are struck on this machine first."><span class="ring" aria-hidden="true"></span>Apertus on CSCS, Switzerland</a>
+<span class="sbm">Team <b>control-free</b></span>
+{% if stubbed %}<span class="stub" title="These contracts are served by app/stubs.py over the crawled pages until the real module answers">stub: {{ stubbed|join(", ") }}</span>{% endif %}
+</div>
+</aside>
 <div class="wrap">
-<header class="top">
-<a class="brand" href="/">{% if logo %}<img src="/logo.png" alt="Bern Economic Development Agency">{% else %}<span aria-hidden="true" class="sq"></span>{% endif %}<b style="font-size:16px" lang="de">Bärner Mutz</b></a>
-{% set nav = active_page|default('leads') %}
-<nav aria-label="Main" class="gn"><a href="/" class="{% if nav == 'leads' %}on{% endif %}">Leads</a><a href="/insights" class="{% if nav == 'insights' %}on{% endif %}">Insights</a><a href="/archives" class="{% if nav == 'archives' %}on{% endif %}">Archives</a><a href="/eval" class="{% if nav == 'eval' %}on{% endif %}">Evaluation</a></nav>
-<a class="sov" style="margin-left:auto" href="/eval#sovereignty" title="Briefs are read by Apertus 70B on CSCS in Switzerland. Confidential figures and contact data are struck on this machine first.">Apertus on CSCS, Switzerland</a>
-<span style="font-size:14px">[Officer name]</span>
-</header>
+{% if self.actions()|trim %}<div class="ab" role="toolbar" aria-label="Actions">{% block actions %}{% endblock %}</div>{% endif %}
 {% block casebar %}{% endblock %}
 <div class="view {% block viewclass %}{% endblock %}">
 {% block content %}{% endblock %}
 </div>
 </div>
-<footer class="ft">
-<span>Public web pages only</span>
-{% if stubbed %}<span class="stub" title="These contracts are served by app/stubs.py over the crawled pages until the real module answers">stub: {{ stubbed|join(", ") }}</span>{% endif %}
-<a href="/states">States</a>
-</footer>
+</div>
 {% set m = mutz or {} %}
 <div id="mutz" class="{% if m.corner == 'left' %}left{% endif %}" data-screen="{{ m.screen or '' }}" data-lead="{{ m.lead or '' }}" data-need="{{ m.need or '' }}" data-pot="{{ m.pot or '' }}">
 {% if m.bubble %}<p class="bubble" id="mutzbubble">{{ m.bubble }}{% if 'Grüessech' in m.bubble %}<span class="lb" style="display:block">Hello! (Bernese German)</span>{% endif %}<button type="button" aria-label="Dismiss" onclick="this.parentNode.remove()">×</button></p>{% endif %}

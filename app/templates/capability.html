@@ -1,35 +1,44 @@
-{% extends "base.html" %}{% set active_page = "insights" %}
+{% extends "base.html" %}{% set active_page = "insights" %}{% set active_sub = "capability" %}
 {% block title %}Capability map{% endblock %}
 {% block viewclass %}panes{% endblock %}
+{% block actions %}<a class="b s" href="?recompute=1">Recompute</a><span class="sp">Computed {{ at|date(True) }}{% if stub %} · stub search{% endif %}</span>{% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:999 1 720px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:20px">
-<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px">
-<div><h1 style="margin:0;font-size:28px;line-height:1.15">Where Bern is strong, thin or absent</h1>
-<p class="lb" style="margin:4px 0 0">Supply from our archives, demand from logged leads. Each field runs through the same coverage check as a need. Computed {{ at|date(True) }}{% if stub %} on the stub search{% endif %}.</p></div>
-<a class="b" href="?recompute=1">Recompute from archives</a>
+<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px 20px"><h1 style="margin:0;font-size:28px;line-height:1.15">Capability map</h1>
+<span class="cl-key lb"><span><b class="cw strong">Aa</b> Strong</span><span><b class="cw thin">Aa</b> Thin</span><span><b class="cw none">Aa</b> Absent</span><span>Size = units and pages</span></span></div>
+{% if computing %}<div role="status" style="display:flex;gap:16px;align-items:center;border:1px solid #111;padding:14px">{{ ui.mutz("search", 54, 46) }}<span style="font-size:14px">Bear with me… checking {{ 13 }} fields.</span></div><script>setTimeout(function(){ location.href = '/insights/capability'; }, 5000);</script>{% endif %}
+{% if cloud %}
+<div class="cloud" id="cloud">
+{% for r in cloud %}<button type="button" class="cw {{ r.cov }}" style="font-size:{{ r.size }}px" data-i="{{ loop.index0 }}" aria-pressed="false" title="{{ r.name }}: {{ {'strong':'strong','thin':'thin','none':'absent'}[r.cov] }} · {{ r.units }} units · {{ r.pages }} pages · {{ r.demand }} leads asking">{{ r.name }}</button>{% endfor %}
 </div>
-<nav aria-label="Insights" class="tb"><a href="/insights">Gap report</a><a class="on" href="/insights/capability">Capability map</a></nav>
-{% if computing %}<div role="status" style="display:flex;gap:16px;align-items:center;border:1px solid #111;padding:14px">{{ ui.mutz("search", 54, 46) }}<span style="font-size:14px">Bear with me… running {{ 13 }} fields through the coverage check. This page refreshes when done.</span></div><script>setTimeout(function(){ location.href = '/insights/capability'; }, 5000);</script>{% endif %}
-{% if rows %}<div style="overflow-x:auto"><table class="t" style="min-width:780px">
-<thead><tr><th>Field</th><th>Bern supply</th><th>Units with evidence</th><th>Pages</th><th>Active studies</th><th>SNSF grants</th><th>Leads asking</th><th>Use</th></tr></thead>
-<tbody>
-{% for r in rows %}
-<tr {% if r.use == 'Policy gap' %}style="background:#FCE3E5"{% endif %}><td><b>{{ r.name }}</b>{% if r.unit_names %}<div class="lb">{{ r.unit_names|join(', ') }}</div>{% endif %}</td><td><span style="display:inline-flex;gap:6px;align-items:center">{{ ui.pot(r.cov, 18, 20) }}{{ {'strong':'Strong','thin':'Thin','none':'Absent'}[r.cov] }}</span></td><td>{{ r.units }}</td><td>{{ r.pages }}</td><td>{{ r.studies }}</td><td>{{ r.grants }}</td><td>{{ r.demand }}</td><td><span style="font-size:12px;border:1px solid {{ '#B8000F' if r.use == 'Policy gap' else '#111' }};padding:2px 6px;white-space:nowrap;{{ 'color:#B8000F' if r.use == 'Policy gap' }}{{ ';background:#111;color:#fff' if r.use == 'Outbound target' }}">{{ r.use }}</span></td></tr>
-{% endfor %}
-</tbody></table></div>{% endif %}
-<p class="lb" style="margin:0">Several independent pages is strong, one weak page is thin, nothing is absent. Leads asking come from the anonymous lead log{% if not has_demand %}, which is still empty: every field counts as low demand until leads are triaged{% endif %}.</p>
+<div id="cwd" class="cwd hidden" aria-live="polite"></div>
+<script type="application/json" id="clouddata">{{ cloud|tojson }}</script>
+{% endif %}
 </section>
-<aside style="flex:1 1 340px;padding:32px;border-left:1px solid #D9D9D9;display:flex;flex-direction:column;gap:14px">
-<h2 style="margin:0;font-size:18px">Supply against demand</h2>
-<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
-{% for k, sub, txt in [('Outbound target','Strong supply, low demand','The agency contacts companies first.'),('Keep pitching','Strong supply, high demand',"Bern's winning fields."),('Decline quickly','No supply, low demand','Say so in seconds.'),('Policy gap','No supply, high demand','See the gap report.')] %}
-<div style="border:{{ '2px' if k == 'Keep pitching' else '1px' }} solid {{ '#B8000F' if k == 'Policy gap' else '#111' }};padding:12px;min-height:110px;display:flex;flex-direction:column;gap:4px;font-size:13px"><span class="lb">{{ sub }}</span><b style="font-size:14px;{{ 'color:#B8000F' if k == 'Policy gap' }}">{{ k }}</b>{{ txt }} {{ quad[k]|join(', ') }}</div>
-{% endfor %}
-</div>
-<p class="lb" style="margin:0">Up: supply in Bern. Right: demand from leads.</p>
-<div style="background:#F2F2F2;padding:14px;font-size:14px">Used at triage: a new lead in an absent field gets the honest decline note in seconds, instead of an afternoon of searching.</div>
-<a class="b" href="/insights" style="align-self:flex-start">Open the gap report</a>
-</aside>
 </main>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  var el = document.getElementById('cloud'); if (!el) return;
+  var D = JSON.parse(document.getElementById('clouddata').textContent), box = document.getElementById('cwd');
+  var COV = {strong: 'Strong', thin: 'Thin', none: 'Absent'};
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  $$('#cloud .cw').forEach(function(b){ b.addEventListener('click', function(){
+    var on = b.getAttribute('aria-pressed') !== 'true';
+    $$('#cloud .cw').forEach(function(x){ x.setAttribute('aria-pressed', 'false'); });
+    el.classList.toggle('pick', on);
+    if (!on) { box.classList.add('hidden'); return; }
+    b.setAttribute('aria-pressed', 'true');
+    var r = D[b.dataset.i];
+    box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><h2>' + esc(r.name) + '</h2><span class="chip">' + esc(r.use) + '</span></div>' +
+      '<dl class="sd" style="margin:8px 0 0">' +
+      '<dt>Bern supply</dt><dd>' + COV[r.cov] + '</dd>' +
+      '<dt>Units</dt><dd>' + r.units + (r.unit_names.length ? '<span class="lb" style="display:block">' + esc(r.unit_names.join(', ')) + '</span>' : '') + '</dd>' +
+      '<dt>Pages</dt><dd>' + r.pages + '</dd><dt>Active studies</dt><dd>' + r.studies + '</dd><dt>SNSF grants</dt><dd>' + r.grants + '</dd><dt>Leads asking</dt><dd>' + r.demand + '</dd></dl>';
+    box.classList.remove('hidden');
+  }); });
+})();
+</script>
 {% endblock %}

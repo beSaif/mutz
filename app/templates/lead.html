@@ -36,7 +36,6 @@
 {% if request.query_params.get('err') == 'gateway' %}<div class="err" role="alert"><b>The Apertus gateway did not answer.</b> The timeline is saved. Try again in a minute.</div>{% endif %}
 {% if not diff %}
 <div><h2 style="margin:0;font-size:21px">Re-evaluate on new information</h2>
-<p style="font-size:14px">Add the CEO's reply or call notes on the left, then compare them with the needs. Unchanged needs keep their matches; locked and hand edited cards are never touched.</p>
 <form method="post" action="/leads/{{ lead.id }}/reevaluate"><button class="b p">Compare with the needs</button></form></div>
 {% elif diff.stage == 'none' %}
 <div><h2 style="margin:0;font-size:21px">Nothing to re-evaluate</h2><p style="font-size:14px">{{ diff.note }}</p>
@@ -60,8 +59,7 @@
 {% for n in diff.new_needs %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>New</b><span>Need added: rerun on its own</span><a class="b s" href="/leads/{{ lead.id }}/matches?need={{ n }}">Review its matches</a></div>{% endfor %}
 <div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px;color:#5E5E5E"><span>Kept</span><span>Accepted matches did not move</span><span class="lb">already accepted</span></div>
 </div></div>
-<div><div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:21px">3 · Pitch v{{ (versions|length) + 1 }}</h2><span class="lb">Locked and hand edited cards are never touched</span></div>
-<p style="font-size:14px">Accept the new matches you want, then build the next version. New cards are added; v{{ versions|length }} stays exactly as sent.</p>
+<div><div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:21px">3 · Pitch v{{ (versions|length) + 1 }}</h2></div>
 <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b">Keep v{{ versions|length }}</button></form><form method="post" action="/leads/{{ lead.id }}/diff/build"><button class="b p">Build v{{ (versions|length) + 1 }} from accepted changes</button></form></div></div>
 {% endif %}
 {% endif %}
@@ -69,7 +67,7 @@
 <b style="display:block;margin-bottom:4px">Versions</b>
 {% if versions %}<div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:4px 12px">{% for v in versions %}<b>v{{ v.n }}</b><span>Sent {{ v.sent_at|date }} · from entries {{ v.built_from|join(', ') }}</span><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/clean.pdf">Clean PDF</a><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/pitch.json">JSON</a>{% endfor %}</div>{% else %}<p style="margin:0">No version sent yet. <a href="/leads/{{ lead.id }}/review">Review and export</a></p>{% endif %}
 </div>
-<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid #111;padding-top:14px"><span class="lb" style="flex:1">When the CEO says yes, set the status to Visit accepted.</span><form method="post" action="/leads/{{ lead.id }}/stage"><input type="hidden" name="stage" value="visit"><button class="b">Visit accepted: contact researchers</button></form></div>
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid #111;padding-top:14px"><span style="flex:1"></span><form method="post" action="/leads/{{ lead.id }}/stage"><input type="hidden" name="stage" value="visit"><button class="b">Visit accepted: contact researchers</button></form></div>
 </section>
 </main>
 {% endblock %}

@@ -242,7 +242,24 @@ def ctx(request, **kw):
     kw["logo"] = lg
     kw["stubbed"] = contracts.stubbed()
     kw["request"] = request
+    kw["navc"] = nav_counts()
     return kw
+
+
+CLOSED = ("pitched", "visit", "won", "lost")
+
+
+def lead_group(r):
+    """Which sidebar folder a lead sits in: drafts (opened or not), or sent and closed."""
+    return "closed" if r["stage"] in CLOSED else "drafts"
+
+
+def nav_counts():
+    rows = db.leads()
+    out = {"all": len(rows), "drafts": 0, "closed": 0, "archives": archive_stats().get("n")}
+    for r in rows:
+        out[lead_group(r)] += 1
+    return out
 
 
 def render(request, tpl, **kw):
@@ -401,19 +418,14 @@ def lead_progress(l):
 
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request, q: str = ""):
+def home(request: Request, q: str = "", f: str = ""):
     rows = db.leads()
     if q:
         rows = [r for r in rows if q.lower() in (r["title"] + " " + (r["summary"] or "") + " " + (r["sector"] or "")).lower()]
-    groups = {"new": [], "drafts": [], "closed": []}
+    groups = {"drafts": [], "closed": []}
     for r in rows:
         r["p"] = lead_progress(r)
-        if r["stage"] in ("pitched", "visit", "won", "lost"):
-            groups["closed"].append(r)
-        elif not r["opened"]:
-            groups["new"].append(r)
-        else:
-            groups["drafts"].append(r)
+        groups[lead_group(r)].append(r)
     arch = archive_stats()
     bubble = None
     for r in groups["drafts"]:
@@ -421,7 +433,8 @@ def home(request: Request, q: str = ""):
         if p.get("cards") and p["cards"] - p["checked"] > 0:
             bubble = f"Grüessech! The {r['title']} pitch is {p['cards'] - p['checked']} ticks from done."
             break
-    return render(request, "home.html", groups=groups, arch=arch, q=q, total=len(rows), bubble=bubble,
+    f = f if f in groups else ""
+    return render(request, "home.html", groups=groups, arch=arch, q=q, f=f, total=len(rows), bubble=bubble,
                   mutz={"screen": "Leads", "bubble": bubble})
 
 
@@ -805,13 +818,6 @@ def matches(request: Request, lid: str, need: str = "", type: str = "all", why: 
             s["n"] = n_src
     bid = sum(1 for n in ns if n.get("coverage") in ("strong", "thin"))
     n_acc = len(db.accepted(lid))
-    curated = []
-    for n in ns:
-        for e in ((n.get("route") or {}).get("entries") or []):
-            if e not in curated:
-                curated.append(e)
-    if not curated:
-        curated = [e for e in contracts.curated() if set(e.get("need_types", [])) & {n["type"] for n in ns}][:1]
     searching = l["search_state"] == "running" or any(not n.get("searched_at") for n in ns)
     whynot = None
     if why.strip() and cur.get("searched_at"):
@@ -827,7 +833,7 @@ def matches(request: Request, lid: str, need: str = "", type: str = "all", why: 
                   ftype=type, filters=TYPE_FILTER, bid=bid, sorts=SORTS, sort=sort, cov=cov, rec=rec, smin=smin,
                   grade=grade, facets=facets, bands=SCORE_BANDS, grades=GRADE_LABEL, rec_label=REC_LABEL, murl=murl,
                   filtered=bool(cov or rec or smin or grade), n_typed=len(typed),
-                  any_grants=any(r.get("grants") or r.get("grants_other") for r in shown), n_acc=n_acc, curated=curated[:2], searching=searching,
+                  any_grants=any(r.get("grants") or r.get("grants_other") for r in shown), n_acc=n_acc, searching=searching,
                   pending=pending, arch=arch, case=case_ctx(l, "matches"), whynot=whynot, why=why,
                   mutz={"screen": "Matches", "lead": lid, "need": cur["id"], "need_text": cur["text"],
                         "pot": cur.get("coverage") if cur.get("searched_at") else None,
@@ -1086,23 +1092,31 @@ def review(request: Request, lid: str, done: int = 0, err: str = ""):
              "edited": sum(1 for c in cards if c.get("edited") and c.get("sources")),
              "nosource": sum(1 for c in cards if not c.get("sources")),
              "unchecked": sum(1 for c in cards if not c.get("checked")), "total": len(cards)}
-    srcs, seen = [], {}
-    for c in cards:
-        for s in c.get("sources", []):
-            k = (host(s.get("url", "")), stubs.clean_quote(s.get("quote") or "").lower() or s.get("url"))
-            if k in seen:
-                continue
-            seen[k] = len(srcs) + 1
-            srcs.append({**s, "card": c, "n": len(srcs) + 1})
+    titles = {s["id"]: s["title"] for s in draft["sections"]}
     vs = db.versions(lid)
-    return render(request, "review.html", lead=l, draft=draft, stats=stats, problems=problems, srcs=srcs, versions=vs,
-                  done=done, err=err, case=case_ctx(l, "export"),
+    ready = not problems and not stats["nosource"] and not stats["unchecked"]
+    return render(request, "review.html", lead=l, draft=draft, stats=stats, problems=problems, cards=cards, titles=titles,
+                  versions=vs, done=done, err=err, case=case_ctx(l, "export"),
                   mutz={"screen": "Export", "lead": lid, "corner": "left",
-                        "bubble": "Every card has a source. Good to send." if not stats["nosource"] and not problems else None})
+                        "bubble": "Every card is checked. Good to send." if ready and not done else None})
+
+
+@app.post("/api/pitch/{lid}/check")
+async def pitch_check(lid: str, request: Request):
+    """Tick one card from the export screen; same flag as the pitch editor's checkbox."""
+    body = await request.json()
+    get_lead(lid)
+    draft = ensure_draft(lid)
+    for c in draft["cards"]:
+        if c.get("card_id") == body["card_id"]:
+            c["checked"] = bool(body["checked"])
+    db.save_pitch(lid, draft)
+    cards = pitchgen.visible_cards(draft)
+    return {"ok": True, "checked": sum(1 for c in cards if c.get("checked")), "total": len(cards)}
 
 
 @app.post("/leads/{lid}/export")
-def export(lid: str, clean: str = Form(""), review_pdf: str = Form(""), pjson: str = Form(""), override: str = Form("")):
+def export(lid: str, override: str = Form("")):
     l = get_lead(lid)
     draft = ensure_draft(lid)
     cards = pitchgen.visible_cards(draft)
@@ -1115,10 +1129,9 @@ def export(lid: str, clean: str = Form(""), review_pdf: str = Form(""), pjson: s
     out = EXPORTS / lid / f"v{n}"
     out.mkdir(parents=True, exist_ok=True)
     try:
-        if clean or not (review_pdf or pjson):
-            contracts.build_pdf(p, "clean", str(out / "clean.pdf"))
-        if review_pdf:
-            contracts.build_pdf(p, "review", str(out / "review.pdf"))
+        # the clean PDF is what goes out; the review PDF and JSON are the agency's own copies
+        contracts.build_pdf(p, "clean", str(out / "clean.pdf"))
+        contracts.build_pdf(p, "review", str(out / "review.pdf"))
     except Exception as e:
         probs = getattr(e, "problems", None) or [str(e)]
         log.warning("export refused: %s", probs)
@@ -1252,13 +1265,20 @@ def seed_signals():
 @app.get("/insights/capability", response_class=HTMLResponse)
 def capability(request: Request, recompute: int = 0):
     from app import lifecycle
-    return render(request, "capability.html", **lifecycle.capability(recompute=bool(recompute)),
-                  mutz={"screen": "Capability map"})
+    cap = lifecycle.capability(recompute=bool(recompute))
+    # word cloud: size by supply (units and pages), biggest word in the middle
+    top = max([r["units"] + r["pages"] for r in cap["rows"]] or [0]) or 1
+    cloud = []
+    for i, r in enumerate(sorted(cap["rows"], key=lambda r: -(r["units"] + r["pages"]))):
+        w = {**r, "size": round(15 + 45 * ((r["units"] + r["pages"]) / top) ** 0.5)}
+        cloud.append(w) if i % 2 else cloud.insert(0, w)
+    return render(request, "capability.html", **cap, cloud=cloud, mutz={"screen": "Capability map"})
 
 
 # ---------------------------------------------------------------- archives, evaluation, states
 
 @app.get("/archives", response_class=HTMLResponse)
+@app.get("/archives/add", response_class=HTMLResponse)
 def archives(request: Request, url: str = ""):
     arch = archive_stats()
     people = kg_counts()
@@ -1270,7 +1290,8 @@ def archives(request: Request, url: str = ""):
     if enrich.exists():
         with open(enrich) as f:
             snsf = sum(1 for _ in f)
-    return render(request, "archives.html", arch=arch, people=people, proposal=proposal, url=url, snsf=snsf,
+    view = "add" if request.url.path.endswith("/add") else "sources"
+    return render(request, "archives.html", arch=arch, people=people, proposal=proposal, url=url, snsf=snsf, view=view,
                   corpus=stubs.corpus_stats() if stubs._corpus else None, mutz={"screen": "Archives"})
 
 
@@ -1295,6 +1316,7 @@ def propose_source(url):
 
 
 @app.get("/eval", response_class=HTMLResponse)
+@app.get("/eval/checks", response_class=HTMLResponse)
 def evaluation(request: Request):
     """Reads agent D's results: data/eval/latest.json plus the per split files when present."""
     def load(name):
@@ -1314,7 +1336,8 @@ def evaluation(request: Request):
     mp = Path("data/eval/missed_experts.jsonl")
     if mp.exists():
         missed = sum(1 for _ in open(mp))
-    return render(request, "eval.html", ev=ev, splits=splits, tests=tests, weakest=weakest, missed=missed,
+    view = "checks" if request.url.path.endswith("/checks") else "quality"
+    return render(request, "eval.html", ev=ev, splits=splits, tests=tests, weakest=weakest, missed=missed, view=view,
                   arch=archive_stats(), usage=gateway_usage(), mutz={"screen": "Evaluation"})
 
 

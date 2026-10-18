@@ -1,14 +1,12 @@
-{% extends "base.html" %}{% set active_page = "leads" %}
+{% extends "base.html" %}{% set active_page = "insights" %}{% set active_sub = "pipeline" %}
 {% block title %}Pipeline{% endblock %}
+{% block actions %}<a class="b s" href="/">Show as list</a><span class="sp">{{ kpi.leads }} lead{{ 's' if kpi.leads != 1 }} this year</span>{% endblock %}
 {% block content %}
 <main style="max-width:1280px;padding:32px;display:flex;flex-direction:column;gap:22px">
-<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
-<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><h1 style="margin:0;font-size:28px;line-height:1.15">Leads</h1><nav aria-label="Leads view" style="display:flex;border:1px solid #111"><a href="/" style="padding:7px 14px;font-size:14px;text-decoration:none">List</a><a href="/pipeline" style="padding:7px 14px;font-size:14px;text-decoration:none;background:#111;color:#fff;font-weight:700">Pipeline</a></nav></div>
-<form method="post" action="/leads/new"><button class="b p">New lead</button></form>
-</div>
+<h1 style="margin:0;font-size:28px;line-height:1.15">Pipeline</h1>
 <section aria-label="Did better pitches bring more visits?" style="display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-start">
 <div style="flex:1 1 260px;min-width:0"><h2 style="margin:0 0 4px;font-size:18px">Did better pitches bring more visits?</h2>
-<p class="lb" style="margin:0">{{ kpi.leads }} lead{{ 's' if kpi.leads != 1 }} this year. Compared with the agency's baseline from before the tool, which needs last year's numbers from the agency.</p></div>
+</div>
 <div style="flex:2 1 520px;min-width:0;overflow-x:auto"><table class="t" style="min-width:460px">
 <thead><tr><th></th><th>With the navigator</th><th>Before, agency baseline</th></tr></thead>
 <tbody>
@@ -16,7 +14,7 @@
 <tr><td>Visit rate</td><td>{{ ui.meter(kpi.visits, kpi.pitched, "Visit rate", "pitched leads visited", quiet=True) }}</td><td class="lb">Ask the agency</td></tr>
 <tr><td>Win rate</td><td>{{ ui.meter(kpi.won, kpi.visits, "Win rate", "visits won", quiet=True) }}</td><td class="lb">Ask the agency</td></tr>
 </tbody></table>
-<p class="lb" style="margin:8px 0 0">Hours saved per year = hours saved per pitch × leads per year. Every lost lead needs a reason.</p></div>
+</div>
 </section>
 <div style="overflow-x:auto">
 <div style="display:grid;grid-template-columns:repeat(6,minmax(170px,1fr));gap:16px;min-width:1060px">

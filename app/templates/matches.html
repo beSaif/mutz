@@ -9,12 +9,6 @@
 {% for n in needs %}
 <a class="need {{ 'on' if n.id == cur.id }}" href="{{ murl(need=n.id, type='all', cov='', rec='', smin='', grade='') }}" {% if n.id == cur.id %}aria-current="true"{% endif %}>{{ ui.pot(n.coverage if n.searched_at else None) }}<span style="flex:1;min-width:0"><b style="display:block">{{ n.label or (n.type|nlabel) }}</b><span class="lb">{% if not n.searched_at %}{{ 'Searching…' if searching else 'Not searched' }}{% elif n.error %}Error · try again{% else %}{% set r = n.result or {} %}{% set res = r.results or [] %}{{ ui.potlabel(n.coverage) }}{% if n.coverage == 'none' %}{{ ' · no source for suppliers yet' if (n.route or {}).kind == 'not_covered' else ' · nothing with evidence' }}{% elif (n.route or {}).kind == 'curated' %} · {{ [(n.route.entries or [])|length, 3]|min }} curated{% else %} · {{ res|length }} match{{ 'es' if res|length != 1 }}, {{ res|map(attribute='unit')|unique|list|length }} unit{{ 's' if res|map(attribute='unit')|unique|list|length != 1 }}{% endif %}{% endif %}</span></span></a>
 {% endfor %}
-{% if curated %}
-<div style="margin-top:20px;padding:14px;border:1px dashed #111"><b style="display:block;font-size:14px">You might not have thought of</b>
-{% for e in curated[:1] %}<p style="margin:4px 0 8px;font-size:14px">{{ e.name }}. {{ e.description|truncate(140) }} <a class="chip" href="{{ e.source_url or e.url }}" target="_blank" rel="noopener">{{ (e.source_url or e.url)|host }}</a></p>
-<button class="b s" data-add-curated='{{ {"entity_id": "curated:" ~ e.id, "type": "infrastructure" if e.kind in ("clinical_trials","infrastructure","space") else "unit", "name": e.name, "unit": e.region or "Bern", "reasons": [{"url": e.source_url or e.url, "quote": e.description, "deep_link": e.source_url or e.url}]}|tojson|forceescape }}'>Add to pitch</button>{% endfor %}
-</div>
-{% endif %}
 <p class="lb" style="margin-top:16px"><a href="/leads/{{ lead.id }}/brief">Edit the needs</a></p>
 </aside>
 <div aria-hidden="true" class="vr"></div>
@@ -38,18 +32,16 @@
 <div class="sl"><b>Next</b><span>Grouping pages into people and units</span></div>
 <div class="sl"><b>Next</b><span>Ranking and a quoted reason per match</span></div>
 </div>
-<p class="lb" style="margin:0">Results appear need by need. You can <a href="/leads/{{ lead.id }}/brief">keep editing the needs</a>.</p>
 </section>
 {% elif cur.error %}
 <section class="pn" aria-label="Error" style="max-width:680px">
 <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("sad", 80, 75) }}
 <div style="flex:1 1 220px;min-width:0" role="alert"><h2 style="margin:0 0 6px;font-size:21px">The search did not answer.</h2>
-<p style="margin:0;font-size:14px">Your brief and needs are saved. Try again in a minute. Matches already found for other needs stay on screen.</p></div></div>
+<p style="margin:0;font-size:14px">Your needs are saved. Try again in a minute.</p></div></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><form method="post" action="/leads/{{ lead.id }}/search"><button class="b p">Try again</button></form></div>
-<p class="lb" style="margin:0">Nothing is sent to another model as a fallback. Confidential text only goes to CSCS.</p>
 </section>
 {% elif (cur.route or {}).kind == 'curated' %}
-<p class="lb">This need is about {{ cur.type|nlabel|lower }}, so it goes to a short curated list instead of the researcher search.</p>
+<p class="lb">Curated list</p>
 {% for e in cur.route.entries %}
 {% if loop.index == 4 %}<details><summary class="b s" style="list-style:none;margin:10px 0">Show all {{ cur.route.entries|length }} entries</summary>{% endif %}
 <article class="res"><div class="lb">{{ e.kind|replace('_',' ')|capitalize }}<br>{{ e.region }}</div><div>
@@ -61,7 +53,7 @@
 {% if loop.last and loop.length > 3 %}</details>{% endif %}
 {% else %}<p>No curated entry for this need type yet.</p>{% endfor %}
 {% elif not results and total %}
-<div class="pn" style="max-width:680px"><h2 style="margin:0;font-size:18px">No match passes these filters.</h2><p class="lb" style="margin:0">{{ total }} match{{ 'es' if total != 1 }} found for this need. Loosen a filter in Rank and filter, or clear them.</p><div><a class="b s" href="{{ murl(type='all', cov='', rec='', smin='', grade='') }}">Clear filters</a></div></div>
+<div class="pn" style="max-width:680px"><h2 style="margin:0;font-size:18px">No match passes these filters.</h2><p class="lb" style="margin:0">{{ total }} match{{ 'es' if total != 1 }} hidden by filters</p><div><a class="b s" href="{{ murl(type='all', cov='', rec='', smin='', grade='') }}">Clear filters</a></div></div>
 {% elif not results %}
 {# no match state #}
 <section class="pn" aria-label="No match" style="max-width:680px">
@@ -70,20 +62,19 @@
 <div style="flex:1 1 220px;min-width:0">
 <h2 style="margin:0 0 6px;font-size:21px">Kei Hung im Topf.</h2>
 <p class="lb" style="margin:0 0 8px">No honey in the pot.</p>
-<p style="margin:0;font-size:14px">{% if (cur.route or {}).kind == 'not_covered' %}{{ cur.route.note or 'Companies and suppliers are not in the indexed archives yet.' }}{% else %}{{ cur.label or (cur.type|nlabel) }}: {{ cur.text }}. Not found in the indexed sources with real evidence. Better not to pitch this need yet.{% endif %}</p>
+<p style="margin:0;font-size:14px">{% if (cur.route or {}).kind == 'not_covered' %}{{ cur.route.note or 'Companies and suppliers are not in the indexed archives yet.' }}{% else %}Nothing with evidence in the indexed sources.{% endif %}</p>
 </div></div>
 <div style="border-top:1px solid #D9D9D9;padding-top:8px;font-size:14px">
 <div class="sl"><b>Searched</b><span>{{ ((cur.result or {}).searched_sources or ['artorg','dcb','unibe'])|archives }}{% if (cur.result or {}).message %}<span class="lb" style="display:block">{{ cur.result.message }}</span>{% endif %}</span></div>
 <div class="sl"><b>Terms</b><span>{{ (cur.terms|selectattr('on')|map(attribute='t')|list + ((cur.result or {}).expansions or []))|unique|join(', ') or cur.text }}</span></div>
-<div class="sl"><b>Not indexed</b><span>Inselspital, BFH, sitem-insel, Biel/Bienne. The expertise may sit there: check before dropping this need.</span></div>
+<div class="sl"><b>Not indexed</b><span>Inselspital, BFH, sitem-insel, Biel/Bienne</span></div>
 </div>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="b" href="/leads/{{ lead.id }}/brief">Rephrase the need</a><a class="b" href="/archives">Add an archive</a><button class="b" data-leave="{{ cur.id }}">Leave out of the pitch</button></div>
-<p class="lb" style="margin:0">Logged anonymously for the <a href="/insights">gap report</a>: field and coverage only, no company name.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="b" href="/leads/{{ lead.id }}/brief">Rephrase the need</a><a class="b" href="/archives/add">Add an archive</a><button class="b" data-leave="{{ cur.id }}">Leave out of the pitch</button></div>
 </section>
 {% else %}
 <div role="group" aria-label="Match types" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">{% for k, label in filters %}<a class="b s {{ 'k' if ftype == k }}" href="{{ murl(type=k) }}">{{ label }} {{ total if k == 'all' else counts.get(k, 0) }}</a>{% endfor %}</div>
 {% for r in results %}
-{% if r.is_adjacent and (loop.first or not loop.previtem.is_adjacent) %}<div style="border-top:1px solid #111;padding:14px 0 4px"><b>Adjacent</b> <span class="lb">Close to the need, not a direct match. Worth a look; not counted in recall.</span></div>{% endif %}
+{% if r.is_adjacent and (loop.first or not loop.previtem.is_adjacent) %}<div style="border-top:1px solid #111;padding:14px 0 4px"><b>Adjacent</b></div>{% endif %}
 {% set open = whynot and whynot.get('shown') and whynot.entity_id == r.entity_id %}
 <article class="res mc{{ ' sel' if open or (not whynot and loop.first) }}" data-entity="{{ r.entity_id }}" data-need="{{ cur.id }}">
 <div class="sc0" title="Score: evidence × role × recency × type. Details in Rank and filter.">{% if r.parts %}<b>{{ '%.2f'|format(r.parts.score) }}</b><span class="bar"><i style="width:{{ [r.parts.score * 100, 100]|min|round|int }}%"></i></span>{% else %}<b>–</b>{% endif %}<span class="lb">{% if whynot %}#{{ loop.index }} · {% endif %}score</span></div>
@@ -124,9 +115,8 @@
 <div style="min-width:0"><h2 style="margin:0;font-size:18px">{{ whynot.name }}</h2>
 <p style="margin:4px 0 8px;font-size:14px">{{ whynot.reason }}</p>
 {% if whynot.stages %}<table class="sc" style="margin:0 0 8px"><thead><tr><th>Signal</th><th>Score</th><th>Rank</th><th>Note</th></tr></thead><tbody>{% for st in whynot.stages %}<tr><td>{{ st.stage }}</td><td>{{ st.score if st.score is not none else '–' }}</td><td>{{ st.rank if st.rank is not none else '–' }}</td><td>{{ st.note }}</td></tr>{% endfor %}</tbody></table>{% endif %}
-<p class="lb" style="margin:0 0 8px">Searched {{ whynot.searched_sources|archives }}. Numbers from the ranking log; Bärner Mutz never reranks silently.</p>
+<p class="lb" style="margin:0 0 8px">Searched {{ whynot.searched_sources|archives }}</p>
 <div style="display:flex;gap:6px;flex-wrap:wrap">{% if whynot.in_index and whynot.entity_id %}<button class="b s" data-anyway='{{ {"entity_id": whynot.entity_id, "type": "person" if whynot.entity_id.startswith("person") else "unit", "name": whynot.name, "unit": "", "function": "", "coverage": "thin", "reasons": whynot.evidence or []}|tojson|forceescape }}'>Add anyway</button>{% endif %}<button class="b s" data-missed="{{ whynot.name }}" data-eid="{{ whynot.entity_id or '' }}" data-q="{{ cur.text }}">This is a missed expert</button><a class="b s" href="?need={{ cur.id }}">Close</a></div>
-<span class="lb">“Add anyway” marks it as added by you. “Missed expert” saves a new test case.</span>
 </div></article>
 {% endif %}
 {% endif %}
@@ -139,7 +129,6 @@
 <div>
 <h2 class="rh">Sort by</h2>
 <div class="fg">{% for k, label, desc in sorts %}<a href="{{ murl(sort=k) }}" class="{{ 'on' if sort == k }}" title="{{ desc }}"{% if sort == k %} aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}</div>
-<p class="lb" style="margin:6px 0 0">{% for k, label, desc in sorts if k == sort %}{{ desc }}{% endfor %}</p>
 </div>
 <div>
 <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="rh">Filter</h2>{% if filtered %}<a class="lb" href="{{ murl(cov='', rec='', smin='', grade='') }}">Clear filters</a>{% endif %}</div>
@@ -154,7 +143,7 @@
 </div>
 <div>
 <h2 class="rh">How the score is built</h2>
-<p class="lb" style="margin:0 0 10px"><b style="color:#111">Score = Evidence × Role × Recency × Type × Small group.</b> Each factor is between 0 and 1, except a 1.1 boost for small groups. Click a match to see its numbers.</p>
+<p class="lb" style="margin:0 0 10px"><b style="color:#111">Evidence × Role × Recency × Type × Small group</b></p>
 {% for r in results if r.parts %}
 <div class="bd{{ '' if (whynot and whynot.get('shown') and whynot.entity_id == r.entity_id) or (not (whynot and whynot.get('shown')) and loop.first) else ' hidden' }}" data-bd="{{ r.entity_id }}">
 <p style="margin:0 0 6px;font-size:14px"><b lang="de">{{ r.name }}</b></p>
@@ -164,7 +153,6 @@
 </table>
 </div>
 {% endfor %}
-<p class="lb" style="margin:10px 0 0">Ranking weights live in search/query.py and every query is logged. Bärner Mutz never reranks silently.</p>
 </div>
 </aside>
 {% endif %}

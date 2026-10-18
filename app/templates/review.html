@@ -3,55 +3,89 @@
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
 {% block content %}
+{% set nsec = draft.sections|rejectattr('hidden')|rejectattr('deleted')|list|length %}
+{% set nv = (versions|length) + 1 %}
 <main class="two">
-<section style="flex:1 1 360px;padding:32px;display:flex;flex-direction:column;gap:18px">
+<section style="flex:1 1 360px;max-width:460px;padding:32px;display:flex;flex-direction:column;gap:18px">
 {% if done %}
-<h1 style="margin:0;font-size:28px;line-height:1.15">Pitch v{{ done }} exported</h1>
-<p style="margin:0">Saved as pitch v{{ done }} and frozen. Later changes become v{{ done + 1 }}; v{{ done }} stays exactly as sent.</p>
-<div style="display:flex;flex-direction:column;gap:8px">
-<a class="ex" href="/leads/{{ lead.id }}/export/v{{ done }}/clean.pdf" style="text-decoration:none"><span><b>Clean PDF for the CEO</b><span class="lb" style="display:block">Numbered sources, agency logo on the cover</span></span></a>
-<a class="ex" href="/leads/{{ lead.id }}/export/v{{ done }}/review.pdf" style="text-decoration:none"><span><b>Review PDF</b><span class="lb" style="display:block">For the agency. Every [n] opens its quote</span></span></a>
-<a class="ex" href="/leads/{{ lead.id }}/export/v{{ done }}/pitch.json" style="text-decoration:none"><span><b>Pitch JSON</b><span class="lb" style="display:block">Reopen and edit from Leads later</span></span></a>
-</div>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="b p" href="/leads/{{ lead.id }}/after">After sending: timeline</a><a class="b" href="/">Back to Leads</a></div>
+<div><p class="lb" style="margin:0 0 4px">Export, the last step</p>
+<h1 style="margin:0;font-size:28px;line-height:1.15">Pitch v{{ done }} sent</h1>
+<p style="margin:6px 0 0;font-size:14px">Frozen as v{{ done }}. Later changes become v{{ done + 1 }}; v{{ done }} stays exactly as sent.</p></div>
+<a class="b p" href="/leads/{{ lead.id }}/export/v{{ done }}/clean.pdf" style="justify-content:center">Download the clean PDF</a>
+<div style="display:flex;flex-direction:column;gap:4px"><span class="lb">For the agency</span>
+<a href="/leads/{{ lead.id }}/export/v{{ done }}/review.pdf">Review PDF</a><span class="lb" style="margin-top:-2px">Every [n] opens its quote</span>
+<a href="/leads/{{ lead.id }}/export/v{{ done }}/pitch.json" style="margin-top:6px">Pitch JSON</a><span class="lb" style="margin-top:-2px">Reopen and edit from Leads later</span></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="b" href="/leads/{{ lead.id }}/after">After sending: timeline</a><a class="b" href="/">Back to Leads</a></div>
 {% else %}
 <div><p class="lb" style="margin:0 0 4px">Export, the last step</p>
-<h1 style="margin:0;font-size:28px;line-height:1.15">{% if problems or stats.nosource %}Not ready yet{% elif stats.unchecked %}{{ stats.unchecked }} card{{ 's' if stats.unchecked != 1 }} left to tick{% else %}Ready to send{% endif %}</h1>
-<p style="margin:6px 0 0;font-size:14px">Nothing has left the agency yet. Read the evidence, choose the files, then export.</p></div>
-<div style="display:flex;flex-direction:column;gap:12px;max-width:420px">
-{{ ui.meter(stats.total - stats.unchecked, stats.total, "Cards checked") }}
-{{ ui.meter(stats.verified, stats.total, "Claims with a verified quote") }}
-{{ ui.meter(stats.edited, stats.total, "Edited by you, source attached") }}
-{{ ui.meter(stats.nosource, stats.total, "Claims without a source") }}
+<h1 id="xhead" style="margin:0;font-size:28px;line-height:1.15">{% if problems or stats.nosource %}Not ready yet{% elif stats.unchecked %}{{ stats.unchecked }} card{{ 's' if stats.unchecked != 1 }} left to tick{% else %}Ready to send{% endif %}</h1>
 </div>
-{% if err %}<div class="err" role="alert">{% if err == 'unchecked' %}<b>{{ stats.unchecked }} card{{ 's' if stats.unchecked != 1 }} not ticked as checked.</b> Tick them in the pitch, or export anyway below.{% else %}<b>Export refused.</b> {{ err }}{% endif %}</div>{% endif %}
+<div id="xmeter">{{ ui.meter(stats.total - stats.unchecked, stats.total, "Cards checked") }}</div>
+{% if err %}<div class="err" role="alert">{% if err == 'unchecked' %}<b>{{ stats.unchecked }} card{{ 's' if stats.unchecked != 1 }} not ticked as checked.</b> Tick them on the right, or send anyway below.{% else %}<b>Export refused.</b> {{ err }}{% endif %}</div>{% endif %}
 {% if problems %}<div class="err" role="alert"><b>Fix before export:</b><ul style="margin:6px 0 0;padding-left:18px">{% for p in problems %}<li>{{ p }}</li>{% endfor %}</ul></div>{% endif %}
-<form method="post" action="/leads/{{ lead.id }}/export" style="display:flex;flex-direction:column;gap:18px">
-<fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">
-<legend class="lb" style="margin-bottom:6px">Export</legend>
-<label class="ex"><input type="checkbox" name="clean" value="1" checked style="margin-top:4px"><span><b>Clean PDF for the CEO</b><span class="lb" style="display:block">{{ draft.sections|rejectattr('hidden')|rejectattr('deleted')|list|length }} sections, numbered sources, agency logo on the cover</span></span></label>
-<label class="ex"><input type="checkbox" name="review_pdf" value="1" checked style="margin-top:4px"><span><b>Review PDF</b><span class="lb" style="display:block">For the agency. Every [n] opens its quote</span></span></label>
-<label class="ex"><input type="checkbox" name="pjson" value="1" checked style="margin-top:4px"><span><b>Pitch JSON</b><span class="lb" style="display:block">Reopen and edit from Leads later</span></span></label>
-{% if stats.unchecked %}<label class="lb"><input type="checkbox" name="override" value="1"> Export although {{ stats.unchecked }} card{{ 's are' if stats.unchecked != 1 else ' is' }} not ticked as checked</label>{% endif %}
-</fieldset>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b p" type="submit" {% if problems %}disabled{% endif %}>Export and mark as sent</button><a class="b" href="/leads/{{ lead.id }}/pitch">Back to the pitch</a></div>
+<div class="ex" style="flex-direction:column;gap:2px"><span class="lb">What the company gets</span><b>Clean PDF for the CEO</b><span class="lb">{{ nsec }} section{{ 's' if nsec != 1 }}, {{ stats.total }} card{{ 's' if stats.total != 1 }}, numbered sources, agency logo on the cover</span></div>
+<form method="post" action="/leads/{{ lead.id }}/export" style="display:flex;flex-direction:column;gap:12px">
+<label class="lb" id="xover" {% if not stats.unchecked %}hidden{% endif %}><input type="checkbox" name="override" value="1"> Send without ticking every card</label>
+<button class="b p" id="xgo" type="submit" style="justify-content:center" {% if problems or stats.unchecked %}disabled{% endif %}>Export and mark as sent</button>
+<a class="b" href="/leads/{{ lead.id }}/pitch" style="justify-content:center">Back to the pitch</a>
 </form>
-<p class="lb" style="margin:0">Saved as pitch v{{ (versions|length) + 1 }} and frozen. Later changes become v{{ (versions|length) + 2 }}; v{{ (versions|length) + 1 }} stays exactly as sent. The original PDF is deleted unless you keep it with the lead.</p>
 {% endif %}
 </section>
 <div aria-hidden="true" class="vr"></div>
-<section style="flex:999 1 520px;min-width:0;padding:32px;background:#F2F2F2">
-<p class="lb" style="margin:0 0 12px">Review PDF · evidence appendix</p>
-<div style="background:#fff;padding:24px 28px">
-{% for s in srcs %}
-<div class="ev" {% if loop.last %}style="border-bottom:0"{% endif %}><b>[{{ s.n }}]</b><div style="min-width:0">
-{% if s.quote and not s.added_by_officer %}<p style="margin:0;font-style:italic">“{{ s.quote|cq }}”</p>{% else %}<p style="margin:0">{{ s.card.text|truncate(120) }}</p>{% endif %}
-<p class="lb" style="margin:4px 0 6px">{{ s.card.name }} · {{ s.url|host }}{% if s.fetched_at %} · fetched {{ s.fetched_at|date }}{% endif %}{% if s.card.edited %} · sentence edited by you{% endif %}</p>
-<div style="display:flex;gap:6px;flex-wrap:wrap">{% if s.added_by_officer %}<span class="chip d">Added by you</span>{% elif s.card.edited %}<span class="chip d">Edited by you</span>{% else %}<span class="chip">Verified quote</span>{% endif %}<a class="chip" href="{{ s.deep_link or s.url }}" target="_blank" rel="noopener">{{ 'Open at quote' if s.quote else 'Open page' }}</a><a class="chip" href="/leads/{{ lead.id }}/map">Show in map</a></div>
-</div></div>
-{% else %}<p>No sources yet. Every card needs at least one before export.</p>{% endfor %}
+<section style="flex:999 1 520px;min-width:0;padding:32px;background:var(--panel2)">
+<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin:0 0 12px">
+<h2 style="margin:0;font-size:20px">{{ 'Cards as sent' if done else 'Tick each card' }}</h2>
 </div>
-<p class="lb" style="margin:12px 0 0">Links jump to the exact sentence. If a page changed, it simply opens at the top.</p>
+<div style="display:flex;flex-direction:column;gap:12px">
+{% for c in cards %}
+{% if loop.first or c.section != loop.previtem.section %}<p class="lb" style="margin:{{ '0' if loop.first else '12px' }} 0 0">{{ titles.get(c.section, c.section) }}</p>{% endif %}
+<div class="xc{% if c.checked %} on{% endif %}" data-card="{{ c.card_id }}">
+{% if done %}<span aria-hidden="true" class="xt">{{ '✓' if c.checked }}</span>{% else %}<label class="xt" title="Checked against its sources"><input type="checkbox" data-check {% if c.checked %}checked{% endif %} aria-label="Checked: {{ c.name }}"></label>{% endif %}
+<div style="min-width:0">
+<p class="lb" style="margin:0 0 4px">{{ c.name }}{% if c.unit and c.unit != c.name %} · {{ c.unit }}{% endif %}{% if c.edited %} · <span class="chip d">Edited by you</span>{% endif %}</p>
+<p style="margin:0">{{ c.text }}</p>
+{% for s in c.sources %}
+<div class="ev" style="padding:10px 0 0;border-bottom:0;grid-template-columns:28px minmax(0,1fr)"><b class="lb" style="color:var(--black)">[{{ loop.index }}]</b><div style="min-width:0">
+{% if s.quote and not s.added_by_officer %}<p style="margin:0;font-style:italic;font-size:14px">“{{ s.quote|cq }}”</p>{% endif %}
+<p class="lb" style="margin:2px 0 6px">{{ s.url|host }}{% if s.fetched_at %} · fetched {{ s.fetched_at|date }}{% endif %}{% if s.added_by_officer %} · added by you{% endif %}</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><a class="chip" href="{{ s.deep_link or s.url }}" target="_blank" rel="noopener">{{ 'Open at quote' if s.quote else 'Open page' }}</a><a class="chip" href="/leads/{{ lead.id }}/map">Show in map</a></div>
+</div></div>
+{% else %}<p class="lb" style="color:#B8000F;margin:8px 0 0">No source, cannot be exported</p>{% endfor %}
+</div></div>
+{% else %}<p>No cards yet. Build the pitch first.</p>{% endfor %}
+</div>
 </section>
 </main>
 {% endblock %}
+{% block scripts %}{% if not done %}
+<script>
+(function () {
+  var lid = {{ lead.id|tojson }}, blocked = {{ (problems or stats.nosource)|tojson }};
+  var go = document.getElementById("xgo"), over = document.getElementById("xover"), ov = over.querySelector("input");
+  function gate(left) {
+    go.disabled = blocked || (left > 0 && !ov.checked);
+  }
+  ov.addEventListener("change", function () { gate(Number(over.dataset.left || {{ stats.unchecked }})); });
+  document.querySelectorAll("[data-check]").forEach(function (box) {
+    box.addEventListener("change", function () {
+      var card = box.closest("[data-card]");
+      card.classList.toggle("on", box.checked);
+      fetch("/api/pitch/" + lid + "/check", {method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({card_id: card.dataset.card, checked: box.checked})})
+        .then(function (r) { if (!r.ok) throw r; return r.json(); })
+        .then(function (d) {
+          var left = d.total - d.checked, pc = d.total ? Math.round(100 * d.checked / d.total) : 0;
+          over.dataset.left = left;
+          document.getElementById("xmeter").innerHTML = '<div class="meter" title="Cards checked: ' + d.checked + " of " + d.total + '"><span class="meter-l"><span>Cards checked</span><span class="lb">' + d.checked + " of " + d.total + "</span></span>" +
+            '<span class="bar" role="meter" aria-label="Cards checked" aria-valuemin="0" aria-valuemax="' + d.total + '" aria-valuenow="' + d.checked + '"><i style="width:' + pc + '%"></i></span></div>';
+          if (!blocked) document.getElementById("xhead").textContent = left ? left + " card" + (left === 1 ? "" : "s") + " left to tick" : "Ready to send";
+          over.hidden = !left;
+          if (!left) ov.checked = false;
+          gate(left);
+        })
+        .catch(function () { box.checked = !box.checked; card.classList.toggle("on", box.checked); alert("Could not save the tick. Try again."); });
+    });
+  });
+})();
+</script>
+{% endif %}{% endblock %}

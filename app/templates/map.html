@@ -5,24 +5,29 @@
 {% block content %}
 <main class="stack">
 <div style="flex:none;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;padding:14px 32px;border-bottom:1px solid #D9D9D9">
-<h1 style="margin:0;font-size:21px">Every claim, traced to its page</h1>
+<h1 style="margin:0;font-size:21px">Evidence map</h1>
 <span class="kk"><i style="border-top:2px solid #111"></i>Read</span>
 <span class="kk"><i style="border-top:2px dashed #111"></i>Derived</span>
 <span class="kk"><i style="border-top:2px dotted #9A9A9A"></i>Missing</span>
 <span class="kk"><i style="border-top:4px solid #111"></i>Selected</span>
 <span style="flex:1"></span>
-{% if m.needs %}<button class="b s" type="button" id="m-open">Expand all</button><button class="b s" type="button" id="m-close">Collapse all</button>{% endif %}
 <label class="lb"><input type="checkbox" {% if not all %}checked{% endif %} onchange="location.search=this.checked?'':'?all=1'"> Accepted matches only</label>
 </div>
 {% if not m.needs %}
 <section style="flex:1;padding:24px 32px">
 <div class="pn" style="max-width:760px"><span class="k">Nothing to map yet</span>
-<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("idle", 80, 75) }}<div style="flex:1 1 220px"><h2 style="margin:0 0 6px;font-size:21px">Accept a match and it appears here with its facts and pages.</h2><p class="lb" style="margin:0">The map only shows what is in this case, so it stays readable.</p></div></div>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("idle", 80, 75) }}<div style="flex:1 1 220px"><h2 style="margin:0;font-size:21px">No accepted matches yet</h2></div></div>
 <div style="display:flex;gap:8px"><a class="b p" href="/leads/{{ lead.id }}/matches">Back to matches</a>{% if not all %}<a class="b" href="?all=1">Show all suggested matches</a>{% endif %}</div></div>
 </section>
 {% else %}
 <div class="mapbody">
-<section class="tree-pane scrollx" aria-label="Evidence tree">
+<section class="kg-pane" aria-label="Evidence graph">
+<svg id="kg" role="group" aria-label="Needs, matches, facts and source pages"><g id="kgvp"></g></svg>
+<div class="kg-z" role="group" aria-label="Zoom"><button type="button" class="b s" data-kz="+" aria-label="Zoom in">+</button><button type="button" class="b s" data-kz="-" aria-label="Zoom out">−</button><button type="button" class="b s" data-kz="0" aria-label="Fit to screen">Fit</button></div>
+<div class="kg-k lb" aria-hidden="true"><span><i class="kd nd"></i>Need</span><span><i class="kd mt"></i>Match</span><span><i class="kd ft"></i>Fact</span><span><i class="kd ns"></i>Source</span></div>
+</section>
+{# the tree view, hidden while the graph is tried out; kept so it can come back #}
+<section class="tree-pane scrollx hidden" aria-label="Evidence tree">
 <div class="tcols lb" aria-hidden="true"><span style="width:220px">Need</span><span style="width:240px">Match</span><span style="width:300px">Fact</span><span style="width:220px">Source</span></div>
 <div class="tree" id="map">
 {% for n in m.needs %}
@@ -53,10 +58,10 @@
 <aside id="detail" class="drawer hidden" aria-label="Details" aria-live="polite"></aside>
 </div>
 <div class="dock r" style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:12px 32px;font-size:14px">
-<span class="lb">Click any box to see everything behind it: the quotes, pages, people and needs.</span>
 <span style="flex:1"></span><a class="b p" href="/leads/{{ lead.id }}/pitch">Go to pitch</a>
 </div>
 <script type="application/json" id="mapdata">{{ m.detail|tojson }}</script>
+<script type="application/json" id="graphdata">{{ m.needs|tojson }}</script>
 {% endif %}
 </main>
 {% endblock %}
@@ -155,7 +160,7 @@
       body(d) + actions(d);
     panel.classList.remove('hidden'); panel.scrollTop = 0;
     panel.querySelector('[data-close]').addEventListener('click', close);
-    panel.querySelectorAll('[data-go]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); var b = tree.querySelector('[data-id="' + a.dataset.go + '"]'); if (b) { reveal(b); sel(b); b.focus(); } }); });
+    panel.querySelectorAll('[data-go]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); if (kg && kg.pick(a.dataset.go)) return; var b = tree.querySelector('[data-id="' + a.dataset.go + '"]'); if (b) { reveal(b); sel(b); b.focus(); } }); });
     var rm = panel.querySelector('[data-remove]');
     if (rm) rm.addEventListener('click', function(){ mutzPost('/api/decide', {lead: lid, need: d.need_id, entity: d.entity, decision: null}).then(function(){ location.reload(); }); });
   }
@@ -163,6 +168,7 @@
     panel.classList.add('hidden'); cur = null;
     $$('#map .on').forEach(function(x){ x.classList.remove('on'); });
     $$('#map .tn.sel').forEach(function(x){ x.classList.remove('sel'); });
+    kg && kg.clear();
   }
   function setOpen(br, on){ br.classList.toggle('open', on); var b = br.querySelector(':scope>.tn'); if (b && b.hasAttribute('aria-expanded')) b.setAttribute('aria-expanded', on); }
   function reveal(btn){ for (var br = btn.parentNode.parentNode; br && br !== tree; br = br.parentNode) if (br.classList.contains('br')) setOpen(br, true); }
@@ -181,9 +187,150 @@
     sel(n);
   }); });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && cur && !document.getElementById('mutzcard').contains(e.target)) close(); });
-  function all(on){ $$('#map .tn.nd, #map .tn.mt').forEach(function(b){ setOpen(b.parentNode, on); }); }
-  document.getElementById('m-open').addEventListener('click', function(){ all(true); });
-  document.getElementById('m-close').addEventListener('click', function(){ all(false); });
+  var kg = graph(document.getElementById('kg'), JSON.parse(document.getElementById('graphdata').textContent));
+
+  /* knowledge graph: need -> match -> fact -> source page as one network. A match in several needs and a page
+     quoted by several facts are one node each. Laid out once by a small force simulation; drag to pan,
+     wheel or the buttons to zoom, drag a node to move it, click it for the side panel. */
+  function graph(svg, needs){
+    if (!svg) return null;
+    var NS = 'http://www.w3.org/2000/svg', vp = svg.querySelector('#kgvp');
+    var nodes = [], edges = [], byKey = {}, alias = {}, ekeys = {};
+    function node(key, o){ if (!byKey[key]) { o.key = key; o.nb = []; o.es = []; nodes.push(o); byKey[key] = o; } return byKey[key]; }
+    function edge(a, b, st){
+      var k = a.key + '|' + b.key; if (ekeys[k]) return; ekeys[k] = 1;
+      var e = {a: a, b: b, st: st}; edges.push(e); a.nb.push(b); b.nb.push(a); a.es.push(e); b.es.push(e);
+    }
+    needs.forEach(function(n){
+      var nn = node(n.nid, {t: 'need', id: n.nid, label: n.label, tip: 'Need ' + n.i + ' · ' + n.label});
+      n.matches.forEach(function(mt){
+        var mn = node('e:' + mt.entity, {t: 'match', id: mt.id, label: mt.name, entity: mt.entity, acc: false});
+        mn.acc = mn.acc || mt.accepted; mn.tip = mt.type + ' · ' + mt.name; alias[mt.id] = mn;
+        edge(nn, mn, mt.accepted ? 'read' : 'sugg');
+        mt.facts.forEach(function(f){
+          var fn = node('f:' + mt.entity + ':' + f.kind + ':' + f.label, {t: 'fact', id: f.id, label: f.label, entity: mt.entity, miss: f.style === 'missing', tip: f.kind + ' · ' + f.how + ' · ' + f.label});
+          alias[f.id] = fn; edge(mn, fn, f.style);
+          if (f.url) { var pg = (D[f.sid] || {}).title || f.src, sn = node('u:' + f.url.split('#')[0], {t: 'source', id: f.sid, label: pg, url: f.deep_link || f.url, tip: 'Source · ' + pg + ' · ' + f.src}); alias[f.sid] = sn; edge(fn, sn, f.style); }
+        });
+      });
+    });
+    nodes.forEach(function(o){ alias[o.id] = alias[o.id] || o; });
+
+    // seed: rings around the centre, needs inside, then matches, facts and pages; each node sits in its parent's slice
+    var LAYER = {need: 0, match: 1, fact: 2, source: 3}, cnt = [0, 0, 0, 0];
+    nodes.forEach(function(o){ cnt[LAYER[o.t]]++; });
+    var ring = [cnt[0] > 1 ? 40 + 22 * cnt[0] : 0], C = 2 * Math.PI;
+    ring[1] = Math.max(ring[0] + 190, cnt[1] * 130 / C); ring[2] = Math.max(ring[1] + 120, cnt[2] * 24 / C); ring[3] = Math.max(ring[2] + 120, cnt[3] * 34 / C);
+    function size(o){ return o.sz || (o.sz = 1 + o.kids.reduce(function(t, q){ return t + size(q); }, 0)); }
+    nodes.forEach(function(o){ o.kids = []; });
+    nodes.forEach(function(o){ if (o.t === 'need') o.own = true; });
+    nodes.forEach(function(o){ o.nb.forEach(function(q){ if (!q.own && LAYER[q.t] === LAYER[o.t] + 1) { q.own = true; o.kids.push(q); } }); });
+    function place(o, a, w){
+      o.ang = a; o.r = ring[LAYER[o.t]]; o.x = Math.cos(a) * o.r; o.y = Math.sin(a) * o.r;
+      var t = a - w / 2, tot = o.kids.reduce(function(s, q){ return s + size(q); }, 0);
+      o.kids.forEach(function(q){ var qw = w * size(q) / tot; place(q, t + qw / 2, qw); t += qw; });
+    }
+    var roots = nodes.filter(function(o){ return o.t === 'need'; }), all = roots.reduce(function(s, q){ return s + size(q); }, 0), a0 = -Math.PI / 2;
+    roots.forEach(function(o){ var w = C * size(o) / all; place(o, a0 + w / 2, w); a0 += w; });
+    // relax: repulsion and springs, with a pull back to each node's ring so the layers stay readable
+    var REST = {need: 190, match: 110, fact: 90}, Q = {need: 3000, match: 9000, fact: 300, source: 900};
+    for (var it = 0, T = 1; it < 260; it++, T *= 0.988) {
+      nodes.forEach(function(o){ o.vx = 0; o.vy = 0; });
+      for (var i = 0; i < nodes.length; i++) for (var j = i + 1; j < nodes.length; j++) {
+        var a = nodes[i], b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy + 0.01;
+        if (d2 > 90000) continue;
+        var f = Math.sqrt(Q[a.t] * Q[b.t]) / d2, d = Math.sqrt(d2);
+        a.vx += dx / d * f; a.vy += dy / d * f; b.vx -= dx / d * f; b.vy -= dy / d * f;
+      }
+      edges.forEach(function(e){
+        var dx = e.b.x - e.a.x, dy = e.b.y - e.a.y, d = Math.sqrt(dx * dx + dy * dy) || 1, f = (d - REST[e.a.t]) * 0.02;
+        e.a.vx += dx / d * f; e.a.vy += dy / d * f; e.b.vx -= dx / d * f; e.b.vy -= dy / d * f;
+      });
+      nodes.forEach(function(o){
+        var r = Math.sqrt(o.x * o.x + o.y * o.y) || 1, pull = (o.r - r) * 0.15;
+        o.vx += o.x / r * pull; o.vy += o.y / r * pull;
+        var v = Math.sqrt(o.vx * o.vx + o.vy * o.vy), m = Math.min(v, 14 * T) / (v || 1); o.x += o.vx * m; o.y += o.vy * m;
+      });
+    }
+
+    function el(tag, at, parent){ var x = document.createElementNS(NS, tag); for (var k in at) x.setAttribute(k, at[k]); if (parent) parent.appendChild(x); return x; }
+    function cut(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+    var DASH = {read: '', derived: '6 4', missing: '2 3', sugg: ''}, COL = {read: '#111', derived: '#111', missing: '#9A9A9A', sugg: '#B5B5B5'};
+    var ge = el('g', {}, vp), gn = el('g', {}, vp);
+    edges.forEach(function(e){
+      e.el = el('line', {'class': 'kg-e', stroke: COL[e.st], 'stroke-width': e.st === 'sugg' ? 1.5 : 2}, ge);
+      if (DASH[e.st]) e.el.setAttribute('stroke-dasharray', DASH[e.st]);
+    });
+    nodes.forEach(function(o){
+      var g = o.el = el('g', {'class': 'kg-n ' + o.t, tabindex: 0, role: 'button', 'aria-label': o.tip}, gn);
+      el('title', {}, g).textContent = o.tip + (o.t === 'source' ? ' (double click opens the page)' : '');
+      if (o.t === 'need') {
+        var w = Math.min(210, 18 + 6.4 * cut(o.label, 30).length);
+        el('rect', {'class': 'kg-s', x: -w / 2, y: -15, width: w, height: 30, fill: '#111', stroke: '#111'}, g);
+        el('text', {x: 0, y: 4, 'text-anchor': 'middle', fill: '#fff', 'font-size': 12, 'font-weight': 700}, g).textContent = cut(o.label, 30);
+      } else if (o.t === 'match') {
+        var c = el('circle', {'class': 'kg-s', r: 11, fill: '#fff', stroke: '#111', 'stroke-width': o.acc ? 2.5 : 1.5}, g);
+        if (!o.acc) c.setAttribute('stroke-dasharray', '4 3');
+        el('text', {x: 0, y: 26, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#111', lang: 'de'}, g).textContent = cut(o.label, 34);
+      } else if (o.t === 'fact') {
+        el('circle', {'class': 'kg-s', r: 5, fill: o.miss ? '#fff' : '#111', stroke: o.miss ? '#9A9A9A' : '#111', 'stroke-width': 1.5, 'stroke-dasharray': o.miss ? '2 2' : ''}, g);
+        el('circle', {r: 10, fill: 'transparent'}, g);
+      } else {
+        el('rect', {'class': 'kg-s', x: -6, y: -6, width: 12, height: 12, fill: '#F2F2F2', stroke: '#111', 'stroke-width': 1.5}, g);
+        el('text', {x: 10, y: 4, 'font-size': 11, fill: '#5E5E5E'}, g).textContent = cut(o.label, 28);
+      }
+    });
+    function draw(){
+      edges.forEach(function(e){ e.el.setAttribute('x1', e.a.x); e.el.setAttribute('y1', e.a.y); e.el.setAttribute('x2', e.b.x); e.el.setAttribute('y2', e.b.y); });
+      nodes.forEach(function(o){ o.el.setAttribute('transform', 'translate(' + o.x + ',' + o.y + ')'); });
+    }
+    draw();
+
+    // pan and zoom
+    var tx = 0, ty = 0, k = 1;
+    function apply(){ vp.setAttribute('transform', 'translate(' + tx + ',' + ty + ') scale(' + k + ')'); svg.classList.toggle('kg-far', k < 0.85); svg.classList.toggle('kg-vfar', k < 0.5); }
+    function fit(){
+      var r = svg.getBoundingClientRect(), x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      nodes.forEach(function(o){ x0 = Math.min(x0, o.x - 110); x1 = Math.max(x1, o.x + 130); y0 = Math.min(y0, o.y - 30); y1 = Math.max(y1, o.y + 34); });
+      if (!nodes.length || !r.width) return;
+      k = Math.min(r.width / (x1 - x0), r.height / (y1 - y0), 1.4); tx = r.width / 2 - k * (x0 + x1) / 2; ty = r.height / 2 - k * (y0 + y1) / 2; apply();
+    }
+    function zoom(f, cx, cy){ var r = svg.getBoundingClientRect(); cx = cx == null ? r.width / 2 : cx; cy = cy == null ? r.height / 2 : cy;
+      var nk = Math.max(0.2, Math.min(4, k * f)); tx = cx - (cx - tx) * nk / k; ty = cy - (cy - ty) * nk / k; k = nk; apply(); }
+    svg.addEventListener('wheel', function(e){ e.preventDefault(); var r = svg.getBoundingClientRect(); zoom(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top); }, {passive: false});
+    document.querySelectorAll('[data-kz]').forEach(function(b){ b.addEventListener('click', function(){ b.dataset.kz === '0' ? fit() : zoom(b.dataset.kz === '+' ? 1.25 : 0.8); }); });
+    var drag = null;
+    svg.addEventListener('pointerdown', function(e){
+      var g = e.target.closest('.kg-n'), o = g && nodes.filter(function(n){ return n.el === g; })[0];
+      drag = {o: o, x: e.clientX, y: e.clientY, moved: false}; svg.setPointerCapture(e.pointerId); if (!o) svg.classList.add('pan');
+    });
+    svg.addEventListener('pointermove', function(e){
+      if (!drag) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
+      drag.moved = true; drag.x = e.clientX; drag.y = e.clientY;
+      if (drag.o) { drag.o.x += dx / k; drag.o.y += dy / k; draw(); } else { tx += dx; ty += dy; apply(); }
+    });
+    svg.addEventListener('pointerup', function(){
+      var d = drag; drag = null; svg.classList.remove('pan'); if (!d || d.moved) return;
+      if (!d.o) { cur && close(); return; }
+      // a second click on a source page within a moment opens the page itself
+      var now = Date.now(); if (d.o.url && last.o === d.o && now - last.t < 400) window.open(d.o.url, '_blank', 'noopener');
+      last = {o: d.o, t: now}; select(d.o);
+    });
+    var last = {};
+    svg.addEventListener('keydown', function(e){ if (e.key !== 'Enter' && e.key !== ' ') return; var g = e.target.closest('.kg-n'), o = g && nodes.filter(function(n){ return n.el === g; })[0]; if (o) { e.preventDefault(); select(o); } });
+
+    function clear(){ svg.classList.remove('kg-dim'); svg.querySelectorAll('.on').forEach(function(x){ x.classList.remove('on'); }); }
+    function select(o){
+      clear(); svg.classList.add('kg-dim'); o.el.classList.add('on');
+      o.es.forEach(function(e){ e.el.classList.add('on'); }); o.nb.forEach(function(q){ q.el.classList.add('on'); });
+      show(o.id);
+      window.mutzSelect && window.mutzSelect({entity_id: o.entity, name: o.label});
+    }
+    requestAnimationFrame(fit);
+    return {clear: clear, pick: function(id){ var o = alias[id]; if (!o) return false; select(o); o.el.focus(); return true; }};
+  }
 })();
 </script>
 {% endblock %}

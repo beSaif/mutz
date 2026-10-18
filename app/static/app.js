@@ -92,6 +92,23 @@
     msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
   }
 
+  // what the officer sees: visible text of the page, minus form fields and passages struck from the brief
+  var SKIP = "script,style,template,textarea,input,select,svg,#mutz,#mutzcard,.ps.x,[data-mutz-skip],[aria-hidden=true]";
+  function pageText() {
+    var out = [];
+    [$(".casebar"), $(".view")].forEach(function (root) {
+      if (!root) return;
+      var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {acceptNode: function (n) {
+        var p = n.parentElement;
+        if (!p || !n.nodeValue.trim() || p.closest(SKIP)) return NodeFilter.FILTER_REJECT;
+        if (p.checkVisibility ? !p.checkVisibility() : !p.offsetParent) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }});
+      while (w.nextNode()) out.push(w.currentNode.nodeValue.trim());
+    });
+    return out.join(" ").replace(/\s+/g, " ").slice(0, 8000);
+  }
+
   function send(q) {
     if (busy || !q.trim()) return;
     busy = true;
@@ -99,7 +116,7 @@
     var wait = document.createElement("div"); wait.className = "m bot"; wait.setAttribute("role", "status");
     wait.innerHTML = '<span class="w">Bärner Mutz</span><div style="display:flex;gap:10px;align-items:center">' + $("#tpl-search").innerHTML + '<p class="lb">Bear with me… searching the archives.</p></div>';
     msgs.appendChild(wait); msgs.scrollTop = msgs.scrollHeight;
-    post("/api/mutz", {key: key, message: q, ctx: ctx, selection: selection}).then(function (r) {
+    post("/api/mutz", {key: key, message: q, ctx: Object.assign({page: pageText()}, ctx), selection: selection}).then(function (r) {
       wait.remove(); addBot(r);
     }).catch(function () {
       wait.remove();

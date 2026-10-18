@@ -5,7 +5,7 @@
 {% block content %}
 <main id="pitchapp">
 <aside aria-label="Outline" style="flex:0 0 250px;padding:20px 16px 20px 24px;border-right:1px solid #D9D9D9">
-<p class="lb" style="margin:0 0 8px">Outline. Drag to reorder, the eye hides a section from the PDF.</p>
+<p class="lb" style="margin:0 0 8px">Outline</p>
 <div id="outline"></div>
 <div id="toast" role="status"></div>
 <div style="margin:16px 0 0" id="checkedcount"></div>
@@ -14,7 +14,6 @@
 <div class="pe-bar">
 <span class="lb" id="pgno">Page 1</span>
 <span style="flex:1"></span>
-<span class="lb">Click any text on the page to edit it</span>
 <span class="pe-z" role="group" aria-label="Zoom"><button type="button" class="b s" data-z="-" aria-label="Zoom out">−</button><span id="zl" class="lb" style="min-width:42px;text-align:center">100%</span><button type="button" class="b s" data-z="+" aria-label="Zoom in">+</button><button type="button" class="b s" data-z="fit">Fit</button></span>
 </div>
 <div class="pane" id="canvas"><div class="pages" id="pages"></div></div>
@@ -23,7 +22,6 @@
 <div class="pane" id="inspector" style="padding:20px 24px 88px"></div>
 <div class="dock r" style="padding:12px 24px;display:flex;flex-direction:column;gap:6px">
 <a class="b p" href="/leads/{{ lead.id }}/export" style="justify-content:center">Continue to export</a>
-<span class="lb" style="text-align:center">Nothing is sent from here. Export is the next step.</span>
 </div>
 </aside>
 </main>

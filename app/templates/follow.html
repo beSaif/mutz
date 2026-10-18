@@ -5,7 +5,7 @@
 {% block content %}
 <main class="two">
 <section style="flex:999 1 640px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:20px">
-<div><h1 style="margin:0;font-size:24px">Contact the researchers</h1><p class="lb" style="margin:4px 0 0">One row per accepted match. Nothing is sent automatically; these are the agency's relationships.</p></div>
+<div><h1 style="margin:0;font-size:24px">Contact the researchers</h1></div>
 {% if not rows %}<p>No accepted matches yet. <a href="/leads/{{ lead.id }}/matches">Accept matches first.</a></p>{% else %}
 <div style="overflow-x:auto"><table class="t" style="min-width:560px">
 <thead><tr><th>Researcher or group</th><th>Language</th><th>Why them</th><th>Status</th></tr></thead>
@@ -21,7 +21,6 @@
 <span style="flex:1"></span>{% for l in ['de','fr','en'] %}<button class="b s {{ 'k' if cur.lang == l }}" data-lang="{{ l }}">{{ l|upper }}</button>{% endfor %}</div>
 <label for="draft" class="lb">Edit before sending</label>
 <textarea id="draft" lang="{{ cur.lang }}" rows="10" class="in" style="font-size:14px;line-height:1.55;resize:vertical" placeholder="Write the draft, or let Bärner Mutz draft it from the shareable needs.">{{ cur.draft }}</textarea>
-<p class="lb" style="margin:0">The confidential description and the CEO's emails are not used. Only needs marked shareable.</p>
 <p class="lb hidden" id="omsg" style="margin:0"></p>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b s {{ 'p' if not cur.draft }}" data-gen>{{ 'Draft it' if not cur.draft else 'Draft again' }}</button><button class="b s" data-copy>Copy</button><a class="b s" id="mailto" href="mailto:?subject={{ 'Anfrage: Gespräch mit einem Unternehmen' if cur.lang == 'de' else ('Demande: rencontre avec une entreprise' if cur.lang == 'fr' else 'Request: meeting with a company') }}">Open in mail</a><button class="b s" data-short>Rewrite shorter</button><button class="b s" data-sent>Mark as sent</button></div>
 </div>
@@ -30,7 +29,6 @@
 <div aria-hidden="true" class="vr"></div>
 <aside style="flex:1 1 340px;padding:32px;display:flex;flex-direction:column;gap:14px">
 <h2 style="margin:0;font-size:21px">Visit day</h2>
-<p class="lb" style="margin:0">Fills as researchers agree. Same schedule as the last page of the pitch.</p>
 <div style="border-top:1px solid #111">
 {% for v in visit %}<div class="sl" style="display:grid;grid-template-columns:60px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid #D9D9D9"><b style="width:auto;color:#111;font-weight:700">{{ v.time }}</b><span {% if not v.on %}style="color:#5E5E5E"{% endif %}>{{ v.what }}<span class="lb" style="display:block">{{ v.note }}</span></span></div>{% endfor %}
 </div>

@@ -1,31 +1,32 @@
-{% extends "base.html" %}{% set active_page = "leads" %}
-{% block title %}Leads{% endblock %}
+{% extends "base.html" %}{% set active_page = "leads" %}{% set active_sub = f or "all" %}
+{% set heads = {"drafts": "Drafts", "closed": "Sent and closed"} %}
+{% block title %}{{ heads.get(f, "Leads") }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
+{% block actions %}
+<form method="get" action="/" class="srch" role="search">{% if f %}<input type="hidden" name="f" value="{{ f }}">{% endif %}<input id="sr" name="q" aria-label="Search leads" value="{{ q }}" class="in" placeholder="Search company, sector, expert"></form>
+<a class="ic" href="{{ request.url.path }}{% if f %}?f={{ f }}{% endif %}" title="Refresh" aria-label="Refresh"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.9 4.1M12 1v3.3H8.7" fill="none" stroke="#111" stroke-width="1.6"/></svg></a>
+{% if total %}<form method="post" action="/leads/demo"><button class="b s">Load the sport wearable demo</button></form>{% endif %}
+{% if q %}<a class="b s" href="/{% if f %}?f={{ f }}{% endif %}">Clear search</a>{% endif %}
+<span class="sp">{% set shown = (groups[f]|length) if f else total %}{% if shown %}1–{{ shown }} of {{ shown }}{% else %}0 leads{% endif %}</span>
+{% endblock %}
 {% block content %}
 <main class="two">
-<section style="flex:999 1 640px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:28px">
-<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
-<div><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><h1 style="margin:0;font-size:28px;line-height:1.15">Leads</h1><nav aria-label="Leads view" style="display:flex;border:1px solid #111"><a href="/" style="padding:7px 14px;font-size:14px;text-decoration:none;background:#111;color:#fff;font-weight:700">List</a><a href="/pipeline" style="padding:7px 14px;font-size:14px;text-decoration:none">Pipeline</a></nav></div>
-<p class="lb" style="margin:4px 0 0">{{ groups.new|length }} new · {{ groups.drafts|length }} draft{{ '' if groups.drafts|length == 1 else 's' }} · {{ groups.closed|selectattr('stage','equalto','pitched')|list|length }} waiting for the CEO</p></div>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><form method="get" action="/" style="display:flex;gap:8px"><label for="sr" class="lb" style="align-self:center">Search</label><input id="sr" name="q" value="{{ q }}" class="in" placeholder="company, sector, expert" style="font-size:14px;padding:10px;width:220px"></form>
-<form method="post" action="/leads/new"><button class="b p" type="submit">New lead</button></form></div>
-</div>
+<section style="flex:1 1 640px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:28px">
+<h1 style="margin:0;font-size:28px;line-height:1.15">{{ heads.get(f, "Leads") }}</h1>
 
 {% if total == 0 and not q %}
 <section class="pn" aria-label="No leads yet" style="max-width:640px">
-<span class="k">First visit, no leads yet</span>
 <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
 {{ ui.mutz("idle", 80, 75) }}
 <div style="flex:1 1 220px;min-width:0">
-<h2 style="margin:0 0 6px;font-size:21px">Paste a company description, upload the PDF, or try the demo case.</h2>
-<p class="lb" style="margin:0">Grüessech! Bärner si gmüetlech. I bi d Usnahm.<br>Hello! Bernese people take it slow. I'm the exception.</p>
+<h2 style="margin:0;font-size:21px">No leads yet</h2>
+<p class="lb" style="margin:4px 0 0" lang="de">Grüessech!</p>
 </div></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
 <form method="post" action="/leads/new"><button class="b p">New lead</button></form>
 <form method="post" action="/leads/demo"><button class="b">Load the sport wearable demo</button></form>
 <form method="post" action="/leads/seed"><button class="b">Load 4 more demo leads</button></form>
 </div>
-<p class="lb" style="margin:0">{{ arch.n }} archives ready · {{ arch.total|num }} pages{% if arch.last %} · last crawl {{ arch.last|date(True) }}{% endif %}</p>
 </section>
 {% elif total == 0 %}
 <p>No lead matches “{{ q }}”. <a href="/">Show all leads</a></p>
@@ -33,7 +34,7 @@
 
 {% macro leadrow(r, kind, first=False) %}
 {% set p = r.p %}
-<a class="row" href="/leads/{{ r.id }}" {% if kind == 'draft' and first %}style="background:#FCE3E5;padding-left:8px;padding-right:8px"{% endif %}>
+<a class="row" href="/leads/{{ r.id }}">
 <span><b{% if kind == 'closed' %} style="color:#111"{% endif %}>{{ r.title }}</b><span class="lb" style="display:block">{{ r.summary or (r.sector or 'No summary yet') }}{% if r.demo %} · demo{% endif %}</span></span>
 <span class="lb">{{ r.origin }} · {{ r.created_at|date }}</span>
 {% if kind == 'new' %}
@@ -46,22 +47,12 @@
 <span class="b s">{{ 'Continue' if kind == 'draft' else 'Open' }}</span></a>
 {% endmacro %}
 
-{% if groups.new %}<div><h2>New, not opened yet</h2><div style="border-top:1px solid #111;margin-top:8px">{% for r in groups.new %}{{ leadrow(r, 'new') }}{% endfor %}</div></div>{% endif %}
-{% if groups.drafts %}<div><h2>Drafts</h2><div style="border-top:1px solid #111;margin-top:8px">{% for r in groups.drafts %}{{ leadrow(r, 'draft', loop.first) }}{% endfor %}</div></div>{% endif %}
-{% if groups.closed %}<div><h2>Sent and closed</h2><div style="border-top:1px solid #111;margin-top:8px;color:#5E5E5E">{% for r in groups.closed %}{{ leadrow(r, 'closed') }}{% endfor %}</div></div>{% endif %}
-{% if total and not groups.drafts %}<form method="post" action="/leads/demo"><button class="b">Load the sport wearable demo</button></form>{% endif %}
+{% if f and total and not groups[f] %}<p class="lb" style="margin:0">Nothing here{% if q %} for “{{ q }}”{% endif %}. <a href="/">Show all leads</a></p>{% endif %}
+{# the overview shows three per section; the folder in the sidebar shows them all #}
+{% for g, kind in [("drafts", "draft"), ("closed", "closed")] if groups[g] and f in ("", g) %}{% set rs = groups[g] if f else groups[g][:3] %}
+<div><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>{{ heads[g] }}</h2>{% if rs|length < groups[g]|length %}<a class="lb" href="/?f={{ g }}{% if q %}&q={{ q|urlencode }}{% endif %}">Show all {{ groups[g]|length }}</a>{% endif %}</div>
+<div style="border-top:1px solid #111;margin-top:8px{{ ';color:#5E5E5E' if g == 'closed' }}">{% for r in rs %}{{ leadrow(r, kind) }}{% endfor %}</div></div>
+{% endfor %}
 </section>
-<aside style="flex:1 1 300px;padding:32px;border-left:1px solid #D9D9D9;display:flex;flex-direction:column;gap:24px">
-<div>
-<h2>Archives</h2>
-<p style="margin:6px 0 4px">{{ arch.n }} archives · {{ arch.total|num }} pages</p>
-<p class="lb" style="margin:0 0 10px">{% if arch.last %}Last crawl {{ arch.last|date(True) }} · {% endif %}robots.txt respected</p>
-<a class="b s" href="/archives">Manage archives</a>
-</div>
-<div>
-<h2>Where the text goes</h2>
-<p style="margin:6px 0 0;font-size:14px">One pagers go only to Apertus on CSCS in Switzerland, after confidential figures and contact data are struck on this machine. Search runs on this machine.</p>
-</div>
-</aside>
 </main>
 {% endblock %}
