@@ -1,0 +1,47 @@
+{% extends "base.html" %}{% set active_page = "archives" %}
+{% block title %}Archives{% endblock %}
+{% block content %}
+<main class="two">
+<section style="flex:999 1 600px;min-width:0;padding:32px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+<div><h1 style="margin:0;font-size:28px;line-height:1.15">Archives</h1><p class="lb" style="margin:4px 0 0">Public pages only · robots.txt respected · recrawl by ETag and content hash</p></div>
+</div>
+<div style="overflow-x:auto">
+<table class="t" style="min-width:680px">
+<thead><tr><th>Archive</th><th>Pages</th><th>People found</th><th>Languages</th><th>Last crawl</th><th>Skipped</th></tr></thead>
+<tbody>
+{% for g in arch.groups %}
+<tr><td><b>{{ g.name }}</b><div class="lb">{{ g.sub }}</div></td><td>{{ g.pages|num }}</td><td>{{ people.get(g.id, '–') if people else 'not extracted yet' }}</td><td>{{ g.langs }}</td><td>{{ g.last|date(True) }}</td><td>{{ g.skipped }}{% if g.skipped %} <span class="lb">404, 401 or 403</span>{% endif %}</td></tr>
+{% else %}
+<tr><td colspan="6">No pages crawled yet. Run crawl.py with config/sources.json.</td></tr>
+{% endfor %}
+<tr><td><b>SNSF grants</b><div class="lb">opendata.swiss · filtered to Bern</div></td><td>{{ '1 file' if snsf is not none else '–' }}</td><td>{{ (snsf ~ ' grants') if snsf is not none else 'not loaded' }}</td><td>EN</td><td></td><td></td></tr>
+{% if proposal and proposal.ok %}
+<tr style="background:#FCE3E5"><td><b>{{ proposal.id }}</b><div class="lb">{{ proposal.host }} · proposed</div></td><td>not crawled</td><td></td><td></td><td>Not yet</td><td>robots.txt checked at crawl</td></tr>
+{% endif %}
+</tbody>
+</table>
+</div>
+<p class="lb" style="margin:12px 0 0">{{ arch.total|num }} pages in total. The BORIS research portal is not crawled because its robots.txt blocks our fetcher. People can ask to be removed through the agency. Companies and suppliers have no source yet; next: Zefix and cantonal cluster lists.</p>
+</section>
+<aside style="flex:1 1 380px;padding:32px;border-left:1px solid #E30613;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:18px">Add an archive</h2>
+<form method="get" action="/archives" style="display:flex;flex-direction:column;gap:12px">
+<label for="url" class="lb">Public website</label>
+<input id="url" name="url" value="{{ url or '' }}" placeholder="https://sitem-insel.ch/" class="in">
+<button class="b" style="align-self:flex-start">Check this site</button>
+</form>
+{% if proposal %}
+{% if proposal.ok %}
+<div><div class="ok"><b aria-hidden="true">✓</b>Public address, not a social network or login page</div><div class="ok"><b aria-hidden="true">✓</b>robots.txt is checked by crawl.py before the first request</div><div class="ok"><b aria-hidden="true">✓</b>Polite: 1 request per second, cached, never refetched</div></div>
+<p class="lb" style="margin:0">Saved as one entry in config/sources.json. No code changes.</p>
+<pre>{{ proposal.entry }}</pre>
+<p class="lb" style="margin:0">Then run: python crawl.py --config config/sources.json, and the ingest steps. The page count appears here after the crawl.</p>
+{% else %}
+<div class="err" role="alert">{{ proposal.reason }}</div>
+{% endif %}
+{% endif %}
+<p class="lb" style="margin:0">LinkedIn, social media and login pages are refused.</p>
+</aside>
+</main>
+{% endblock %}

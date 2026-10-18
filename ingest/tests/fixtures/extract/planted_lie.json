@@ -1,0 +1,37 @@
+{
+  "about": "Invented page. The canned 8B output contains a planted lie (a role, an institute and a topic the page never states) and an invented person. Only the true facts may survive.",
+  "pages": [
+    {"page_id": "fx_lie_0000001", "url": "https://fixture.example/research/imaging/index_eng.html", "source": "fixture_a",
+     "group": "fixture_a", "lang": "en", "title": "Retinal Imaging Lab", "page_type": "group", "sibling_group": "sg_lie",
+     "fetched_at": "2026-10-18T12:00:00+00:00", "breadcrumbs": ["Research", "Retinal Imaging Lab"], "emails": [],
+     "text": "Retinal Imaging Lab\nThe Retinal Imaging Lab develops optical coherence tomography methods for the early detection of diabetic eye disease. Dr. Anna Beispiel is the group head of the Retinal Imaging Lab and leads a team of six researchers. Our lab operates a custom adaptive optics scanning laser ophthalmoscope that is available to clinical partners.",
+     "html": ""}
+  ],
+  "llm": {
+    "fx_lie_0000001": {
+      "people": [
+        {"name": "Dr. Anna Beispiel", "function": "Director of the Institute for Quantum Medicine", "relation": "head",
+         "quote": "Dr. Anna Beispiel is the Director of the Institute for Quantum Medicine and has led it since 2019."},
+        {"name": "Prof. Max Erfunden", "function": "Senior Scientist", "relation": "member",
+         "quote": "Prof. Max Erfunden is a senior scientist in the Retinal Imaging Lab working on lasers."},
+        {"name": "Dr. Anna Beispiel", "function": "group head", "unit": "Retinal Imaging Lab", "relation": "head",
+         "quote": "Dr. Anna Beispiel is the group head of the Retinal Imaging Lab and leads a team of six researchers."}
+      ],
+      "expertise": [
+        {"label": "quantum computing", "holder": "Retinal Imaging Lab",
+         "quote": "The Retinal Imaging Lab develops quantum computing methods for the early detection of diabetic eye disease."},
+        {"label": "diabetes", "holder": "Retinal Imaging Lab", "quote": "diabetes"},
+        {"label": "optical coherence tomography", "holder": "Retinal Imaging Lab",
+         "quote": "The Retinal Imaging Lab develops optical coherence tomography methods for the early detection of diabetic eye disease."}
+      ],
+      "projects": [],
+      "infrastructure": [
+        {"name": "adaptive optics scanning laser ophthalmoscope", "kind": "facility",
+         "quote": "Our lab operates a custom adaptive optics scanning laser ophthalmoscope that is available to clinical partners."}
+      ]
+    }
+  },
+  "expect": {"persons": ["Anna Beispiel"], "not_persons": ["Max Erfunden"], "functions": {"Anna Beispiel": "group head"},
+             "expertise": ["optical coherence tomography"], "not_expertise": ["quantum computing", "diabetes"],
+             "infrastructure": 1}
+}

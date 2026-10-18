@@ -1,0 +1,127 @@
+{
+  "case_id": "demo-0001",
+  "lang": "en",
+  "company": {
+    "name": "Talvera Sensorik GmbH",
+    "country": "Germany",
+    "summary": "Invented example. Maker of a skin patch that tracks glucose during endurance sport. Looking for a clinical study partner, sensor research and a site for a small team."
+  },
+  "title": "Bern for wearable glucose sensing",
+  "intro": "Bern has research groups, a diabetes clinic and clinical study support that match the three needs in your brief. This document lists them with the public page each statement comes from.",
+  "officer": {
+    "name": "Lea Beispiel",
+    "email": "lea.beispiel@example.org"
+  },
+  "created_at": "2026-10-18T15:30:00+02:00",
+  "cards": [
+    {
+      "entity_id": "why-1",
+      "type": "why",
+      "name": "Sensors and signal processing",
+      "unit": "",
+      "show_person_name": false,
+      "checked": true,
+      "text": "A Bern research group combines skin sensors and signal processing for metabolic monitoring, the core of your patch [1].",
+      "sources": [
+        {
+          "url": "https://research.example.org/groups/metabolic-sensing",
+          "quote": "The group develops skin worn sensors and signal processing methods for continuous metabolic monitoring.",
+          "title": "Metabolic Sensing Group",
+          "fetched_at": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "entity_id": "why-2",
+      "type": "why",
+      "name": "Clinical study on sport",
+      "unit": "",
+      "show_person_name": false,
+      "checked": true,
+      "text": "A Bern clinical centre already runs a study on glucose levels during endurance sport.",
+      "sources": [
+        {
+          "url": "https://clinic.example.net/studies/glucose-endurance",
+          "quote": "The study follows glucose levels in adults with type 1 diabetes during endurance training.",
+          "title": "Glucose and endurance study",
+          "fetched_at": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "entity_id": "person-0001",
+      "type": "person",
+      "name": "Prof. Erika Muster",
+      "unit": "Metabolic Sensing Group, Institute for Biomedical Engineering",
+      "show_person_name": false,
+      "checked": true,
+      "text": "The group builds skin worn sensors and the algorithms that turn their signals into glucose estimates. Its current project tests a patch during physical activity.",
+      "notes": "Internal: the group head is on leave in November. Ask before proposing a date.",
+      "sources": [
+        {
+          "url": "https://research.example.org/groups/metabolic-sensing",
+          "quote": "The group develops skin worn sensors and signal processing methods for continuous metabolic monitoring.",
+          "title": "Metabolic Sensing Group",
+          "fetched_at": "2026-10-18"
+        },
+        {
+          "url": "https://research.example.org/projects/patch-activity",
+          "quote": "The project evaluates a wearable glucose patch during physical activity in a controlled setting.",
+          "title": "Wearable patch during activity",
+          "fetched_at": "2026-10-18"
+        }
+      ]
+    },
+    {
+      "entity_id": "group-0002",
+      "type": "group",
+      "name": "Forschungsabteilung für Sensorgestützte Stoffwechselüberwachung und Bewegungsphysiologie",
+      "unit": "Department of Sport Science",
+      "person": "Dr. Max Beispiel",
+      "show_person_name": true,
+      "checked": true,
+      "text": "The department measures how exercise changes metabolism and runs a movement lab with motion capture and gas exchange analysis.",
+      "sources": [
+        {
+          "url": "https://sport.example.org/research/metabolism-movement",
+          "quote": "Our movement lab combines motion capture with gas exchange analysis to study metabolism during exercise.",
+          "title": "Metabolism and movement",
+          "fetched_at": "2026-10-17"
+        }
+      ]
+    },
+    {
+      "entity_id": "curated-ctu",
+      "type": "clinical_trials",
+      "name": "Clinical Trial Unit",
+      "unit": "University hospital",
+      "show_person_name": false,
+      "checked": true,
+      "edited": true,
+      "text": "The clinical trial unit helps companies plan and run studies, including approvals and data management.",
+      "sources": [
+        {
+          "url": "javascript:alert(1)",
+          "quote": ""
+        }
+      ]
+    }
+  ],
+  "visit_day": [
+    {
+      "time": "09:30",
+      "topic": "Wearable sensors for metabolic monitoring",
+      "with": "Metabolic Sensing Group"
+    },
+    {
+      "time": "11:00",
+      "topic": "Movement lab and exercise physiology",
+      "with": "Department of Sport Science"
+    },
+    {
+      "time": "14:00",
+      "topic": "Planning a clinical study",
+      "with": "Clinical Trial Unit"
+    }
+  ]
+}

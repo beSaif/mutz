@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<title>{{ title }}{% if review %} (review copy){% endif %}</title>
+<meta name="author" content="{{ agency }}">
+<link rel="stylesheet" href="pitch.css">
+{% if review %}
+<style>
+@page { @top-left {
+  content: "Review copy for the agency. Not for sending.";
+  font: bold 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #E30613;
+  vertical-align: bottom; padding-bottom: 6mm;
+} }
+</style>
+{% endif %}
+</head>
+<body class="{{ mode }}">
+<div class="rule" aria-hidden="true"></div>
+
+{# ------------------------------------------------------------- Cover #}
+<section class="cover">
+  <div class="row">
+    <div class="l">
+      {% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="{{ agency }}">
+      {% else %}<span class="logo-text">{{ agency }}</span>{% endif %}
+    </div>
+    <div class="r"></div>
+  </div>
+  <div class="row">
+    <div class="l">{% if review %}<span class="label">Lead</span>{% endif %}</div>
+    <div class="r">
+      {% if review %}<div class="banner">Review copy. Every claim shows its quote and source. Send the clean PDF to the company.</div>{% endif %}
+      <h1>{{ title }}</h1>
+      <p class="for">For {{ company.name }}{% if company.country %}, {{ company.country }}{% endif %}</p>
+    </div>
+  </div>
+  <div class="meta">
+    <div class="row"><div class="l"><span class="label">Date</span></div><div class="r">{{ date }}</div></div>
+    <div class="row"><div class="l"><span class="label">Contact</span></div>
+      <div class="r">{{ officer.name }}<br>{{ agency }}{% if officer.email %}<br><a href="mailto:{{ officer.email }}">{{ officer.email }}</a>{% endif %}</div></div>
+    {% if review and case_id %}<div class="row"><div class="l"><span class="label">Case</span></div><div class="r">{{ case_id }}</div></div>{% endif %}
+    {% if review and company.summary %}
+    <div class="row"><div class="l"><span class="label">Lead summary, internal</span></div>
+      <div class="r"><div class="internal">{{ company.summary }}</div></div></div>
+    {% endif %}
+  </div>
+  {% if intro %}
+  <div class="row"><div class="l"></div><div class="r"><p class="intro">{{ intro }}</p></div></div>
+  {% endif %}
+</section>
+
+{# ------------------------------------------------------------- Sections #}
+{% for sec in sections %}
+<section class="sec{{ " cont" if sec.key == "infrastructure" }}" id="sec-{{ sec.key }}">
+  <div class="row">
+    <div class="l"><h2>{{ sec.title }}</h2></div>
+    <div class="r"><p class="lede">
+      {%- if sec.key == "why" %}{{ sec.cards|length }} reason{{ "s" if sec.cards|length != 1 }}, each with a source.
+      {%- elif sec.key == "matches" %}Research groups and projects in Bern that fit your plans. Each entry links to the public page it is based on.
+      {%- else %}Facilities and support services you can use in Bern.{% endif -%}
+    </p></div>
+  </div>
+  {% for it in sec.cards %}
+  <div class="row card" id="{{ it.id }}">
+    <div class="l">
+      {% if sec.key == "why" %}<span class="kind">Point {{ loop.index }}</span>
+      {% elif it.kind %}<span class="kind">{{ it.kind }}</span>{% endif %}
+      {% if review %}<span class="status {{ it.status }}">{{ it.status_label }}</span>{% endif %}
+    </div>
+    <div class="r">
+      {% if sec.key != "why" %}
+      <h3>{{ it.heading }}</h3>
+      {% if it.sub %}<p class="sub">{{ it.sub }}</p>{% endif %}
+      {% if it.person %}<p class="sub">Led by {{ it.person }}</p>{% endif %}
+      {% endif %}
+      <p>{{ it.text }}{% for n in it.refs %}<sup class="ref"><a href="#{{ 'ev' if review else 'src' }}-{{ n }}">[{{ n }}]</a></sup>{% endfor %}</p>
+      {% if review %}
+        {% for n in it.refs %}{% set s = sources[n - 1] %}
+        <p class="evline">[{{ n }}] {% if s.quote %}“{{ s.quote }}” {% endif %}{{ s.host }} ·
+          <a href="{{ s.deep_link if s.quote else s.url }}">{{ "Open at quote" if s.quote else "Open page" }}</a></p>
+        {% endfor %}
+        {% if it.notes %}<div class="internal notes"><b>Officer note:</b> {{ it.notes }}</div>{% endif %}
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endfor %}
+
+{# ------------------------------------------------------------- Visit day #}
+{% if visit_day %}
+<section class="sec cont" id="sec-visit">
+  <div class="row">
+    <div class="l"><h2>A suggested visit day</h2></div>
+    <div class="r">
+      <p class="lede">A draft programme for one day in Bern. Nothing is arranged yet. If you decide to visit, the agency asks each group whether they are available.</p>
+      <table class="visit">
+        {% for v in visit_day %}
+        <tr><td class="time">{{ v.time }}</td><td>{{ v.topic }}{% if v.with %}<br><span class="lede">{{ v.with }}</span>{% endif %}</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ------------------------------------------------------------- Sources #}
+<section class="sec" id="sec-sources">
+  <div class="row">
+    <div class="l"><h2>{{ "Evidence" if review else "Sources" }}</h2></div>
+    <div class="r"><p class="lede">
+      {%- if review %}Each [n] with the exact quote from the public page. "Open at quote" opens the page scrolled to the sentence; if the page has changed, it opens at the top.
+      {%- else %}Every statement in this document is based on these public pages.{% endif -%}
+    </p></div>
+  </div>
+  <div class="row"><div class="l"></div><div class="r">
+  {% if review %}
+    {% for s in sources %}
+    <div class="ev" id="ev-{{ s.n }}">
+      <p class="quote"><b>[{{ s.n }}]</b> {% if s.quote %}“{{ s.quote }}”{% else %}No quote stored. Check the page by hand.{% endif %}</p>
+      <p class="src">{% if s.title %}{{ s.title }} · {% endif %}{{ s.host }}{% if s.fetched %} · fetched {{ s.fetched }}{% endif %} · {{ {"verified": "Verified quote", "edited": "Card edited by you", "needs_check": "Needs a check"}[s.status] }}</p>
+      <p class="url">{{ s.url }}</p>
+      <p class="links">{% if s.quote %}<a class="go" href="{{ s.deep_link }}">Open at quote</a>{% endif %}<a class="go" href="{{ s.url }}">Open page</a><a class="go" href="#{{ s.claim }}">Back to claim</a></p>
+    </div>
+    {% endfor %}
+  {% else %}
+    <ol class="sources">
+      {% for s in sources %}
+      <li id="src-{{ s.n }}"><span class="n">[{{ s.n }}]</span>{% if s.title %}{{ s.title }}, {% endif %}<a class="url" href="{{ s.url }}">{{ s.url }}</a></li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+  </div></div>
+</section>
+</body>
+</html>

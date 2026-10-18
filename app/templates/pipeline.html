@@ -1,0 +1,37 @@
+{% extends "base.html" %}{% set active_page = "leads" %}
+{% block title %}Pipeline{% endblock %}
+{% block content %}
+<main style="max-width:1280px;padding:32px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
+<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><h1 style="margin:0;font-size:28px;line-height:1.15">Leads</h1><nav aria-label="Leads view" style="display:flex;border:1px solid #111"><a href="/" style="padding:7px 14px;font-size:14px;text-decoration:none">List</a><a href="/pipeline" style="padding:7px 14px;font-size:14px;text-decoration:none;background:#111;color:#fff;font-weight:700">Pipeline</a></nav></div>
+<form method="post" action="/leads/new"><button class="b p">New lead</button></form>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px 16px 12px 0;border-right:1px solid #D9D9D9;min-width:150px"><b style="font-size:28px;line-height:1.1">{{ kpi.leads }}</b><span class="lb">leads this year</span></div>
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px 16px 12px 0;border-right:1px solid #D9D9D9;min-width:150px"><b style="font-size:28px;line-height:1.1">{{ (kpi.median_days ~ ' days') if kpi.median_days is not none else '–' }}</b><span class="lb">median, lead to pitch{% if kpi.median_days is none %} · no pitch sent yet{% endif %}</span></div>
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px 16px 12px 0;border-right:1px solid #D9D9D9;min-width:150px"><b style="font-size:28px;line-height:1.1">{{ kpi.visit_rate or '–' }}</b><span class="lb">visit rate · {{ kpi.visits }} visits ÷ {{ kpi.pitched }} pitched</span></div>
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px 16px 12px 0;min-width:150px"><b style="font-size:28px;line-height:1.1">{{ kpi.win_rate or '–' }}</b><span class="lb">win rate · {{ kpi.won }} won ÷ {{ kpi.visits }} visits</span></div>
+</div>
+<div style="overflow-x:auto">
+<div style="display:grid;grid-template-columns:repeat(6,minmax(170px,1fr));gap:16px;min-width:1060px">
+{% for s in stages %}
+<section style="min-width:0;display:flex;flex-direction:column;gap:8px" aria-label="{{ s }}">
+<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #111;padding-bottom:6px"><b style="font-size:15px">{{ {'new':'New','triaged':'Triaged','pitched':'Pitched','visit':'Visit','won':'Won','lost':'Lost'}[s] }}</b><span class="lb">{{ cols[s]|length }}</span></div>
+{% for l in cols[s] %}
+<a href="/leads/{{ l.id }}" style="border:1px solid #111;padding:10px;font-size:13px;line-height:1.4;text-decoration:none;display:block;background:#fff;{{ 'color:#5E5E5E' if s == 'lost' }}"><b style="display:block;font-size:14px;color:#111">{{ l.title }}</b>{{ l.origin }} · {% if l.versions %}v{{ l.versions|length }} sent {{ l.versions[-1].sent_at|date }}{% else %}{{ l.created_at|date }}{% endif %}
+<span class="lb" style="display:block">{% if s == 'new' %}{{ 'Not opened' if not l.opened else (l.n_needs ~ ' needs') }}{% elif s == 'triaged' %}{{ l.n_strong }} of {{ l.n_needs }} needs strong{% elif s == 'lost' %}{{ l.lost_reason or 'Reason missing' }}{% elif s == 'visit' %}{{ l.n_out|selectattr('status','equalto','agreed')|list|length }} of {{ l.n_out|length }} researchers agreed{% else %}{{ l.n_needs }} needs{% endif %}</span></a>
+{% else %}<span class="lb">None</span>{% endfor %}
+</section>
+{% endfor %}
+</div></div>
+<section style="border-top:1px solid #111;padding-top:16px;display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+<div style="flex:1 1 360px;min-width:0"><h2 style="margin:0 0 4px;font-size:18px">Did better pitches bring more visits?</h2>
+<p class="lb" style="margin:0">Compared with the agency's baseline from before the tool. The baseline needs last year's numbers from the agency.</p></div>
+<div style="flex:2 1 520px;min-width:0;overflow-x:auto"><table class="t" style="min-width:460px">
+<thead><tr><th></th><th>Days to pitch</th><th>Visit rate</th></tr></thead>
+<tbody><tr><td>Before, agency baseline</td><td>ask the agency</td><td>ask the agency</td></tr>
+<tr><td><b>With the navigator</b></td><td>{{ kpi.median_days if kpi.median_days is not none else '–' }}</td><td>{{ kpi.visit_rate or '–' }}</td></tr></tbody></table>
+<p class="lb" style="margin:8px 0 0">Hours saved per year = hours saved per pitch × leads per year. Every lost lead needs a reason.</p></div>
+</section>
+</main>
+{% endblock %}

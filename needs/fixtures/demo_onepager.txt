@@ -1,0 +1,29 @@
+CONFIDENTIAL - Project description for cantonal promotion agencies
+Project ref. DEMO-2026-0417. Invented demo case, no real company or person.
+
+Kestrelyn Health Oy
+
+The company
+Kestrelyn Health Oy was founded in 2021 in Tampere, Finland, and employs 26 people. It builds Kestra, a thin skin patch that continuously measures interstitial glucose and lactate in women during endurance sport. The patch pairs with a phone app that adapts training load and carbohydrate intake in real time. A first version is used by 400 amateur athletes in a pilot study in Finland and Sweden.
+
+We are passionate about empowering every woman to reach her full potential, and we believe Kestra will revolutionise women's health. Our world-class team combines Nordic design with cutting-edge science.
+
+Why Switzerland
+The company is comparing Switzerland, Germany and the Netherlands for a European R&D and clinical base, to open in 2027. Its next product, for women who have type 1 diabetes, needs clinical evidence and a regulatory pathway in Europe.
+
+Financials
+Revenue 2025: EUR 1.4 million. Shareholders: founders 58%, a Nordic seed fund 31%, employees 11%. Current valuation: EUR 22 million.
+
+What the company is looking for
+- Clinical validation of the patch with women who have type 1 diabetes, including how glucose and lactate change across the menstrual cycle and during exercise.
+- A research partner in biosensors, signal processing and machine learning to improve the glucose and lactate algorithms.
+- Access to a clinical trial unit that can run a GCP compliant medical device study for CE marking under the EU MDR.
+- Cleanroom and microfabrication capacity for prototyping the next generation of microneedle sensors.
+- Non-dilutive funding for a joint R&D project with a Swiss research partner, for example through Innosuisse.
+- Licensing options for university technology in sweat-based or microneedle sensing.
+- A contract manufacturer for flexible electronics and patch assembly in Switzerland.
+- Hiring around 10 people in the first two years: firmware engineers, data scientists and regulatory affairs specialists.
+- About 400 m2 of lab and office space close to a university hospital.
+
+Timeline
+The location decision is expected in Q2 2027. The CEO plans to visit two or three Swiss cantons in spring.

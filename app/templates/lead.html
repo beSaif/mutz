@@ -1,0 +1,74 @@
+{% extends "base.html" %}{% set active_page = "leads" %}
+{% block title %}After sending · {{ lead.title }}{% endblock %}
+{% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
+{% block content %}
+<main class="two">
+<section style="flex:1 1 380px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:18px">
+<h1 style="margin:0;font-size:24px">Timeline</h1>
+<div class="tl">
+{% for e in entries %}
+<div class="it {{ 'red' if loop.last and e.kind in ('email','call','note') }}"><span class="lb">{{ e.at|date }} · {{ {'one_pager':'one pager','website':'website','pitch':'pitch','email':'email','call':'call notes','note':'note'}.get(e.kind, e.kind) }}{% if e.added_by and e.added_by != 'officer' %} · added through Mutz{% endif %}</span>
+<b style="display:block">{{ {'one_pager':'Company description','website':'Company website'}.get(e.kind) or (e.text if e.kind == 'pitch' else e.kind|capitalize) }}</b>
+{% if e.kind in ('email','call','note') %}<p style="margin:4px 0 0">{{ e.text|truncate(400) }}</p>{% elif e.kind == 'website' %}<p class="lb" style="margin:2px 0 0">{{ e.text }}</p>{% endif %}
+<span class="lb">{{ 'Confidential' if e.confidential else 'Public' }}{% if e.kind in ('email','call','note') %} · {{ 'shareable' if e.shareable else 'not shareable' }}{% endif %}</span></div>
+{% endfor %}
+</div>
+<form method="post" action="/leads/{{ lead.id }}/entry" style="border:1px solid #111;padding:14px;display:flex;flex-direction:column;gap:8px">
+<b style="font-size:14px">Add information</b>
+<label for="kind" class="lb">Kind</label>
+<select id="kind" name="kind" class="in" style="font-size:14px;padding:8px"><option value="email">Email</option><option value="call">Call notes</option><option value="note">Note</option></select>
+<label for="info" class="lb">Paste or type</label>
+<textarea id="info" name="text" rows="3" placeholder="What changed?" class="in" style="font-size:14px;resize:vertical" required></textarea>
+<div style="display:flex;gap:16px;flex-wrap:wrap" class="lb"><label><input type="checkbox" name="confidential" value="1" checked> Confidential</label><label><input type="checkbox" name="shareable" value="1"> Shareable with researchers</label></div>
+<button class="b" style="align-self:flex-start">Add to timeline</button>
+</form>
+<form method="post" action="/leads/{{ lead.id }}/stage" style="border-top:1px solid #111;padding-top:14px;display:flex;flex-direction:column;gap:8px">
+<label for="stage" class="lb">Status</label>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><select id="stage" name="stage" class="in" style="font-size:14px;padding:8px">{% for s in stages %}<option value="{{ s }}" {% if lead.stage == s %}selected{% endif %}>{{ {'new':'New','triaged':'Triaged','pitched':'Pitched','visit':'Visit accepted','won':'Won','lost':'Lost'}[s] }}</option>{% endfor %}</select>
+<select name="lost_reason" class="in" style="font-size:14px;padding:8px" aria-label="Reason if lost"><option value="">Reason, if lost</option>{% for r in lost %}<option {% if lead.lost_reason == r %}selected{% endif %}>{{ r }}</option>{% endfor %}</select>
+<button class="b s">Set status</button></div>
+{% if request.query_params.get('err') == 'reason' %}<p class="lb" style="color:#B8000F;margin:0">A lost lead needs a reason, so the pipeline can learn from it.</p>{% endif %}
+</form>
+</section>
+<div aria-hidden="true" class="vr"></div>
+<section style="flex:999 1 560px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:22px">
+{% if request.query_params.get('err') == 'gateway' %}<div class="err" role="alert"><b>The Apertus gateway did not answer.</b> The timeline is saved. Try again in a minute.</div>{% endif %}
+{% if not diff %}
+<div><h2 style="margin:0;font-size:21px">Re-evaluate on new information</h2>
+<p style="font-size:14px">Add the CEO's reply or call notes on the left, then compare them with the needs. Unchanged needs keep their matches; locked and hand edited cards are never touched.</p>
+<form method="post" action="/leads/{{ lead.id }}/reevaluate"><button class="b p">Compare with the needs</button></form></div>
+{% elif diff.stage == 'none' %}
+<div><h2 style="margin:0;font-size:21px">Nothing to re-evaluate</h2><p style="font-size:14px">{{ diff.note }}</p>
+<form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b s">OK</button></form></div>
+{% else %}
+<div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:21px">1 · What the reply changes</h2><span class="lb">Apertus 70B on CSCS compared old needs with the new entry</span></div>
+<div style="border-top:1px solid #111;margin-top:8px">
+{% for a in diff.added %}<div class="df" style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>Added</b><span>{{ a.text }}</span><span class="lb">from the {{ diff.entry_label }}</span></div>{% endfor %}
+{% for c in diff.changed %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>{{ 'Priority' if c.priority else 'Changed' }}</b><span>{{ c.label }}: {{ c.note }}{% if c.from_sentence %} “{{ c.from_sentence|truncate(80) }}”{% endif %}</span><span class="lb">from the {{ diff.entry_label }}</span></div>{% endfor %}
+{% for c in diff.removed %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>Removed</b><span>{{ c.label }}: {{ c.text }}</span><span class="lb">from the {{ diff.entry_label }}</span></div>{% endfor %}
+{% if diff.same %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px;color:#5E5E5E"><span>Same</span><span>{{ diff.same|join(' · ') }}</span><span class="lb">matches kept as they are</span></div>{% endif %}
+{% if not diff.added and not diff.changed and not diff.removed %}<p style="font-size:14px">The new entry does not change any need.</p>{% endif %}
+</div>
+{% if diff.stage == 'needs' %}<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><form method="post" action="/leads/{{ lead.id }}/diff/confirm"><button class="b s p">Confirm changes</button></form><a class="b s" href="/leads/{{ lead.id }}/brief">Edit</a><form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b s">Discard</button></form></div>{% endif %}
+</div>
+{% if diff.stage == 'matches' %}
+{% set nm = namespace(rows=[]) %}
+<div><h2 style="margin:0;font-size:21px">2 · Matches, rerun for changed needs only</h2>
+<div style="border-top:1px solid #111;margin-top:8px">
+{% for n in diff.new_needs %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>New</b><span>Need added: rerun on its own</span><a class="b s" href="/leads/{{ lead.id }}/matches?need={{ n }}">Review its matches</a></div>{% endfor %}
+<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px;color:#5E5E5E"><span>Kept</span><span>Accepted matches did not move</span><span class="lb">already accepted</span></div>
+</div></div>
+<div><div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:21px">3 · Pitch v{{ (versions|length) + 1 }}</h2><span class="lb">Locked and hand edited cards are never touched</span></div>
+<p style="font-size:14px">Accept the new matches you want, then build the next version. New cards are added; v{{ versions|length }} stays exactly as sent.</p>
+<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b">Keep v{{ versions|length }}</button></form><form method="post" action="/leads/{{ lead.id }}/diff/build"><button class="b p">Build v{{ (versions|length) + 1 }} from accepted changes</button></form></div></div>
+{% endif %}
+{% endif %}
+<div style="background:#F2F2F2;padding:14px;font-size:14px">
+<b style="display:block;margin-bottom:4px">Versions</b>
+{% if versions %}<div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:4px 12px">{% for v in versions %}<b>v{{ v.n }}</b><span>Sent {{ v.sent_at|date }} · from entries {{ v.built_from|join(', ') }}</span><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/clean.pdf">Clean PDF</a><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/pitch.json">JSON</a>{% endfor %}</div>{% else %}<p style="margin:0">No version sent yet. <a href="/leads/{{ lead.id }}/review">Review and export</a></p>{% endif %}
+</div>
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid #111;padding-top:14px"><span class="lb" style="flex:1">When the CEO says yes, set the status to Visit accepted.</span><form method="post" action="/leads/{{ lead.id }}/stage"><input type="hidden" name="stage" value="visit"><button class="b">Visit accepted: contact researchers</button></form></div>
+</section>
+</main>
+{% endblock %}

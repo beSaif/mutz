@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="{{ p.lang or 'en' }}"><head><meta charset="utf-8">
+<style>
+@page{size:A4;margin:22mm 18mm 20mm 18mm;@bottom-left{content:"Prototype, not an official Canton of Bern tool";font:8pt Helvetica,Arial,sans-serif;color:#5E5E5E}@bottom-right{content:counter(page) " / " counter(pages);font:8pt Helvetica,Arial,sans-serif;color:#5E5E5E}}
+body{font:10pt/1.45 "Helvetica Neue",Helvetica,Arial,sans-serif;color:#111;margin:0}
+.pg{display:grid;grid-template-columns:1fr 1fr;column-gap:10mm;position:relative;page-break-after:always;min-height:240mm}
+.pg:last-child{page-break-after:auto}
+.pg::before{content:"";position:absolute;left:50%;top:-22mm;bottom:-20mm;border-left:0.15mm solid {{ '#111' if mode == 'clean' else '#E30613' }}}
+h1{font-size:21pt;margin:0 0 6mm;line-height:1.15}
+h2{font-size:13pt;margin:0 0 3mm;bookmark-level:1}
+h3{font-size:10.5pt;margin:0 0 1mm;bookmark-level:{{ 2 if mode == 'review' else 'none' }}}
+.l{color:#5E5E5E;font-size:9pt}
+p{margin:0 0 3mm}
+.card{margin:0 0 5mm;break-inside:avoid}
+a{color:#111}
+sup a,a.n{text-decoration:none;color:#111}
+.mk{font-size:7.5pt;border:0.2mm solid #111;padding:0 1mm;color:#5E5E5E}
+.mk.e{border-style:dashed}
+.ev{margin:0 0 4mm;break-inside:avoid}
+img.logo{width:62mm;margin-bottom:14mm}
+</style></head><body>
+<section class="pg">
+<div>{% if logo %}<img class="logo" src="{{ logo }}" alt="Bern Economic Development Agency">{% else %}<p><b>Bern Economic Development Agency</b></p>{% endif %}
+<h1>{{ p.title }}</h1><p class="l">{{ today }}</p></div>
+<div style="padding-top:40mm"><p>{{ p.intro }}</p><p class="l">Prepared for {{ p.company.name }}<br>Contact: {{ p.officer.name }}{% if p.officer.email %}, {{ p.officer.email }}{% endif %}</p></div>
+</section>
+{% set ns = namespace(n=0) %}
+{% for sec in (p.sections or []) if sec.id not in ('cover',) %}
+{% set scards = cards|selectattr('section','in',[sec.id, 'infrastructure' if sec.id == 'infra' else sec.id])|list %}
+{% if sec.id == 'sources' %}
+<section class="pg"><div><h2>Sources</h2><p class="l">{{ 'Each entry gives the exact quote, the page and the fetch date.' if mode == 'review' else 'Every claim in this document links to a public page.' }}</p></div>
+<div>{% set m = namespace(n=0) %}{% for c in cards %}{% for s in c.sources %}{% set m.n = m.n + 1 %}
+<div class="ev" id="ev-{{ m.n }}"><b>[{{ m.n }}]</b> {% if mode == 'review' and s.quote %}<i>“{{ s.quote }}”</i><br>{% endif %}<a href="{{ s.deep_link if mode == 'review' else s.url }}">{{ s.url }}</a>{% if mode == 'review' %}<br><span class="l">{{ c.name }}{% if s.fetched_at %} · fetched {{ s.fetched_at[:10] }}{% endif %} · {{ 'edited by you' if c.edited else ('added by you' if s.added_by_officer else 'verified quote') }}</span>{% endif %}</div>
+{% endfor %}{% endfor %}</div></section>
+{% elif sec.id == 'visit' %}
+<section class="pg"><div><h2>Suggested visit day</h2><p class="l">A draft schedule. Meetings depend on each group's availability.</p></div>
+<div>{% for r in p.visit or [] %}<p><b>{{ r.time }}</b> {{ r.what }}</p>{% endfor %}</div></section>
+{% elif scards %}
+<section class="pg"><div><h2>{{ sec.title }}</h2></div><div>
+{% for c in scards %}
+{% set t = namespace(s=c.text) %}{% for k in range(c.sources|length) %}{% set t.s = t.s.replace('[' ~ (k + 1) ~ ']', '[[' ~ (c.nums[k]) ~ ']]') %}{% endfor %}
+<div class="card">{% if sec.id != 'why' %}<h3>{{ c.name }}</h3>{% if c.unit and c.unit != c.name %}<p class="l">{{ c.unit }}</p>{% endif %}{% endif %}
+<p>{{ t.s|replace('[[','[')|replace(']]',']') }} {% if mode == 'review' %}{% for n in c.nums %}<a class="n" href="#ev-{{ n }}">→{{ n }}</a> {% endfor %}<span class="mk {{ 'e' if c.edited }}">{{ 'edited by you' if c.edited else 'verified quote' }}</span>{% endif %}</p></div>
+{% endfor %}</div></section>
+{% endif %}
+{% endfor %}
+</body></html>

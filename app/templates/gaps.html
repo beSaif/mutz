@@ -1,0 +1,41 @@
+{% extends "base.html" %}{% set active_page = "insights" %}
+{% block title %}Gap report{% endblock %}
+{% block content %}
+<main class="two">
+<section style="flex:999 1 680px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px">
+<div><h1 style="margin:0;font-size:28px;line-height:1.15">What leads asked for, and Bern could not answer</h1>
+<p class="lb" style="margin:4px 0 0">Every empty honey pot is logged at triage. {{ real_rows }} rows from leads in this app{% if demo_rows %} · {{ demo_rows }} seeded demo rows, labelled demo{% endif %}.</p></div>
+<form method="get" style="display:flex;gap:8px;align-items:center"><label for="yr" class="lb">Year</label><select id="yr" name="year" class="in" style="font-size:14px;padding:9px" onchange="this.form.submit()">{% for y in years %}<option {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
+</div>
+<nav aria-label="Insights" class="tb"><a class="on" href="/insights">Gap report</a><a href="/insights/capability">Capability map</a></nav>
+{% if top %}
+<div style="border-left:4px solid #E30613;padding:8px 0 8px 16px">
+<p style="margin:0;font-size:21px;font-weight:700;line-height:1.3">{{ top.share }}% of leads this year asked for {{ top.name|lower }}, and Bern had no group with evidence.</p>
+<p class="lb" style="margin:4px 0 0">{{ top.empty }} of {{ n_leads }} leads · {{ top.archives }} archives searched · biggest gap this year</p>
+</div>
+{% endif %}
+{% if rows %}
+<div style="overflow-x:auto"><table class="t" style="min-width:760px">
+<thead><tr><th>Field asked for</th><th>Leads</th><th>Empty pot</th><th>Share</th><th>Bern coverage</th><th>Searched</th><th>Outcome of those leads</th></tr></thead>
+<tbody>
+{% for r in rows %}
+<tr><td><b>{{ r.name }}</b></td><td>{{ r.leads }}</td><td>{{ r.empty }}</td><td>{{ r.share }}%</td><td><span style="display:inline-flex;gap:6px;align-items:center">{{ ui.pot(r.cov, 18, 20) }}{{ ui.potlabel(r.cov) }}</span>{% if r.maybe_archive_gap and r.cov != 'strong' %}<div class="lb" style="margin-top:4px;color:#B8000F">Maybe an archive gap</div>{% endif %}</td><td>{{ r.archives }} archives{% if r.maybe_archive_gap and r.cov != 'strong' %}<div><a class="b s" href="/archives" style="margin-top:6px">Add an archive to check</a></div>{% endif %}</td><td>{{ r.outcome }}</td></tr>
+{% endfor %}
+<tr style="color:#5E5E5E"><td colspan="7">Fields asked for by fewer than {{ k_min }} leads are grouped as “Other” so no company can be recognised · {{ other }} leads</td></tr>
+</tbody></table></div>
+{% else %}
+<section class="pn" style="max-width:640px"><span class="k">Not enough leads yet</span>
+<p style="margin:0">A field appears only once at least {{ k_min }} leads asked for it, so no single company can be recognised. {{ n_leads }} lead{{ 's' if n_leads != 1 }} logged so far this year.</p>
+<form method="post" action="/insights/seed"><button class="b">Load seeded demo rows, labelled as such</button></form></section>
+{% endif %}
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="b" href="/insights/gaps.csv?year={{ year }}">Download CSV</a>{% if rows and not demo_rows %}<form method="post" action="/insights/seed"><button class="b">Add seeded demo rows</button></form>{% endif %}</div>
+</section>
+<aside style="flex:1 1 320px;padding:32px;border-left:1px solid #E30613;display:flex;flex-direction:column;gap:20px">
+<div><h2 style="margin:0 0 6px;font-size:18px">How a lead becomes a data point</h2><p style="margin:0;font-size:14px">At triage, each need is saved as a field, its coverage and the archives searched. When the lead closes, its outcome is added.</p></div>
+<div><h2 style="margin:0 0 6px;font-size:18px">What is never logged</h2><p style="margin:0;font-size:14px">Company names, the one pager text, the CEO's emails. Only the field, the coverage and the outcome.</p></div>
+<div><h2 style="margin:0 0 6px;font-size:18px">Archive gap or Bern gap?</h2><p style="margin:0;font-size:14px">An empty pot can mean the expertise sits on a site we do not crawl. Check the archives before anyone draws a policy conclusion.</p></div>
+<div style="background:#F2F2F2;padding:14px;font-size:14px">Share = leads with an empty pot for a field ÷ all leads that year. The count is always shown next to the percentage.</div>
+</aside>
+</main>
+{% endblock %}

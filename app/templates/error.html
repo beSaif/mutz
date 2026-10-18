@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Something broke{% endblock %}
+{% block content %}
+<main style="max-width:760px;padding:32px">
+<section class="pn" aria-label="Error">
+<span class="k">Something broke on our side</span>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("sad", 80, 75) }}
+<div style="flex:1 1 220px;min-width:0" role="alert"><h2 style="margin:0 0 6px;font-size:21px">This page did not load.</h2>
+<p style="margin:0;font-size:14px">Your leads, needs and pitch drafts are saved. Go back and try again; if it happens again, the cached demo case still works.</p>
+{% if msg %}<p class="lb" style="margin:8px 0 0">{{ msg }}</p>{% endif %}</div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="b p" href="javascript:history.back()">Go back</a><a class="b" href="/">Open Leads</a></div>
+</section>
+</main>
+{% endblock %}

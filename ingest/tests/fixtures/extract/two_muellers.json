@@ -1,0 +1,72 @@
+{
+ "about": "Invented team listings. Two different Prof. Müllers (Thomas, Tobias) in different units and two Anna Müllers in different units must stay separate; the DE and EN versions of one page and Thomas on a second source (same email local part) must merge into one person with two affiliations.",
+ "pages": [
+  {
+   "page_id": "fx_mue_cardio_en",
+   "url": "https://fixture.example/research_groups/cardio_lab/team/index_eng.html",
+   "source": "fixture_a",
+   "group": "fixture_a",
+   "lang": "en",
+   "title": "Team",
+   "page_type": "group",
+   "sibling_group": "sg_cardio",
+   "fetched_at": "2026-10-18T12:00:00+00:00",
+   "breadcrumbs": [],
+   "emails": [],
+   "text": "Team\nGroup Head\nProf. Dr. Thomas Müller Group Head thomas.mueller@fixture.example\nPhD Students\nAnna Müller PhD Student\nFormer Members\nDr. Otto Gewesen Postdoctoral Researcher",
+   "html": "<html lang='en'><body><main><h1>Team</h1><h2>Group Head</h2><article class=\"team-box\" itemscope=\"itemscope\" itemtype=\"http://schema.org/Person\">\n<dl class=\"left\"><dd><a href=\"#\">Prof. Dr. Thomas Müller</a></dd><dd class=\"jobTitle\">Group Head</dd><dd class=\"mail\"><a href=\"mailto:thomas.mueller@fixture.example\" itemprop=\"email\">thomas.mueller@fixture.example</a></dd></dl></article><h2>PhD Students</h2><article class=\"team-box\" itemscope=\"itemscope\" itemtype=\"http://schema.org/Person\">\n<dl class=\"left\"><dd><a href=\"#\">Anna Müller</a></dd><dd class=\"jobTitle\">PhD Student</dd></dl></article><h2>Former Members</h2><article class=\"team-box\" itemscope=\"itemscope\" itemtype=\"http://schema.org/Person\">\n<dl class=\"left\"><dd><a href=\"#\">Dr. Otto Gewesen</a></dd><dd class=\"jobTitle\">Postdoctoral Researcher</dd></dl></article></main></body></html>"
+  },
+  {
+   "page_id": "fx_mue_cardio_de",
+   "url": "https://fixture.example/research_groups/cardio_lab/team/index_ger.html",
+   "source": "fixture_a",
+   "group": "fixture_a",
+   "lang": "de",
+   "title": "Team",
+   "page_type": "group",
+   "sibling_group": "sg_cardio",
+   "fetched_at": "2026-10-18T12:00:00+00:00",
+   "breadcrumbs": [],
+   "emails": [],
+   "text": "Team\nGruppenleitung\nProf. Dr. Thomas Müller Leiter der Forschungsgruppe thomas.mueller@fixture.example\nDoktorierende\nAnna Mueller Doktorandin",
+   "html": "<html lang='de'><body><main><h1>Team</h1><h2>Gruppenleitung</h2><article class=\"team-box\" itemscope=\"itemscope\" itemtype=\"http://schema.org/Person\">\n<dl class=\"left\"><dd><a href=\"#\">Prof. Dr. Thomas Müller</a></dd><dd class=\"jobTitle\">Leiter der Forschungsgruppe</dd><dd class=\"mail\"><a href=\"mailto:thomas.mueller@fixture.example\" itemprop=\"email\">thomas.mueller@fixture.example</a></dd></dl></article><h2>Doktorierende</h2><article class=\"team-box\" itemscope=\"itemscope\" itemtype=\"http://schema.org/Person\">\n<dl class=\"left\"><dd><a href=\"#\">Anna Mueller</a></dd><dd class=\"jobTitle\">Doktorandin</dd></dl></article></main></body></html>"
+  },
+  {
+   "page_id": "fx_mue_neuro_en",
+   "url": "https://fixture.example/research_groups/neuro_lab/team/index_eng.html",
+   "source": "fixture_a",
+   "group": "fixture_a",
+   "lang": "en",
+   "title": "Team",
+   "page_type": "group",
+   "sibling_group": "sg_neuro",
+   "fetched_at": "2026-10-18T12:00:00+00:00",
+   "breadcrumbs": [],
+   "emails": [],
+   "text": "Team\nGroup Head\nProf. Dr. Tobias Müller Group Head tobias.mueller@fixture.example\nPostdocs\nDr. Anna Müller Postdoctoral Researcher anna.mueller2@fixture.example",
+   "html": "<html lang='en'><body><main><h1>Team</h1><h2>Group Head</h2><article class=\"team-box\" itemscope=\"itemscope\" itemtype=\"http://schema.org/Person\">\n<dl class=\"left\"><dd><a href=\"#\">Prof. Dr. Tobias Müller</a></dd><dd class=\"jobTitle\">Group Head</dd><dd class=\"mail\"><a href=\"mailto:tobias.mueller@fixture.example\" itemprop=\"email\">tobias.mueller@fixture.example</a></dd></dl></article><h2>Postdocs</h2><article class=\"team-box\" itemscope=\"itemscope\" itemtype=\"http://schema.org/Person\">\n<dl class=\"left\"><dd><a href=\"#\">Dr. Anna Müller</a></dd><dd class=\"jobTitle\">Postdoctoral Researcher</dd><dd class=\"mail\"><a href=\"mailto:anna.mueller2@fixture.example\" itemprop=\"email\">anna.mueller2@fixture.example</a></dd></dl></article></main></body></html>"
+  },
+  {
+   "page_id": "fx_mue_other_en",
+   "url": "https://fixture-b.example/en/team/",
+   "source": "fixture_b",
+   "group": "fixture_b",
+   "lang": "en",
+   "title": "Team",
+   "page_type": "group",
+   "sibling_group": "sg_b",
+   "fetched_at": "2026-10-18T12:00:00+00:00",
+   "breadcrumbs": [],
+   "emails": [],
+   "text": "Team\nAssociated Research Groups\nProf. Thomas Müller Associated professor thomas.mueller@fixture-b.example",
+   "html": "<html lang='en'><body><main><h1>Team</h1><h2>Associated Research Groups</h2><article class=\"team-box\" itemscope=\"itemscope\" itemtype=\"http://schema.org/Person\">\n<dl class=\"left\"><dd><a href=\"#\">Prof. Thomas Müller</a></dd><dd class=\"jobTitle\">Associated professor</dd><dd class=\"mail\"><a href=\"mailto:thomas.mueller@fixture-b.example\" itemprop=\"email\">thomas.mueller@fixture-b.example</a></dd></dl></article></main></body></html>"
+  }
+ ],
+ "llm": {},
+ "expect": {
+  "n_persons": 4,
+  "multi_affiliation": {
+   "Thomas Müller": 2
+  }
+ }
+}

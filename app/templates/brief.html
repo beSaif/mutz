@@ -1,0 +1,97 @@
+{% extends "base.html" %}{% set active_page = "leads" %}
+{% block title %}Brief · {{ lead.title }}{% endblock %}
+{% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
+{% block content %}
+<main class="two">
+<section style="flex:1 1 {{ '520px' if mode != 'text' else '400px' }};min-width:0;padding:32px;display:flex;flex-direction:column;gap:14px">
+<h1 style="margin:0;font-size:24px">The lead</h1>
+<nav aria-label="Input type" class="tb"><a href="?mode=text" class="{{ 'on' if mode == 'text' }}">Text</a><a href="?mode=pdf" class="{{ 'on' if mode == 'pdf' }}">PDF</a><a href="?mode=website" class="{{ 'on' if mode == 'website' }}">Website</a><a href="?mode=keywords" class="{{ 'on' if mode == 'keywords' }}">Keywords</a></nav>
+{% if err %}<div class="err" role="alert"><b>The Apertus gateway did not answer.</b> Your brief is saved. Try again in a minute, or use Keywords, which needs no model.</div>{% endif %}
+<form id="briefform" method="post" action="/leads/{{ lead.id }}/brief" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:14px">
+<input type="hidden" name="mode" value="{{ mode }}">
+<label class="lb" for="title" style="margin-bottom:-10px">Lead name</label>
+<input id="title" class="in" value="{{ lead.title }}" data-lead-title style="font-size:14px;padding:8px 10px">
+{% if mode == 'text' %}
+<label for="op" class="lb">Pasted from the {{ lead.origin or 'S-GE' }} email</label>
+<textarea id="op" name="text" rows="9" class="in" style="resize:vertical" placeholder="Paste a company description, for example from the S-GE or GGBa project description.">{{ lead.input_text or '' }}</textarea>
+{% elif mode == 'pdf' %}
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">{% if lead.pdf_name %}<b style="font-size:14px">{{ lead.pdf_name }}</b><span class="lb">read by Apertus 70B on CSCS</span>{% endif %}<span style="flex:1"></span><label class="b s" for="pdf">{{ 'Replace file' if lead.pdf_name else 'Choose PDF' }}</label><input type="file" id="pdf" name="pdf" accept="application/pdf" class="hidden" onchange="this.form.requestSubmit()"></div>
+<input type="hidden" name="text" value="{{ lead.input_text or '' }}">
+{% elif mode == 'website' %}
+<input type="hidden" name="text" value="{{ lead.input_text or '' }}">
+{% elif mode == 'keywords' %}
+<label for="kw" class="lb">One need per line. Nothing is sent to a model: matches the way you search today.</label>
+<textarea id="kw" name="keywords" rows="5" class="in" placeholder="glucose sensor, women in sport&#10;clinical trial support"></textarea>
+{% endif %}
+{% if lead.passages and mode in ('pdf', 'text', 'website') %}
+<details {% if mode == 'pdf' %}open{% endif %}>
+<summary class="lb" style="cursor:pointer">What was used, ignored and struck · {{ lead.passages|selectattr('status','equalto','used')|list|length }} of {{ lead.passages|length }} passages used</summary>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin:8px 0" class="lb"><span><b style="color:#111">Black rule</b> used</span><span>Grey: ignored</span><span style="text-decoration:line-through">Struck by you</span></div>
+<div style="background:#F2F2F2;padding:16px"><div style="background:#fff;padding:18px 20px;display:flex;flex-direction:column">
+{% for p in lead.passages %}
+<div class="ps {{ {'used':'u','ignored':'i','struck':'x'}.get(p.status,'i') }}" {% if 'instruction' in (p.reason or '') %}style="font-style:italic"{% endif %}><span>{{ p.text }}</span><span class="t">{{ p.status|capitalize }}{% if p.reason and not p.reason.lower().startswith(p.status) %} · {{ p.reason }}{% elif p.reason %}{{ p.reason[p.status|length:] }}{% endif %}{% if p.status == 'struck' %} · <a href="#" data-strike="{{ loop.index0 }}">Undo</a>{% elif p.status == 'used' %} · <a href="#" data-strike="{{ loop.index0 }}">Do not use this</a>{% endif %}</span></div>
+{% endfor %}
+</div></div>
+</details>
+{% endif %}
+{% if mode == 'pdf' %}
+<label style="display:flex;gap:10px;align-items:flex-start;border:1px solid #111;padding:12px;font-size:14px"><input type="checkbox" name="keep_file" value="1" {% if lead.keep_file %}checked{% endif %} style="margin-top:4px"><span><b>Keep the file with the lead</b><span class="lb" style="display:block">By default the file is deleted when you search. Only the profile and the approved needs are kept.</span></span></label>
+{% endif %}
+{% if mode != 'keywords' %}
+<label for="web" class="lb">Company website{{ ', optional' if mode != 'website' }}</label>
+<input id="web" name="website" value="{{ lead.website or '' }}" placeholder="https://" class="in">
+<p class="lb" style="margin:0">Public pages only. Used for needs and to personalise the pitch, never as evidence about Bern.</p>
+{% endif %}
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="lb">Pitch language</span>
+{% for l in ['en','de','fr'] %}<label class="b s {{ 'k' if (lead.lang or 'en') == l }}" style="cursor:pointer"><input type="radio" name="lang" value="{{ l }}" class="hidden" {% if (lead.lang or 'en') == l %}checked{% endif %} onchange="document.querySelectorAll('[name=lang]').forEach(r=>r.parentNode.classList.toggle('k',r.checked))">{{ l|upper }}</label>{% endfor %}</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="b {{ 'p' if not needs }}" type="submit" id="readbtn">{{ 'Read the brief again' if needs else 'Find needs' }}</button><span class="lb">{{ 'No model is used.' if mode == 'keywords' else 'Read by Apertus 70B on CSCS. Never sent to a US cloud.' }}</span></div>
+</form>
+</section>
+<div aria-hidden="true" class="vr"></div>
+<section style="flex:999 1 520px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:12px">
+<div id="reading" class="hidden" role="status" aria-live="polite" style="display:flex;gap:20px;align-items:flex-start"><span>{{ ui.mutz("search", 64, 54) }}</span><div><h2 style="margin:0 0 6px;font-size:21px">Bear with me…</h2><p style="margin:0;font-size:14px">Reading the brief and listing the needs. About 10 seconds.</p></div></div>
+{% if lead.profile and (lead.profile.name or lead.profile.product) %}
+<div>
+<h2 style="margin:0 0 10px;font-size:21px">Company profile</h2>
+<dl class="pr">
+{% for k, label in [('name','Name'),('sector','Sector'),('stage','Stage'),('product','Product')] %}{% if lead.profile.get(k) %}<dt>{{ label }}</dt><dd>{{ lead.profile[k] }}</dd><dd class="lb">{{ {'pdf':'PDF','website':'Website'}.get(lead.input_kind, 'Text') }}</dd>{% endif %}{% endfor %}
+</dl>
+</div>
+{% endif %}
+{% if needs %}
+<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:24px">{{ needs|length }} need{{ 's' if needs|length != 1 }} found</h2><span class="lb">Edit, untick a term, or delete before searching</span></div>
+<div style="border-top:1px solid #111" id="needs">
+{% for n in needs %}
+<div class="nd" data-need="{{ n.id }}">
+<div style="display:flex;gap:10px;align-items:center"><span class="chip">{{ n.label or (n.type|nlabel) }}</span><b style="flex:1" contenteditable="true" spellcheck="false" data-need-text title="Click to edit">{{ n.text }}</b><button class="b s" aria-label="Delete need" data-del>Delete</button></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">{% for t in n.terms %}<label class="chip"><input type="checkbox" data-term="{{ t.t }}" {% if t.on %}checked{% endif %}> {{ t.t }}</label>{% endfor %}<input class="chip" data-addterm placeholder="+ term" style="width:90px;font:12px var(--font)"></div>
+{% if n.from_sentence %}<span class="lb">From {{ {'pdf':'the PDF','website':'the website'}.get(n.source, 'the text') }} · “{{ n.from_sentence|truncate(110) }}”</span>{% endif %}
+{% if n.type in ('supplier','funding','transfer','other') %}<span class="lb">{{ {'supplier':'Suppliers and companies are not in the archives yet: this need gets a clear “not covered” note.','funding':'Goes to the curated list of funding programmes, not to the researcher search.','transfer':'Goes to the curated list of transfer offices, not to the researcher search.','other':'Goes to the curated list.'}[n.type] }}</span>{% endif %}
+<label class="lb"><input type="checkbox" data-share {% if n.shareable %}checked{% endif %}> Shareable with researchers</label>
+</div>
+{% endfor %}
+</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:8px">
+<details><summary class="b dash" style="list-style:none">Add a need</summary>
+<form method="post" action="/leads/{{ lead.id }}/needs/add" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input name="text" class="in" placeholder="What does the company need?" required style="font-size:14px;padding:8px;width:260px"><select name="type" class="in" style="font-size:14px;padding:8px">{% for t in ['research','infrastructure','supplier','funding','transfer','other'] %}<option value="{{ t }}">{{ t|nlabel }}</option>{% endfor %}</select><button class="b s">Add</button></form>
+</details>
+<span style="flex:1"></span><span class="lb">Searches {{ arch.n }} archives in DE, FR and EN</span>
+<form method="post" action="/leads/{{ lead.id }}/search"><button class="b p" type="submit">Find matches</button></form>
+</div>
+<p class="lb" style="margin:0">Only needs marked shareable ever reach a researcher in an intro email. The confidential description never does.</p>
+{% else %}
+<div id="noneeds" style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;border:1px solid #111;padding:24px">
+{{ ui.mutz("idle", 80, 75) }}
+<div style="flex:1 1 260px"><h2 style="margin:0 0 6px;font-size:21px">Paste a company description, upload the PDF, or try the demo case.</h2>
+<p style="margin:0 0 12px;font-size:14px">Then choose Find needs. You can edit, untick or delete every need before anything is searched.</p>
+<form method="post" action="/leads/demo"><button class="b">Load the sport wearable demo</button></form></div>
+</div>
+{% endif %}
+</section>
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+initBrief({{ lead.id|tojson }}, {{ auto_extract|tojson }});
+</script>
+{% endblock %}

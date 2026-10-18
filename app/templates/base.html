@@ -1,0 +1,50 @@
+{% import "_ui.html" as ui %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Expertise Navigator{% endblock %} · Bern</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body{% if (mutz or {}).corner == 'left' %} class="mzl"{% endif %}>
+<div class="wrap">
+<header class="top">
+<a class="brand" href="/">{% if logo %}<img src="/logo.png" alt="Bern Economic Development Agency">{% else %}<span aria-hidden="true" class="sq"></span>{% endif %}<b style="font-size:16px">Expertise Navigator</b></a>
+{% set nav = active_page|default('leads') %}
+<nav aria-label="Main" class="gn"><a href="/" class="{% if nav == 'leads' %}on{% endif %}">Leads</a><a href="/insights" class="{% if nav == 'insights' %}on{% endif %}">Insights</a><a href="/archives" class="{% if nav == 'archives' %}on{% endif %}">Archives</a><a href="/eval" class="{% if nav == 'eval' %}on{% endif %}">Evaluation</a></nav>
+<span style="margin-left:auto" class="lb">Prototype, not an official Canton of Bern tool</span>
+<span style="font-size:14px">[Officer name]</span>
+</header>
+{% block casebar %}{% endblock %}
+{% block content %}{% endblock %}
+<div style="height:96px"></div>
+</div>
+<footer class="ft">
+<span>Prototype, not an official Canton of Bern tool</span>
+<span>Public web pages only · confidential text goes only to Apertus on CSCS</span>
+{% if stubbed %}<span class="stub" title="These contracts are served by app/stubs.py over the crawled pages until the real module answers">stub: {{ stubbed|join(", ") }}</span>{% endif %}
+<a href="/states">States</a>
+</footer>
+{% set m = mutz or {} %}
+<div id="mutz" class="{% if m.corner == 'left' %}left{% endif %}" data-screen="{{ m.screen or '' }}" data-lead="{{ m.lead or '' }}" data-need="{{ m.need or '' }}" data-pot="{{ m.pot or '' }}">
+{% if m.bubble %}<p class="bubble" id="mutzbubble">{{ m.bubble }}{% if 'Grüessech' in m.bubble %}<span class="lb" style="display:block">Hello! (Bernese German)</span>{% endif %}<button type="button" aria-label="Dismiss" onclick="this.parentNode.remove()">×</button></p>{% endif %}
+<button type="button" class="peek" aria-label="Ask Mutz (M)" aria-haspopup="dialog" aria-expanded="false" id="mutzbtn">{{ ui.mutz("idle", 72, 68) }}</button>
+</div>
+<div id="mutzcard" role="dialog" aria-modal="false" aria-label="Mutz" class="hidden{% if m.corner == 'left' %} left{% endif %}">
+<div class="hd" id="mutzhd">
+<svg viewBox="0 0 10 16" width="10" height="16" aria-hidden="true"><circle cx="2" cy="3" r="1.4" fill="#111"/><circle cx="8" cy="3" r="1.4" fill="#111"/><circle cx="2" cy="8" r="1.4" fill="#111"/><circle cx="8" cy="8" r="1.4" fill="#111"/><circle cx="2" cy="13" r="1.4" fill="#111"/><circle cx="8" cy="13" r="1.4" fill="#111"/></svg>
+<div style="flex:1;min-width:0"><b style="display:block;font-size:15px">Mutz</b><span class="lb" id="mutzknows">Knows: {% if lead %}{{ lead.title }} · {% endif %}{{ m.screen or 'Leads' }}</span></div>
+{% if m.pot %}<span title="Coverage for this screen" style="display:inline-flex;align-items:center;gap:4px" class="lb">{{ ui.pot(m.pot, 16, 18) }}{{ ui.potlabel(m.pot) }}</span>{% endif %}
+<button type="button" class="ic" aria-label="Close Mutz, Esc" id="mutzclose"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="#111" stroke-width="1.8"/></svg></button>
+</div>
+<div class="msgs" id="mutzmsgs" aria-live="polite"></div>
+<form id="mutzform" style="display:flex;gap:8px;padding:10px 12px;border-top:1px solid #111;align-items:flex-end">
+<div style="flex:1;display:flex;flex-direction:column;gap:2px"><label for="mutzask" class="lb">Ask in German, French or English</label><input id="mutzask" class="in" autocomplete="off" placeholder="{% if m.screen == 'Matches' %}Why is the first match ranked first?{% else %}Who in Bern works on glucose sensors?{% endif %}" style="font-size:14px;padding:9px 10px"></div>
+<button class="b" type="submit">Ask</button>
+</form>
+</div>
+<template id="tpl-search">{{ ui.mutz("search", 64, 54) }}</template>
+<script src="/static/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

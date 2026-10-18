@@ -1,0 +1,66 @@
+{% extends "base.html" %}{% set active_page = "leads" %}
+{% block title %}Leads{% endblock %}
+{% block content %}
+<main class="two">
+<section style="flex:999 1 640px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
+<div><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><h1 style="margin:0;font-size:28px;line-height:1.15">Leads</h1><nav aria-label="Leads view" style="display:flex;border:1px solid #111"><a href="/" style="padding:7px 14px;font-size:14px;text-decoration:none;background:#111;color:#fff;font-weight:700">List</a><a href="/pipeline" style="padding:7px 14px;font-size:14px;text-decoration:none">Pipeline</a></nav></div>
+<p class="lb" style="margin:4px 0 0">{{ groups.new|length }} new · {{ groups.drafts|length }} draft{{ '' if groups.drafts|length == 1 else 's' }} · {{ groups.closed|selectattr('stage','equalto','pitched')|list|length }} waiting for the CEO</p></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><form method="get" action="/" style="display:flex;gap:8px"><label for="sr" class="lb" style="align-self:center">Search</label><input id="sr" name="q" value="{{ q }}" class="in" placeholder="company, sector, expert" style="font-size:14px;padding:10px;width:220px"></form>
+<form method="post" action="/leads/new"><button class="b p" type="submit">New lead</button></form></div>
+</div>
+
+{% if total == 0 and not q %}
+<section class="pn" aria-label="No leads yet" style="max-width:640px">
+<span class="k">First visit, no leads yet</span>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+{{ ui.mutz("idle", 80, 75) }}
+<div style="flex:1 1 220px;min-width:0">
+<h2 style="margin:0 0 6px;font-size:21px">Paste a company description, upload the PDF, or try the demo case.</h2>
+<p class="lb" style="margin:0">Grüessech! Bärner si gmüetlech. I bi d Usnahm.<br>Hello! Bernese people take it slow. I'm the exception.</p>
+</div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<form method="post" action="/leads/new"><button class="b p">New lead</button></form>
+<form method="post" action="/leads/demo"><button class="b">Load the sport wearable demo</button></form>
+<form method="post" action="/leads/seed"><button class="b">Load 4 more demo leads</button></form>
+</div>
+<p class="lb" style="margin:0">{{ arch.n }} archives ready · {{ arch.total|num }} pages{% if arch.last %} · last crawl {{ arch.last|date(True) }}{% endif %}</p>
+</section>
+{% elif total == 0 %}
+<p>No lead matches “{{ q }}”. <a href="/">Show all leads</a></p>
+{% endif %}
+
+{% macro leadrow(r, kind, first=False) %}
+{% set p = r.p %}
+<a class="row" href="/leads/{{ r.id }}" {% if kind == 'draft' and first %}style="background:#FCE3E5;padding-left:8px;padding-right:8px"{% endif %}>
+<span><b{% if kind == 'closed' %} style="color:#111"{% endif %}>{{ r.title }}</b><span class="lb" style="display:block">{{ r.summary or (r.sector or 'No summary yet') }}{% if r.demo %} · demo{% endif %}</span></span>
+<span class="lb">{{ r.origin }} · {{ r.created_at|date }}</span>
+{% if kind == 'new' %}
+<span style="display:inline-flex;gap:8px;align-items:center;font-size:14px">{{ ui.pot(p.pot, 18, 20, False) }}{% if p.pot %}{{ {"strong":"Likely strong","thin":"Thin","none":"Kei Hung"}[p.pot] }}{% else %}Not checked{% endif %}</span>
+{% elif kind == 'draft' %}
+<span style="font-size:14px">{% if p.cards %}Pitch · {{ p.checked }} of {{ p.cards }} checked<span class="bar" style="width:150px"><i style="width:{{ (100 * p.checked / p.cards)|int }}%"></i></span>{% elif p.accepted or p.searched %}Matches · {{ p.accepted }} accepted<span class="bar" style="width:150px"><i style="width:40%"></i></span>{% elif p.needs %}Brief · {{ p.needs }} needs<span class="bar" style="width:150px"><i style="width:15%"></i></span>{% else %}Brief · not read yet{% endif %}</span>
+{% else %}
+<span style="font-size:14px">{{ {"pitched":"Sent","visit":"Visit accepted","won":"Won","lost":"Lost"}[r.stage] }}{% if r.stage == 'lost' and r.lost_reason %}<span class="lb" style="display:block">{{ r.lost_reason }}</span>{% endif %}</span>
+{% endif %}
+<span class="b s">{{ 'Continue' if kind == 'draft' else 'Open' }}</span></a>
+{% endmacro %}
+
+{% if groups.new %}<div><h2>New, not opened yet</h2><div style="border-top:1px solid #111;margin-top:8px">{% for r in groups.new %}{{ leadrow(r, 'new') }}{% endfor %}</div></div>{% endif %}
+{% if groups.drafts %}<div><h2>Drafts</h2><div style="border-top:1px solid #111;margin-top:8px">{% for r in groups.drafts %}{{ leadrow(r, 'draft', loop.first) }}{% endfor %}</div></div>{% endif %}
+{% if groups.closed %}<div><h2>Sent and closed</h2><div style="border-top:1px solid #111;margin-top:8px;color:#5E5E5E">{% for r in groups.closed %}{{ leadrow(r, 'closed') }}{% endfor %}</div></div>{% endif %}
+{% if total and not groups.drafts %}<form method="post" action="/leads/demo"><button class="b">Load the sport wearable demo</button></form>{% endif %}
+</section>
+<aside style="flex:1 1 300px;padding:32px;border-left:1px solid #E30613;display:flex;flex-direction:column;gap:24px">
+<div>
+<h2>Archives</h2>
+<p style="margin:6px 0 4px">{{ arch.n }} archives · {{ arch.total|num }} pages</p>
+<p class="lb" style="margin:0 0 10px">{% if arch.last %}Last crawl {{ arch.last|date(True) }} · {% endif %}robots.txt respected</p>
+<a class="b s" href="/archives">Manage archives</a>
+</div>
+<div>
+<h2>Where the text goes</h2>
+<p style="margin:6px 0 0;font-size:14px">One pagers stay on Apertus at CSCS in Switzerland. Search runs on this machine. Only public web pages are indexed.</p>
+</div>
+</aside>
+</main>
+{% endblock %}

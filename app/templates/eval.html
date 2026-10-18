@@ -1,0 +1,52 @@
+{% extends "base.html" %}{% set active_page = "eval" %}
+{% block title %}Evaluation{% endblock %}
+{% block content %}
+{% set mt = (ev or {}).get('metrics', {}) %}
+{% macro pct(v) %}{% if v is none %}–{% elif v is number %}{{ (v * 100)|round|int if v <= 1 else v|round|int }}%{% else %}{{ v }}{% endif %}{% endmacro %}
+<main class="two">
+<section style="flex:999 1 620px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:22px">
+<div><h1 style="margin:0;font-size:28px;line-height:1.15">Evaluation</h1>
+<p class="lb" style="margin:4px 0 0">{% if ev %}Last run {{ ev.run_at|date(True) }} · {{ ev.split }} set · {{ ev.n }} queries · from data/eval/latest.json{% else %}No evaluation run yet. Agent D writes data/eval/latest.json with python eval/run_eval.py.{% endif %}</p></div>
+{% if ev %}
+<div>
+<div class="cr lb" style="border-bottom-color:#111"><span>Criterion</span><span>{{ ev.split|capitalize }} set</span><span>Target</span></div>
+<div class="cr"><span><b>Expected experts in top 10</b><span class="lb" style="display:block">Recall@10 on the gold set. Adjacent results are excluded.</span></span><span class="v">{{ pct(mt.get('recall_at_10')) }}</span><span class="lb">≥ 80%</span></div>
+<div class="cr"><span><b>Lay terms find the same experts</b><span class="lb" style="display:block">Overlap of the top 10, for example “glucose sensors” and “CGM”</span></span><span class="v">{{ pct(mt.get('synonym_parity')) }}</span><span class="lb">high</span></div>
+<div class="cr"><span><b>Results with a supporting public page</b><span class="lb" style="display:block">Citation validity: every quote found on its page</span></span><span class="v">{{ pct(mt.get('citation_validity')) }}</span><span class="lb">100%</span></div>
+<div class="cr"><span><b>Required fields filled</b><span class="lb" style="display:block">Filled where the source has them</span></span><span class="v">{{ pct(mt.get('field_completeness')) }}</span><span class="lb">high</span></div>
+</div>
+{% if mt.get('per_source_coverage') %}
+<div><h2 style="margin:0 0 6px;font-size:18px">Coverage per source</h2>
+<div style="overflow-x:auto"><table class="t" style="min-width:420px"><thead><tr><th>Source</th><th>Value</th></tr></thead><tbody>
+{% for k, v in mt.per_source_coverage.items() %}<tr><td>{{ k }}</td><td>{% if v is mapping %}{% for a, b in v.items() %}{{ a }}: {{ pct(b) if b is number and b <= 1 else b }}{{ ' · ' if not loop.last }}{% endfor %}{% else %}{{ pct(v) if v is number and v <= 1 else v }}{% endif %}</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endif %}
+{% if mt.get('exposure') %}
+<div><h2 style="margin:0 0 6px;font-size:18px">Fair discoverability</h2>
+<div style="overflow-x:auto"><table class="t" style="min-width:420px"><thead><tr><th>Measure</th><th>Value</th></tr></thead><tbody>
+{% for k, v in mt.exposure.items() %}<tr><td>{{ k|replace('_',' ') }}</td><td>{{ pct(v) if v is number and v <= 1 else v }}</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endif %}
+{% if ev.per_query %}
+<div><h2 style="margin:0 0 6px;font-size:18px">Per query</h2>
+<div style="overflow-x:auto"><table class="t" style="min-width:420px"><thead><tr><th>Query</th><th>Recall@10</th></tr></thead><tbody>
+{% for q in ev.per_query[:40] %}<tr><td>{{ q.get('query') or q.get('id') }}</td><td>{{ pct(q.get('recall_at_10', q.get('recall'))) }}</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endif %}
+{% else %}
+<section class="pn" style="max-width:640px"><span class="k">Waiting for the first run</span>
+<p style="margin:0">The gold set is built from the 39 hand written cases plus three per unibe cluster, split into a dev set and a locked held out set.</p></section>
+{% endif %}
+</section>
+<aside style="flex:1 1 340px;padding:32px;border-left:1px solid #E30613;display:flex;flex-direction:column;gap:20px">
+{% if tests %}<div><h2 style="margin:0 0 6px;font-size:18px">Pipeline tests</h2>
+{% for t in tests %}<div class="tc"><b {% if not t.passed %}style="color:#B8000F"{% endif %}>{{ 'Pass' if t.passed else 'Fail' }}</b><span>{{ t.name }}</span></div>{% endfor %}</div>{% endif %}
+<div><h2 style="margin:0 0 6px;font-size:18px">What Recall@10 does not measure</h2>
+<p style="margin:0;font-size:14px">The gold set was picked from the same pages we crawl. Real relevance shows only after company feedback, so the officer accept rate is the metric that counts.</p></div>
+<div><h2 style="margin:0 0 6px;font-size:18px">Cost and sovereignty</h2>
+<p style="margin:0 0 6px;font-size:14px">{{ usage.calls|num }} gateway calls so far · {{ (usage.tin + usage.tout)|num }} tokens · {{ arch.total|num }} pages crawled. Recrawl by ETag and content hash.</p>
+<p class="lb" style="margin:0">Confidential text only goes to Apertus on CSCS. Query embedding and reranking run on this machine. Self hosted path: docker compose with a local Apertus.</p></div>
+<div style="background:#F2F2F2;padding:14px;font-size:14px">The held out set is locked and runs once after the freeze. The number is reported as it comes out.</div>
+</aside>
+</main>
+{% endblock %}

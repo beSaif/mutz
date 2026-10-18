@@ -1,0 +1,53 @@
+{% extends "base.html" %}{% set active_page = "leads" %}
+{% block title %}Review · {{ lead.title }}{% endblock %}
+{% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
+{% block content %}
+<main class="two">
+<section style="flex:1 1 360px;padding:32px;display:flex;flex-direction:column;gap:18px">
+{% if done %}
+<h1 style="margin:0;font-size:28px;line-height:1.15">Pitch v{{ done }} exported</h1>
+<p style="margin:0">Saved as pitch v{{ done }} and frozen. Later changes become v{{ done + 1 }}; v{{ done }} stays exactly as sent.</p>
+<div style="display:flex;flex-direction:column;gap:8px">
+<a class="ex" href="/leads/{{ lead.id }}/export/v{{ done }}/clean.pdf" style="text-decoration:none"><span><b>Clean PDF for the CEO</b><span class="lb" style="display:block">Numbered sources, agency logo on the cover</span></span></a>
+<a class="ex" href="/leads/{{ lead.id }}/export/v{{ done }}/review.pdf" style="text-decoration:none"><span><b>Review PDF</b><span class="lb" style="display:block">For the agency. Every [n] opens its quote</span></span></a>
+<a class="ex" href="/leads/{{ lead.id }}/export/v{{ done }}/pitch.json" style="text-decoration:none"><span><b>Pitch JSON</b><span class="lb" style="display:block">Reopen and edit from Leads later</span></span></a>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="b p" href="/leads/{{ lead.id }}/after">After sending: timeline</a><a class="b" href="/">Back to Leads</a></div>
+{% else %}
+<h1 style="margin:0;font-size:28px;line-height:1.15">{% if problems or stats.nosource %}Not ready yet{% elif stats.unchecked %}{{ stats.unchecked }} card{{ 's' if stats.unchecked != 1 }} left to tick{% else %}Ready to send{% endif %}</h1>
+<dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 18px">
+<dt style="font-size:28px;font-weight:700">{{ stats.verified }}</dt><dd style="margin:0;align-self:center">claims with a verified quote</dd>
+<dt style="font-size:28px;font-weight:700">{{ stats.edited }}</dt><dd style="margin:0;align-self:center">edited by you, source attached</dd>
+<dt style="font-size:28px;font-weight:700">{{ stats.nosource }}</dt><dd style="margin:0;align-self:center">claims without a source</dd>
+</dl>
+{% if err %}<div class="err" role="alert">{% if err == 'unchecked' %}<b>{{ stats.unchecked }} card{{ 's' if stats.unchecked != 1 }} not ticked as checked.</b> Tick them in the pitch, or export anyway below.{% else %}<b>Export refused.</b> {{ err }}{% endif %}</div>{% endif %}
+{% if problems %}<div class="err" role="alert"><b>Fix before export:</b><ul style="margin:6px 0 0;padding-left:18px">{% for p in problems %}<li>{{ p }}</li>{% endfor %}</ul></div>{% endif %}
+<form method="post" action="/leads/{{ lead.id }}/export" style="display:flex;flex-direction:column;gap:18px">
+<fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">
+<legend class="lb" style="margin-bottom:6px">Export</legend>
+<label class="ex"><input type="checkbox" name="clean" value="1" checked style="margin-top:4px"><span><b>Clean PDF for the CEO</b><span class="lb" style="display:block">{{ draft.sections|rejectattr('hidden')|rejectattr('deleted')|list|length }} sections, numbered sources, agency logo on the cover</span></span></label>
+<label class="ex"><input type="checkbox" name="review_pdf" value="1" checked style="margin-top:4px"><span><b>Review PDF</b><span class="lb" style="display:block">For the agency. Every [n] opens its quote</span></span></label>
+<label class="ex"><input type="checkbox" name="pjson" value="1" checked style="margin-top:4px"><span><b>Pitch JSON</b><span class="lb" style="display:block">Reopen and edit from Leads later</span></span></label>
+{% if stats.unchecked %}<label class="lb"><input type="checkbox" name="override" value="1"> Export although {{ stats.unchecked }} card{{ 's are' if stats.unchecked != 1 else ' is' }} not ticked as checked</label>{% endif %}
+</fieldset>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b p" type="submit" {% if problems %}disabled{% endif %}>Export and mark as sent</button><a class="b" href="/leads/{{ lead.id }}/pitch">Back to pitch</a></div>
+</form>
+<p class="lb" style="margin:0">Saved as pitch v{{ (versions|length) + 1 }} and frozen. Later changes become v{{ (versions|length) + 2 }}; v{{ (versions|length) + 1 }} stays exactly as sent. The original PDF is deleted unless you keep it with the lead.</p>
+{% endif %}
+</section>
+<div aria-hidden="true" class="vr"></div>
+<section style="flex:999 1 520px;min-width:0;padding:32px;background:#F2F2F2">
+<p class="lb" style="margin:0 0 12px">Review PDF · evidence appendix</p>
+<div style="background:#fff;padding:24px 28px">
+{% for s in srcs %}
+<div class="ev" {% if loop.last %}style="border-bottom:0"{% endif %}><b>[{{ s.n }}]</b><div style="min-width:0">
+{% if s.quote and not s.added_by_officer %}<p style="margin:0;font-style:italic">“{{ s.quote|cq }}”</p>{% else %}<p style="margin:0">{{ s.card.text|truncate(120) }}</p>{% endif %}
+<p class="lb" style="margin:4px 0 6px">{{ s.card.name }} · {{ s.url|host }}{% if s.fetched_at %} · fetched {{ s.fetched_at|date }}{% endif %}{% if s.card.edited %} · sentence edited by you{% endif %}</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap">{% if s.added_by_officer %}<span class="chip d">Added by you</span>{% elif s.card.edited %}<span class="chip d">Edited by you</span>{% else %}<span class="chip">Verified quote</span>{% endif %}<a class="chip" href="{{ s.deep_link or s.url }}" target="_blank" rel="noopener">{{ 'Open at quote' if s.quote else 'Open page' }}</a><a class="chip" href="/leads/{{ lead.id }}/map">Show in map</a></div>
+</div></div>
+{% else %}<p>No sources yet. Every card needs at least one before export.</p>{% endfor %}
+</div>
+<p class="lb" style="margin:12px 0 0">Links jump to the exact sentence. If a page changed, it simply opens at the top.</p>
+</section>
+</main>
+{% endblock %}

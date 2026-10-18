@@ -1,0 +1,27 @@
+{# Mutz poses and the honey pot, drawn once and reused everywhere (DESIGN.md: one place for personality). #}
+{% macro mutz(pose="idle", w=72, h=68) -%}
+{%- if pose == "search" -%}
+<svg viewBox="0 0 76 64" width="{{ w * 76 // 64 }}" height="{{ h }}" aria-hidden="true" class="mutz-svg"><circle cx="14" cy="18" r="10" fill="#111"/><circle cx="50" cy="18" r="10" fill="#111"/><circle cx="14" cy="18" r="4" fill="#fff"/><circle cx="50" cy="18" r="4" fill="#fff"/><ellipse cx="32" cy="37" rx="24" ry="22" fill="#111"/><ellipse cx="34" cy="46" rx="10" ry="7" fill="#fff"/><ellipse cx="36" cy="43" rx="4" ry="2.6" fill="#111"/><path d="M20 33h6M38 33h6" stroke="#fff" stroke-width="2.4"/><circle cx="60" cy="48" r="9" fill="#fff" stroke="#E30613" stroke-width="3"/><path d="M66 55l7 7" stroke="#E30613" stroke-width="3.5"/></svg>
+{%- elif pose == "sad" -%}
+<svg viewBox="0 0 64 60" width="{{ w }}" height="{{ h }}" aria-hidden="true" class="mutz-svg"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><path d="M20 29h6M38 29h6" stroke="#fff" stroke-width="2.4"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+{%- else -%}
+<svg viewBox="0 0 64 60" width="{{ w }}" height="{{ h }}" aria-hidden="true" class="mutz-svg"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/><ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/><ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/><ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/><path d="M8 52h48v8H8z" fill="#E30613"/></svg>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro pot(cov, w=20, h=22, lid=True, stroke=1.5) -%}
+<svg viewBox="0 0 20 22" width="{{ w }}" height="{{ h }}" aria-hidden="true">{% if lid %}<rect x="5" y="1" width="10" height="3" fill="#111"/>{% endif %}<path d="M3 5h14v13a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="none" stroke="#111" stroke-width="{{ stroke }}"/>{% if cov == "strong" %}<rect x="4.5" y="8" width="11" height="11.5" fill="#111"/>{% elif cov == "thin" %}<rect x="4.5" y="15" width="11" height="4.5" fill="#111"/>{% endif %}</svg>
+{%- endmacro %}
+
+{% macro potlabel(cov) -%}{{ {"strong": "Strong", "thin": "Thin", "none": "Kei Hung"}.get(cov, "Not checked") }}{%- endmacro %}
+
+{% macro casebar(lead, case, chip=None) -%}
+<div class="casebar">
+<a href="/" style="font-size:14px">Leads</a><span class="lb">/</span><b lang="de" style="overflow-wrap:anywhere">{{ lead.title }}</b>
+{% if chip %}<span class="chip">{{ chip }}</span>{% elif case.step == 'pitch' and case.saved %}<span class="chip" id="saved">Draft saved {{ case.saved|date(True) }}</span>{% else %}<span class="chip">{{ lead.origin or 'Lead' }} · confidential, stays on CSCS</span>{% endif %}
+<nav aria-label="Case steps" class="st" style="margin-left:auto">
+{% set steps = [("brief","1 Brief"),("matches","2 Matches"),("map","3 Evidence map"),("pitch","4 Pitch"),("after","5 After sending")] %}
+{% for s, label in steps %}<a href="/leads/{{ lead.id }}/{{ s }}" class="{% if case.step == s %}on{% elif case.done.get(s) %}done{% endif %}"{% if case.step == s %} aria-current="step"{% endif %}>{{ label }}</a>{% endfor %}
+</nav>
+</div>
+{%- endmacro %}

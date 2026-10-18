@@ -1,0 +1,53 @@
+{% extends "base.html" %}{% set active_page = "leads" %}
+{% block title %}States{% endblock %}
+{% block content %}
+<main style="max-width:1280px;padding:32px;display:flex;flex-direction:column;gap:20px">
+<div><h1 style="margin:0;font-size:28px;line-height:1.15">The states around the happy path</h1><p class="lb" style="margin:4px 0 0">Each one says what happened and what to do next. Mutz changes pose, nothing else moves. These are the same blocks the Leads, Brief and Matches screens show.</p></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:20px">
+<section class="pn" aria-label="Empty state">
+<span class="k">1 · First visit, no leads yet</span>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("idle", 80, 75) }}
+<div style="flex:1 1 220px;min-width:0"><h2 style="margin:0 0 6px;font-size:21px">Paste a company description, upload the PDF, or try the demo case.</h2>
+<p class="lb" style="margin:0">Grüessech! Bärner si gmüetlech. I bi d Usnahm.<br>Hello! Bernese people take it slow. I'm the exception.</p></div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><form method="post" action="/leads/new"><button class="b p">New lead</button></form><form method="post" action="/leads/demo"><button class="b">Load the sport wearable demo</button></form></div>
+<p class="lb" style="margin:0">{{ arch.n }} archives ready · {{ arch.total|num }} pages{% if arch.last %} · last crawl {{ arch.last|date(True) }}{% endif %}</p>
+</section>
+<section class="pn" aria-label="Searching">
+<span class="k">2 · Searching</span>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("search", 88, 74) }}
+<div style="flex:1 1 220px;min-width:0" role="status"><h2 style="margin:0 0 6px;font-size:21px">Bear with me…</h2>
+<p style="margin:0;font-size:14px">Searching {{ arch.n }} archives, {{ arch.total|num }} pages. Need 2 of 4: sensor and machine learning research.</p></div></div>
+<div style="border-top:1px solid #D9D9D9;padding-top:8px">
+<div class="sl"><b>Done</b><span>Needs and terms in DE, FR, EN</span></div>
+<div class="sl"><b>Done</b><span>Keyword and meaning search across chunks</span></div>
+<div class="sl"><b class="now">Now</b><span>Grouping pages into people and units</span></div>
+<div class="sl"><b>Next</b><span>Ranking and a quoted reason per match</span></div></div>
+<p class="lb" style="margin:0">You can keep editing the needs. Results appear need by need.</p>
+</section>
+<section class="pn" aria-label="No match">
+<span class="k">3 · No match for a need</span>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.pot("none", 64, 70, True, 1.2) }}
+<div style="flex:1 1 220px;min-width:0"><h2 style="margin:0 0 6px;font-size:21px">Kei Hung im Topf.</h2><p class="lb" style="margin:0 0 8px">No honey in the pot.</p>
+<p style="margin:0;font-size:14px">Research partner: lithium battery recycling. Not found in the indexed sources with real evidence. Better not to pitch this need yet.</p></div></div>
+<div style="border-top:1px solid #D9D9D9;padding-top:8px;font-size:14px">
+<div class="sl"><b>Searched</b><span>{% for g in arch.groups %}{{ g.name }}{{ ', ' if not loop.last }}{% endfor %}</span></div>
+<div class="sl"><b>Terms</b><span>battery recycling, Batterie, lithium</span></div>
+<div class="sl"><b>Not indexed</b><span>Inselspital, BFH, sitem-insel. Check there before dropping this need.</span></div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="b">Rephrase the need</span><a class="b" href="/archives">Add an archive</a><span class="b">Leave out of the pitch</span></div>
+<p class="lb" style="margin:0">Logged anonymously for the <a href="/insights">gap report</a>: field and coverage only, no company name.</p>
+</section>
+<section class="pn" aria-label="Error">
+<span class="k">4 · The model gateway does not answer</span>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("sad", 80, 75) }}
+<div style="flex:1 1 220px;min-width:0" role="alert"><h2 style="margin:0 0 6px;font-size:21px">The Apertus gateway did not answer.</h2>
+<p style="margin:0;font-size:14px">Your brief and needs are saved. Try again in a minute. Matches already found stay on screen.</p></div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="b p" href="/">Try again</a><form method="post" action="/leads/demo"><button class="b">Open the cached demo case</button></form></div>
+<p class="lb" style="margin:0">Nothing is sent to another model as a fallback. Confidential text only goes to CSCS. Keyword mode on the Brief works with no model at all.</p>
+</section>
+</div>
+<section style="border-top:1px solid #111;padding-top:16px;display:flex;gap:24px;flex-wrap:wrap">
+<div style="flex:1 1 360px;min-width:0"><span class="lb">Long names stress test</span><p lang="de" style="margin:4px 0 0;font-size:18px;font-weight:700;hyphens:auto;overflow-wrap:anywhere">Universitätsklinik für Diabetologie, Endokrinologie, Ernährungsmedizin und Metabolismus</p></div>
+<div style="flex:1 1 300px"><span class="lb">Pitch language</span><p style="margin:6px 0 0;font-size:14px">Chosen per lead on the Brief: EN, DE or FR. Mutz answers in the language you ask in.</p></div>
+</section>
+</main>
+{% endblock %}

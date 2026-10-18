@@ -1,0 +1,33 @@
+{
+  "about": "Invented pages. Study devices (a radar sensor, smartwatches) and a technique are not infrastructure; a core imaging facility and a testing service are.",
+  "pages": [
+    {"page_id": "fx_inf_study01", "url": "https://fixture.example/en/project/nightwatch-study/", "source": "fixture_a",
+     "group": "fixture_a", "lang": "en", "title": "Nightwatch study", "page_type": "project", "sibling_group": "sg_inf1",
+     "fetched_at": "2026-10-18T12:00:00+00:00", "breadcrumbs": [], "emails": [], "html": "",
+     "text": "The Nightwatch study examines whether nocturnal hypoglycaemia can be detected without needles. In each bedroom a ceiling mounted radar sensor is installed to track motion during sleep. Participants also wear wrist-worn smartwatches that are used to collect data on physiological symptoms."},
+    {"page_id": "fx_inf_core001", "url": "https://fixture.example/en/services/imaging/", "source": "fixture_a",
+     "group": "fixture_a", "lang": "en", "title": "Imaging", "page_type": "infrastructure", "sibling_group": "sg_inf2",
+     "fetched_at": "2026-10-18T12:00:00+00:00", "breadcrumbs": [], "emails": [], "html": "",
+     "text": "The Example Light Microscopy Core Facility is open to researchers from all faculties and to industry partners. The group uses magnetic resonance imaging to study inner ear anatomy in many of its projects. We also offer a biomechanical testing service for implant manufacturers on a fee basis."}
+  ],
+  "llm": {
+    "fx_inf_study01": {
+      "people": [], "expertise": [],
+      "projects": [{"title": "Nightwatch study", "quote": "The Nightwatch study examines whether nocturnal hypoglycaemia can be detected without needles."}],
+      "infrastructure": [
+        {"name": "radar sensor", "kind": "facility", "quote": "In each bedroom a ceiling mounted radar sensor is installed to track motion during sleep."},
+        {"name": "wrist-worn smartwatches", "kind": "platform", "quote": "Participants also wear wrist-worn smartwatches that are used to collect data on physiological symptoms."}
+      ]
+    },
+    "fx_inf_core001": {
+      "people": [], "expertise": [], "projects": [],
+      "infrastructure": [
+        {"name": "Example Light Microscopy Core Facility", "kind": "facility", "quote": "The Example Light Microscopy Core Facility is open to researchers from all faculties and to industry partners."},
+        {"name": "magnetic resonance imaging", "kind": "facility", "quote": "The group uses magnetic resonance imaging to study inner ear anatomy in many of its projects."},
+        {"name": "biomechanical testing service", "kind": "service", "quote": "We also offer a biomechanical testing service for implant manufacturers on a fee basis."}
+      ]
+    }
+  },
+  "expect": {"infrastructure": ["Example Light Microscopy Core Facility", "biomechanical testing service"],
+             "devices_on_project": ["radar sensor", "wrist-worn smartwatches"]}
+}

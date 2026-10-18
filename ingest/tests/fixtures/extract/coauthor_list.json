@@ -1,0 +1,30 @@
+{
+  "about": "Invented publication list, once as a publications page and once embedded in a group page. Authors are not members.",
+  "pages": [
+    {"page_id": "fx_pub_0000001", "url": "https://fixture.example/research/biosensors/publications/index_eng.html", "source": "fixture_a",
+     "group": "fixture_a", "lang": "en", "title": "Publications", "page_type": "publications", "sibling_group": "sg_pub",
+     "fetched_at": "2026-10-18T12:00:00+00:00", "breadcrumbs": [], "emails": [], "html": "",
+     "text": "Publications\nProbe L, Fremd X, Muster K, Beispiel A. Enzyme coatings for implantable glucose sensors in vivo. J Invented Sens. 2023;12:45-67.\nMuster K, Probe L. Drift correction of continuous glucose monitors over thirty days. Proc Fict Conf. 2022;3:1-9."},
+    {"page_id": "fx_pub_0000002", "url": "https://fixture.example/research/biosensors/selected/index_eng.html", "source": "fixture_a",
+     "group": "fixture_a", "lang": "en", "title": "Selected work", "page_type": "group", "sibling_group": "sg_pub2",
+     "fetched_at": "2026-10-18T12:00:00+00:00", "breadcrumbs": [], "emails": [], "html": "",
+     "text": "Selected work\nKarl Muster, Xaver Fremd, Anna Beispiel et al. (2021) Long term enzyme stability of glucose sensors in sheep, Journal of Invented Sensors 8: 100-110."}
+  ],
+  "llm": {
+    "fx_pub_0000001": {
+      "people": [
+        {"name": "Karl Muster", "function": "author", "unit": "Biosensor Group", "relation": "member",
+         "quote": "Probe L, Fremd X, Muster K, Beispiel A. Enzyme coatings for implantable glucose sensors in vivo."}
+      ], "expertise": [], "projects": [], "infrastructure": []
+    },
+    "fx_pub_0000002": {
+      "people": [
+        {"name": "Karl Muster", "function": "researcher", "unit": "Biosensor Group", "relation": "member",
+         "quote": "Karl Muster, Xaver Fremd, Anna Beispiel et al. (2021) Long term enzyme stability of glucose sensors in sheep, Journal of Invented Sensors 8: 100-110."},
+        {"name": "Xaver Fremd", "function": "researcher", "relation": "member",
+         "quote": "Karl Muster, Xaver Fremd, Anna Beispiel et al. (2021) Long term enzyme stability of glucose sensors in sheep, Journal of Invented Sensors 8: 100-110."}
+      ], "expertise": [], "projects": [], "infrastructure": []
+    }
+  },
+  "expect": {"persons": [], "not_persons": ["Karl Muster", "Xaver Fremd", "Anna Beispiel", "Lena Probe"]}
+}

@@ -1,0 +1,23 @@
+{
+  "about": "Invented page. The 8B files an external collaborator from ETH as a member of the Bern lab. He must become a mention, never a Bern person.",
+  "pages": [
+    {"page_id": "fx_ext_0000001", "url": "https://fixture.example/research/biosensors/index_eng.html", "source": "fixture_a",
+     "group": "fixture_a", "lang": "en", "title": "Biosensor Group", "page_type": "group", "sibling_group": "sg_ext",
+     "fetched_at": "2026-10-18T12:00:00+00:00", "breadcrumbs": [], "emails": [], "html": "",
+     "text": "Biosensor Group\nThe Biosensor Group builds implantable glucose sensors for continuous monitoring. In collaboration with Prof. Xaver Fremd from ETH Zurich we test new enzyme coatings for long term stability. Prof. Dr. Lena Probe is the group head of the Biosensor Group since 2021 and teaches sensor physics."}
+  ],
+  "llm": {
+    "fx_ext_0000001": {
+      "people": [
+        {"name": "Prof. Xaver Fremd", "function": "Professor", "unit": "Biosensor Group", "relation": "member",
+         "quote": "In collaboration with Prof. Xaver Fremd from ETH Zurich we test new enzyme coatings for long term stability."},
+        {"name": "Prof. Dr. Lena Probe", "function": "group head", "unit": "Biosensor Group", "relation": "head",
+         "quote": "Prof. Dr. Lena Probe is the group head of the Biosensor Group since 2021 and teaches sensor physics."}
+      ],
+      "expertise": [{"label": "glucose sensors", "holder": "Biosensor Group",
+                     "quote": "The Biosensor Group builds implantable glucose sensors for continuous monitoring."}],
+      "projects": [], "infrastructure": []
+    }
+  },
+  "expect": {"persons": ["Lena Probe"], "not_persons": ["Xaver Fremd"], "mentions": ["Prof. Xaver Fremd"]}
+}

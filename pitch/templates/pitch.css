@@ -1,0 +1,89 @@
+/* Canton of Bern look (docs/DESIGN.md). A4, two columns, one thin rule line
+   down the middle of every page: black 0.15 mm as printed in the manual. */
+@page {
+  size: A4;
+  margin: 22mm 18mm 20mm 18mm;
+  @bottom-left {
+    content: "Prototype, not an official Canton of Bern tool";
+    font: 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #5E5E5E;
+    vertical-align: top; padding-top: 6mm;
+  }
+  @bottom-right {
+    content: counter(page) " / " counter(pages);
+    font: 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #5E5E5E;
+    vertical-align: top; padding-top: 6mm;
+  }
+}
+@page :first { @bottom-right { content: none; } }
+
+html { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #111111;
+       font-size: 9.5pt; line-height: 1.45; }
+body { margin: 0; hyphens: auto; overflow-wrap: anywhere; }
+a { color: #111111; text-decoration: none; }
+p { margin: 0 0 2.5mm; }
+
+/* The rule line: content box is 174 mm wide, the page middle is at 87 mm. */
+.rule { position: fixed; left: 87mm; top: -22mm; height: 297mm; width: 0;
+        border-left: 0.15mm solid #111111; }
+
+.row { overflow: hidden; margin-bottom: 6mm; }
+.row .l { float: left; width: 80mm; }
+.row .r { margin-left: 94mm; }
+.l .label { color: #5E5E5E; font-size: 8.5pt; display: block; }
+
+h1, h2, h3 { margin: 0; font-weight: bold; line-height: 1.2; }
+h1 { font-size: 21pt; margin-bottom: 4mm; bookmark-level: 1; bookmark-label: "Cover"; }
+h2 { font-size: 13.5pt; bookmark-level: 1; }
+h3 { font-size: 10pt; bookmark-level: none; }
+body.review h3 { bookmark-level: 2; }
+
+/* Cover */
+.cover { page-break-after: always; }
+.logo { height: 22mm; margin-bottom: 30mm; }
+.logo-text { font-weight: bold; font-size: 12pt; margin-bottom: 30mm; display: block; }
+.cover .for { font-size: 12pt; margin-bottom: 10mm; }
+.meta .row { margin-bottom: 3mm; }
+.intro { font-size: 11pt; margin-top: 10mm; }
+.banner { border: 0.3mm solid #E30613; color: #E30613; padding: 2mm 3mm; font-weight: bold;
+          margin-bottom: 8mm; }
+.internal { background: #FAFAFA; border-left: 0.6mm solid #D9D9D9; padding: 2mm 3mm;
+            color: #111111; font-size: 8.5pt; }
+
+/* Sections and cards */
+section.sec { page-break-before: always; }
+.lede { color: #5E5E5E; }
+.card { border-top: 0.2mm solid #D9D9D9; padding-top: 3mm; page-break-inside: avoid; }
+.card .sub { color: #5E5E5E; margin: 0.5mm 0 1.5mm; }
+.kind { display: block; font-weight: bold; font-size: 8.5pt; }
+.status { display: block; font-size: 8pt; margin-top: 1mm; }
+.status.verified { color: #111111; }
+.status.edited { color: #E30613; }
+.status.needs_check { color: #E30613; font-weight: bold; }
+sup.ref { font-size: 6.5pt; line-height: 0; vertical-align: super; }
+sup.ref a { color: #E30613; }
+body.clean sup.ref a { color: #5E5E5E; }
+.evline { font-size: 8pt; color: #5E5E5E; margin: 0 0 1mm; }
+.evline a, .ev a.go { color: #E30613; text-decoration: underline; }
+.notes { margin-top: 2mm; }
+
+/* Visit day */
+table.visit { border-collapse: collapse; width: 100%; }
+table.visit td { border-top: 0.2mm solid #D9D9D9; padding: 1.5mm 2mm 1.5mm 0; vertical-align: top; }
+table.visit td.time { width: 16mm; font-weight: bold; }
+
+/* Sources and evidence */
+ol.sources { list-style: none; padding: 0; margin: 0; }
+ol.sources li { margin: 0 0 2.5mm; page-break-inside: avoid; }
+ol.sources .n { font-weight: bold; display: inline-block; min-width: 7mm; }
+ol.sources a.url { text-decoration: underline; overflow-wrap: anywhere; }
+.ev { border-top: 0.2mm solid #D9D9D9; padding-top: 2.5mm; margin-bottom: 3.5mm;
+      page-break-inside: avoid; }
+.ev .quote { font-size: 9.5pt; margin-bottom: 1mm; }
+.ev .src { color: #5E5E5E; font-size: 8pt; }
+.ev .url { font-size: 7.5pt; color: #5E5E5E; overflow-wrap: anywhere; }
+.links a { margin-right: 4mm; }
+
+/* Short sections follow on the same page */
+section.sec.cont { page-break-before: auto; margin-top: 12mm; }
+/* Never hyphenate an address: a copied URL must work */
+.url, a[href^="http"], a[href^="mailto"] { hyphens: manual; }

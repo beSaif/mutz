@@ -1,0 +1,1187 @@
+{
+ "generated_at": "2026-10-18T13:19:03+00:00",
+ "model": "apertus-v1-5-70b",
+ "n_units": 25,
+ "n": 47,
+ "dropped": {
+  "rare_term_overlap": 1
+ },
+ "note": "Generated from public page text; queries hold no names or contact data. Report only, never tune on it.",
+ "cases": [
+  {
+   "id": "syn01a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "Looking for advanced robotics that helps people relearn how to move after brain injuries",
+   "expect": "Motor Learning and Neurorehabilitation",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:artorg:mln",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Motor Learning and Neurorehabilitation",
+     "keys": [
+      {
+       "source": "artorg",
+       "path": "/research/mln/"
+      }
+     ],
+     "kg_id": "unit:artorg:mln"
+    }
+   ]
+  },
+  {
+   "id": "syn01b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Suche nach Robotik-Lösungen, die Patienten mit Hirnverletzungen helfen, Bewegungen neu zu lernen",
+   "expect": "Motor Learning and Neurorehabilitation",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:artorg:mln",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Motor Learning and Neurorehabilitation",
+     "keys": [
+      {
+       "source": "artorg",
+       "path": "/research/mln/"
+      }
+     ],
+     "kg_id": "unit:artorg:mln"
+    }
+   ]
+  },
+  {
+   "id": "syn02a",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Suche nach Partnern, die neue Technologien für Diabetes behandlung entwickeln",
+   "expect": "Diabetes Center Berne",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:dcb:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Diabetes Center Berne",
+     "keys": [
+      {
+       "source": "dcb",
+       "path": "/de/"
+      }
+     ],
+     "kg_id": "unit:dcb:root"
+    }
+   ]
+  },
+  {
+   "id": "syn02b",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Recherche de partenaires pour développer de nouvelles technologies de prise en charge du diabète",
+   "expect": "Diabetes Center Berne",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:dcb:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Diabetes Center Berne",
+     "keys": [
+      {
+       "source": "dcb",
+       "path": "/de/"
+      }
+     ],
+     "kg_id": "unit:dcb:root"
+    }
+   ]
+  },
+  {
+   "id": "syn03a",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Comment une entreprise peut-elle collaborer avec des experts en médecine personnalisée à Berne pour développer des traitements ciblés contre le cancer ?",
+   "expect": "Bern Center for Precision Medicine",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_bcpm:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Bern Center for Precision Medicine",
+     "keys": [
+      {
+       "source": "unibe_bcpm",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_bcpm:root"
+    }
+   ]
+  },
+  {
+   "id": "syn03b",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How can a company partner with Bern-based precision medicine specialists to create targeted cancer therapies and treatments?",
+   "expect": "Bern Center for Precision Medicine",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_bcpm:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Bern Center for Precision Medicine",
+     "keys": [
+      {
+       "source": "unibe_bcpm",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_bcpm:root"
+    }
+   ]
+  },
+  {
+   "id": "syn04a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How can we measure and stop bacteria releasing energy molecules that worsen deadly blood infections?",
+   "expect": "Beldi Lab",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dbmr:beldi-lab",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Beldi Lab",
+     "keys": [
+      {
+       "source": "unibe_dbmr",
+       "path": "/research/research_programs/beldi_lab/"
+      }
+     ],
+     "kg_id": "unit:unibe_dbmr:beldi-lab"
+    }
+   ]
+  },
+  {
+   "id": "syn04b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Comment détecter et empêcher les bactéries libérant des molécules énergétiques qui aggravent les infections sanguines mortelles ?",
+   "expect": "Beldi Lab",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dbmr:beldi-lab",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Beldi Lab",
+     "keys": [
+      {
+       "source": "unibe_dbmr",
+       "path": "/research/research_programs/beldi_lab/"
+      }
+     ],
+     "kg_id": "unit:unibe_dbmr:beldi-lab"
+    }
+   ]
+  },
+  {
+   "id": "syn05a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Forschungsgruppen in der anorganischen Chemie in Bern nach Namen sortiert finden",
+   "expect": "Forschungsgruppen – alphabetisch sortiert",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dcbp:alphabetisch",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Forschungsgruppen – alphabetisch sortiert",
+     "keys": [
+      {
+       "source": "unibe_dcbp",
+       "path": "/forschung/forschungsgruppen/alphabetisch/"
+      }
+     ],
+     "kg_id": "unit:unibe_dcbp:alphabetisch"
+    }
+   ]
+  },
+  {
+   "id": "syn05b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "Looking for inorganic chemistry research groups in Bern, listed alphabetically by name",
+   "expect": "Forschungsgruppen – alphabetisch sortiert",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dcbp:alphabetisch",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Forschungsgruppen – alphabetisch sortiert",
+     "keys": [
+      {
+       "source": "unibe_dcbp",
+       "path": "/forschung/forschungsgruppen/alphabetisch/"
+      }
+     ],
+     "kg_id": "unit:unibe_dcbp:alphabetisch"
+    }
+   ]
+  },
+  {
+   "id": "syn06a",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How can we partner with labs that test medical devices using light and lasers for better diagnostics",
+   "expect": "Institute of Applied Physics",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_iap:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institute of Applied Physics",
+     "keys": [
+      {
+       "source": "unibe_iap",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_iap:root"
+    }
+   ]
+  },
+  {
+   "id": "syn06b",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Wie können wir mit Forschungseinrichtungen zusammenarbeiten, die Licht und Laser für genauere medizinische Diagnostik nutzen",
+   "expect": "Institute of Applied Physics",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_iap:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institute of Applied Physics",
+     "keys": [
+      {
+       "source": "unibe_iap",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_iap:root"
+    }
+   ]
+  },
+  {
+   "id": "syn07a",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Wie kann man Arzneimittel entwickeln, die gezielt Transportproteine in Zellmembranen blockieren, um Krebs zu behandeln?",
+   "expect": "Institut für Biochemie und Molekulare Medizin (IBMM)",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_ibmm:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institut für Biochemie und Molekulare Medizin (IBMM)",
+     "keys": [
+      {
+       "source": "unibe_ibmm",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_ibmm:root"
+    }
+   ]
+  },
+  {
+   "id": "syn07b",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Comment développer des médicaments ciblant spécifiquement les protéines de transport dans les membranes cellulaires pour lutter contre le cancer ?",
+   "expect": "Institut für Biochemie und Molekulare Medizin (IBMM)",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_ibmm:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institut für Biochemie und Molekulare Medizin (IBMM)",
+     "keys": [
+      {
+       "source": "unibe_ibmm",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_ibmm:root"
+    }
+   ]
+  },
+  {
+   "id": "syn08a",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Comment former nos employés à prévenir les maladies infectieuses dans leur environnement de travail ?",
+   "expect": "Institute for Infectious Diseases (IFIK)",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_ifik:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institute for Infectious Diseases (IFIK)",
+     "keys": [
+      {
+       "source": "unibe_ifik",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_ifik:root"
+    }
+   ]
+  },
+  {
+   "id": "syn08b",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How can we train our staff to prevent infectious diseases in the workplace?",
+   "expect": "Institute for Infectious Diseases (IFIK)",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_ifik:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institute for Infectious Diseases (IFIK)",
+     "keys": [
+      {
+       "source": "unibe_ifik",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_ifik:root"
+    }
+   ]
+  },
+  {
+   "id": "syn09a",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "Looking for public health research groups in Bern that specialize in preventing disease through community programs",
+   "expect": "Institute of Social and Preventive Medicine (ISPM)",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_ispm:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institute of Social and Preventive Medicine (ISPM)",
+     "keys": [
+      {
+       "source": "unibe_ispm",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_ispm:root"
+    }
+   ]
+  },
+  {
+   "id": "syn09b",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Chercher des groupes de recherche en santé publique à Berne qui travaillent sur la prévention des maladies par des programmes communautaires",
+   "expect": "Institute of Social and Preventive Medicine (ISPM)",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_ispm:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institute of Social and Preventive Medicine (ISPM)",
+     "keys": [
+      {
+       "source": "unibe_ispm",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_ispm:root"
+    }
+   ]
+  },
+  {
+   "id": "syn10a",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Suche Partner, der Unternehmen hilft zu verstehen, wie Krankheitserreger Zellen angreifen und wie man diese Attacken mit neuen Methoden stoppen kann.",
+   "expect": "Institut de biologie cellulaire",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_izb:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institut de biologie cellulaire",
+     "keys": [
+      {
+       "source": "unibe_izb",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_izb:root"
+    }
+   ]
+  },
+  {
+   "id": "syn10b",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "Looking for a research partner who can help companies understand how pathogens invade cells and how to stop these invasions using innovative methods.",
+   "expect": "Institut de biologie cellulaire",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_izb:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Institut de biologie cellulaire",
+     "keys": [
+      {
+       "source": "unibe_izb",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_izb:root"
+    }
+   ]
+  },
+  {
+   "id": "syn12a",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Suche nach moderner Mikroskopie-Ausstattung für biologische Forschung in Bern",
+   "expect": "Microscopy Imaging Center (MIC)",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_mic:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Microscopy Imaging Center (MIC)",
+     "keys": [
+      {
+       "source": "unibe_mic",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_mic:root"
+    }
+   ]
+  },
+  {
+   "id": "syn12b",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Recherche d'équipements de microscopie de pointe pour la recherche en biologie à Berne",
+   "expect": "Microscopy Imaging Center (MIC)",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_mic:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Microscopy Imaging Center (MIC)",
+     "keys": [
+      {
+       "source": "unibe_mic",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_mic:root"
+    }
+   ]
+  },
+  {
+   "id": "syn13a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Comment améliorer la capacité d'attention d'une équipe de travail face à une surcharge d'informations sensorielles ?",
+   "expect": "Sensory Perception Group",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_neuroscience:sensory-perception-group",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Sensory Perception Group",
+     "keys": [
+      {
+       "source": "unibe_neuroscience",
+       "path": "/research/research_groups/sensory_perception_group/"
+      }
+     ],
+     "kg_id": "unit:unibe_neuroscience:sensory-perception-group"
+    }
+   ]
+  },
+  {
+   "id": "syn13b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How can we boost employee focus and reduce sensory overload in a busy office environment?",
+   "expect": "Sensory Perception Group",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_neuroscience:sensory-perception-group",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Sensory Perception Group",
+     "keys": [
+      {
+       "source": "unibe_neuroscience",
+       "path": "/research/research_groups/sensory_perception_group/"
+      }
+     ],
+     "kg_id": "unit:unibe_neuroscience:sensory-perception-group"
+    }
+   ]
+  },
+  {
+   "id": "syn14a",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "Seeking advanced DNA sequencing services to analyze genetic variations for drug discovery",
+   "expect": "Next Generation Sequencing Platform",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_ngs:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Next Generation Sequencing Platform",
+     "keys": [
+      {
+       "source": "unibe_ngs",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_ngs:root"
+    }
+   ]
+  },
+  {
+   "id": "syn14b",
+   "origin": "synthetic",
+   "cat": "synthetic_site",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Recherche de services de séquençage d'ADN de pointe pour analyser les variations génétiques dans le cadre de la découverte de médicaments",
+   "expect": "Next Generation Sequencing Platform",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_ngs:root",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Next Generation Sequencing Platform",
+     "keys": [
+      {
+       "source": "unibe_ngs",
+       "path": "/"
+      }
+     ],
+     "kg_id": "unit:unibe_ngs:root"
+    }
+   ]
+  },
+  {
+   "id": "syn15a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Wie lassen sich entzündliche Krankheiten und Krebs mit neuen Medikamenten besser behandeln?",
+   "expect": "Translational Pharmacology Bourquin Group",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_pki:translational-pharmacologybrbourquin-group",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Translational Pharmacology Bourquin Group",
+     "keys": [
+      {
+       "source": "unibe_pki",
+       "path": "/research/research_groups/translational_pharmacologybrbourquin_group/"
+      }
+     ],
+     "kg_id": "unit:unibe_pki:translational-pharmacologybrbourquin-group"
+    }
+   ]
+  },
+  {
+   "id": "syn15b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How can new medications improve treatment for inflammatory diseases and cancer?",
+   "expect": "Translational Pharmacology Bourquin Group",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_pki:translational-pharmacologybrbourquin-group",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Translational Pharmacology Bourquin Group",
+     "keys": [
+      {
+       "source": "unibe_pki",
+       "path": "/research/research_groups/translational_pharmacologybrbourquin_group/"
+      }
+     ],
+     "kg_id": "unit:unibe_pki:translational-pharmacologybrbourquin-group"
+    }
+   ]
+  },
+  {
+   "id": "syn16a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How can electrical stimulation stop immune cells from entering the brain to reduce inflammation?",
+   "expect": "Diego Pizzagalli",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_tki:diego-pizzagalli",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Diego Pizzagalli",
+     "keys": [
+      {
+       "source": "unibe_tki",
+       "path": "/research/research_groups/diego_pizzagalli/"
+      }
+     ],
+     "kg_id": "unit:unibe_tki:diego-pizzagalli"
+    }
+   ]
+  },
+  {
+   "id": "syn16b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Wie kann elektrische Stimulation verhindern, dass Immunzellen ins Gehirn eindringen und Entzündungen auslösen?",
+   "expect": "Diego Pizzagalli",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_tki:diego-pizzagalli",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Diego Pizzagalli",
+     "keys": [
+      {
+       "source": "unibe_tki",
+       "path": "/research/research_groups/diego_pizzagalli/"
+      }
+     ],
+     "kg_id": "unit:unibe_tki:diego-pizzagalli"
+    }
+   ]
+  },
+  {
+   "id": "syn17a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Wie kann ich durch Simulation die Belastung von Knochen vor einer Operation genauer vorhersagen?",
+   "expect": "Computational Bioengineering",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:artorg:cbe",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Computational Bioengineering",
+     "keys": [
+      {
+       "source": "artorg",
+       "path": "/research/cbe/"
+      }
+     ],
+     "kg_id": "unit:artorg:cbe"
+    }
+   ]
+  },
+  {
+   "id": "syn17b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Comment puis-je simuler de manière précise la charge supportée par les os avant une intervention chirurgicale ?",
+   "expect": "Computational Bioengineering",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:artorg:cbe",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Computational Bioengineering",
+     "keys": [
+      {
+       "source": "artorg",
+       "path": "/research/cbe/"
+      }
+     ],
+     "kg_id": "unit:artorg:cbe"
+    }
+   ]
+  },
+  {
+   "id": "syn18a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Comment identifier des marqueurs biologiques pour guider des traitements personnalisés contre le cancer ?",
+   "expect": "Rubin Lab",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dbmr:rubin-lab",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Rubin Lab",
+     "keys": [
+      {
+       "source": "unibe_dbmr",
+       "path": "/research/research_programs/rubin_lab/"
+      }
+     ],
+     "kg_id": "unit:unibe_dbmr:rubin-lab"
+    }
+   ]
+  },
+  {
+   "id": "syn18b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How to discover biological markers that can guide personalized cancer treatments?",
+   "expect": "Rubin Lab",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dbmr:rubin-lab",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Rubin Lab",
+     "keys": [
+      {
+       "source": "unibe_dbmr",
+       "path": "/research/research_programs/rubin_lab/"
+      }
+     ],
+     "kg_id": "unit:unibe_dbmr:rubin-lab"
+    }
+   ]
+  },
+  {
+   "id": "syn19a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "Looking for chemical analysis expertise to test product purity and detect contaminants",
+   "expect": "Forschungsgruppen – thematisch gruppiert",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dcbp:thematisch",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Forschungsgruppen – thematisch gruppiert",
+     "keys": [
+      {
+       "source": "unibe_dcbp",
+       "path": "/forschung/forschungsgruppen/thematisch/"
+      }
+     ],
+     "kg_id": "unit:unibe_dcbp:thematisch"
+    }
+   ]
+  },
+  {
+   "id": "syn19b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Chercher des experts en chimie analytique pour vérifier la pureté de nos produits et identifier les contaminants",
+   "expect": "Forschungsgruppen – thematisch gruppiert",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dcbp:thematisch",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Forschungsgruppen – thematisch gruppiert",
+     "keys": [
+      {
+       "source": "unibe_dcbp",
+       "path": "/forschung/forschungsgruppen/thematisch/"
+      }
+     ],
+     "kg_id": "unit:unibe_dcbp:thematisch"
+    }
+   ]
+  },
+  {
+   "id": "syn20a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Wie beeinflusst unvorhergesehene Musik die körperliche Reaktion und welche Klänge lösen starke Emotionen aus?",
+   "expect": "Music and Emotion",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_neuroscience:music-and-emotion",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Music and Emotion",
+     "keys": [
+      {
+       "source": "unibe_neuroscience",
+       "path": "/research/research_groups/music_and_emotion/"
+      }
+     ],
+     "kg_id": "unit:unibe_neuroscience:music-and-emotion"
+    }
+   ]
+  },
+  {
+   "id": "syn21a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "Find research on drugs that kill cancer cells by targeting cell death pathways",
+   "expect": "Inflammation Pharmacology and Cell Death Kaufmann Group",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_pki:inflammation-pharmacology-and-cell-deathbrkaufmann-group",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Inflammation Pharmacology and Cell Death Kaufmann Group",
+     "keys": [
+      {
+       "source": "unibe_pki",
+       "path": "/research/research_groups/inflammation_pharmacology_and_cell_deathbrkaufmann_group/"
+      }
+     ],
+     "kg_id": "unit:unibe_pki:inflammation-pharmacology-and-cell-deathbrkaufmann-group"
+    }
+   ]
+  },
+  {
+   "id": "syn21b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Suchen Sie nach Forschung zu Medikamenten, die Krebszellen durch gezielte Einflussnahme auf den Zelltod bekämpfen",
+   "expect": "Inflammation Pharmacology and Cell Death Kaufmann Group",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_pki:inflammation-pharmacology-and-cell-deathbrkaufmann-group",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Inflammation Pharmacology and Cell Death Kaufmann Group",
+     "keys": [
+      {
+       "source": "unibe_pki",
+       "path": "/research/research_groups/inflammation_pharmacology_and_cell_deathbrkaufmann_group/"
+      }
+     ],
+     "kg_id": "unit:unibe_pki:inflammation-pharmacology-and-cell-deathbrkaufmann-group"
+    }
+   ]
+  },
+  {
+   "id": "syn22a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Forschungseinrichtung mit Fokus auf Immunität des Gehirns für Industriekooperation",
+   "expect": "Britta Engelhardt",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_tki:britta-engelhardt",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Britta Engelhardt",
+     "keys": [
+      {
+       "source": "unibe_tki",
+       "path": "/research/research_groups/britta_engelhardt/"
+      }
+     ],
+     "kg_id": "unit:unibe_tki:britta-engelhardt"
+    }
+   ]
+  },
+  {
+   "id": "syn22b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Centre de recherche spécialisé dans l'immunité des barrières cérébrales, coopération avec entreprises",
+   "expect": "Britta Engelhardt",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_tki:britta-engelhardt",
+   "size": "large",
+   "targets": [
+    {
+     "label": "Britta Engelhardt",
+     "keys": [
+      {
+       "source": "unibe_tki",
+       "path": "/research/research_groups/britta_engelhardt/"
+      }
+     ],
+     "kg_id": "unit:unibe_tki:britta-engelhardt"
+    }
+   ]
+  },
+  {
+   "id": "syn23a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Comment rendre les opérations moins invasives en utilisant l'imagerie pour guider le chirurgien en temps réel ?",
+   "expect": "Chair for Image-guided Therapy",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:artorg:igt",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Chair for Image-guided Therapy",
+     "keys": [
+      {
+       "source": "artorg",
+       "path": "/research/igt/"
+      }
+     ],
+     "kg_id": "unit:artorg:igt"
+    }
+   ]
+  },
+  {
+   "id": "syn23b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How can we make surgeries less invasive by using real-time imaging to guide surgeons during procedures?",
+   "expect": "Chair for Image-guided Therapy",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:artorg:igt",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Chair for Image-guided Therapy",
+     "keys": [
+      {
+       "source": "artorg",
+       "path": "/research/igt/"
+      }
+     ],
+     "kg_id": "unit:artorg:igt"
+    }
+   ]
+  },
+  {
+   "id": "syn24a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "How can we find a lab that studies the immune system to improve our drug's effectiveness?",
+   "expect": "Macpherson Lab",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dbmr:macpherson-lab",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Macpherson Lab",
+     "keys": [
+      {
+       "source": "unibe_dbmr",
+       "path": "/research/research_programs/macpherson_lab/team/"
+      }
+     ],
+     "kg_id": "unit:unibe_dbmr:macpherson-lab"
+    }
+   ]
+  },
+  {
+   "id": "syn24b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "fr",
+   "asked_lang": "French",
+   "query": "Comment trouver un laboratoire qui étudie le système immunitaire pour améliorer l'efficacité de notre médicament ?",
+   "expect": "Macpherson Lab",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dbmr:macpherson-lab",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Macpherson Lab",
+     "keys": [
+      {
+       "source": "unibe_dbmr",
+       "path": "/research/research_programs/macpherson_lab/team/"
+      }
+     ],
+     "kg_id": "unit:unibe_dbmr:macpherson-lab"
+    }
+   ]
+  },
+  {
+   "id": "syn25a",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "de",
+   "asked_lang": "German",
+   "query": "Suche nach Experten für neue, leistungsstarke und umweltfreundliche Materialien für die Industrie",
+   "expect": "Research Groups in Alphabetic Order",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dcbp:alphabetic",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Research Groups in Alphabetic Order",
+     "keys": [
+      {
+       "source": "unibe_dcbp",
+       "path": "/research/research_groups/alphabetic/"
+      }
+     ],
+     "kg_id": "unit:unibe_dcbp:alphabetic"
+    }
+   ]
+  },
+  {
+   "id": "syn25b",
+   "origin": "synthetic",
+   "cat": "synthetic_unit",
+   "lang": "en",
+   "asked_lang": "English",
+   "query": "Looking for experts on developing innovative, high-performance, and environmentally friendly materials for industrial applications",
+   "expect": "Research Groups in Alphabetic Order",
+   "split": "synthetic",
+   "check": "recall",
+   "pair": "unit:unibe_dcbp:alphabetic",
+   "size": "small",
+   "targets": [
+    {
+     "label": "Research Groups in Alphabetic Order",
+     "keys": [
+      {
+       "source": "unibe_dcbp",
+       "path": "/research/research_groups/alphabetic/"
+      }
+     ],
+     "kg_id": "unit:unibe_dcbp:alphabetic"
+    }
+   ]
+  }
+ ]
+}

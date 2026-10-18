@@ -1,0 +1,83 @@
+{% extends "base.html" %}{% set active_page = "leads" %}
+{% block title %}Evidence map · {{ lead.title }}{% endblock %}
+{% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
+{% block content %}
+<div style="display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;padding:14px 32px">
+<h1 style="margin:0;font-size:21px">Every claim, traced to its page</h1>
+<span class="kk"><i style="border-top:2px solid #111"></i>Read</span>
+<span class="kk"><i style="border-top:2px dashed #111"></i>Derived</span>
+<span class="kk"><i style="border-top:2px dotted #9A9A9A"></i>Missing</span>
+<span class="kk"><i style="border-top:3px solid #E30613"></i>Selected</span>
+<label class="lb" style="margin-left:auto"><input type="checkbox" {% if not all %}checked{% endif %} onchange="location.search=this.checked?'':'?all=1'"> Accepted matches only</label>
+</div>
+{% set W = m.W %}
+{% if not m.needs %}
+<main style="padding:0 32px;max-width:760px">
+<section class="pn"><span class="k">Nothing to map yet</span>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("idle", 80, 75) }}<div style="flex:1 1 220px"><h2 style="margin:0 0 6px;font-size:21px">Accept a match and it appears here with its facts and pages.</h2><p class="lb" style="margin:0">The map only shows what is in this case, so it stays readable.</p></div></div>
+<div style="display:flex;gap:8px"><a class="b p" href="/leads/{{ lead.id }}/matches">Back to matches</a>{% if not all %}<a class="b" href="?all=1">Show all suggested matches</a>{% endif %}</div></section>
+</main>
+{% else %}
+<div style="overflow-x:auto;padding:0 32px">
+<div class="map" id="map" style="width:{{ m.width + 20 }}px;height:490px">
+<span class="rl" style="top:0">Need</span><span class="rl" style="top:140px">Match</span><span class="rl" style="top:280px">Fact</span><span class="rl" style="top:420px">Source</span>
+{# edges: need -> matches, one elbow per child so a selected path lights up alone #}
+{% for n in m.needs %}<div class="e" data-path="{{ n.id }}" style="left:{{ n.cx|int }}px;top:56px;height:41px;border-left:2px solid #111"></div>{% endfor %}
+{% set ncx = {} %}{% for n in m.needs %}{% set _ = ncx.update({n.id: n.cx}) %}{% endfor %}
+{% for mt in m.matches %}
+{% set a = [ncx[mt.need], mt.cx]|min %}{% set b = [ncx[mt.need], mt.cx]|max %}
+<div class="e" data-path="{{ mt.need }} {{ mt.entity }}" style="left:{{ a|int }}px;top:97px;width:{{ (b - a)|int + 2 }}px;border-top:2px solid #111"></div>
+<div class="e" data-path="{{ mt.need }} {{ mt.entity }}" style="left:{{ mt.cx|int }}px;top:97px;height:43px;border-left:2px solid #111"></div>
+<div class="e" data-path="{{ mt.need }} {{ mt.entity }}" style="left:{{ mt.cx|int }}px;top:196px;height:41px;border-left:2px solid #111"></div>
+{% endfor %}
+{% set mcx = {} %}{% for mt in m.matches %}{% set _ = mcx.update({mt.need ~ ' ' ~ mt.entity: mt.cx}) %}{% endfor %}
+{% for f in m.facts %}
+{% set c0 = mcx[f.need ~ ' ' ~ f.entity] %}{% set fx = f.x + W/2 %}
+<div class="e" data-path="{{ f.need }} {{ f.entity }} f{{ loop.index }}" style="left:{{ [c0, fx]|min|int }}px;top:237px;width:{{ ([c0, fx]|max - [c0, fx]|min)|int + 2 }}px;border-top:2px solid #111"></div>
+{% endfor %}
+{% for f in m.facts %}
+{% set st = {'read':'solid #111','derived':'dashed #111','missing':'dotted #9A9A9A'}[f['style']] %}
+<div class="e" data-path="{{ f.need }} {{ f.entity }} f{{ loop.index }}" style="left:{{ (f.x + W/2)|int }}px;top:237px;height:43px;border-left:2px {{ st }}"></div>
+<div class="e" data-path="{{ f.need }} {{ f.entity }} f{{ loop.index }}" style="left:{{ (f.x + W/2)|int }}px;top:336px;height:{{ 84 if f.url else 28 }}px;border-left:2px {{ 'dotted #9A9A9A' if not f.url else st }}"></div>
+{% endfor %}
+{# nodes #}
+{% for n in m.needs %}<button class="n nd" data-node="{{ n.id }}" data-k="need" data-label="{{ n.label }}: {{ n.text }}" data-kind="Need {{ n.i }} · {{ ui.potlabel(n.cov) }}" style="left:{{ n.x|int }}px;top:0;width:{{ n.w|int }}px"><small>Need {{ n.i }} · {{ ui.potlabel(n.cov) }}</small><span class="lab">{{ n.label }}</span></button>{% endfor %}
+{% for mt in m.matches %}<button class="n" data-node="{{ mt.need }} {{ mt.entity }}" data-k="match" data-entity="{{ mt.entity }}" data-label="{{ mt.name }}" data-kind="{{ mt.type }}" style="left:{{ mt.x|int }}px;top:140px;width:{{ mt.w|int }}px;border-width:2.5px"><small>{{ mt.type }}</small><span class="lab" lang="de">{{ mt.name }}</span>{% if mt.badge %}<span class="badge" aria-label="In {{ mt.badge }} needs">{{ mt.badge }}</span>{% endif %}</button>{% endfor %}
+{% for f in m.facts %}
+<button class="n {{ 'miss' if f['style'] == 'missing' }}" data-node="{{ f.need }} {{ f.entity }} f{{ loop.index }}" data-k="fact" data-entity="{{ f.entity }}" data-label="{{ f.label }}" data-kind="{{ f.kind }}" data-quote="{{ f.quote or '' }}" data-url="{{ f.deep_link or '' }}" data-m="{{ f.mname }}" style="left:{{ f.x|int }}px;top:280px;width:{{ W }}px{% if f['style'] == 'derived' %};border-style:dashed{% endif %}"><small>{{ f.kind }}</small><span class="lab">{{ f.label }}</span></button>
+{% if f.url %}<a class="n ns" href="{{ f.deep_link }}" target="_blank" rel="noopener" data-node="{{ f.need }} {{ f.entity }} f{{ loop.index }}" style="left:{{ f.x|int }}px;top:420px;width:{{ W }}px" title="Opens the page at the quote"><small>Source</small><span class="lab">{{ f.src }}</span></a>
+{% else %}<span class="lb" style="position:absolute;left:{{ f.x|int }}px;top:372px;width:{{ W }}px;text-align:center">no source</span>
+<div class="n miss" style="left:{{ f.x|int }}px;top:420px;width:{{ W }}px"><small>Source</small>None. Check before use</div>{% endif %}
+{% endfor %}
+</div>
+</div>
+<div id="detail" style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:14px 32px;margin-top:12px;border-top:2px solid #111;font-size:14px">
+<b id="d-label">Click a node to see its quote and page.</b><span id="d-kind"></span><span class="lb" id="d-quote"></span><a id="d-open" class="hidden" target="_blank" rel="noopener">Open at quote</a>
+<span style="flex:1"></span><button class="b hidden" id="d-remove">Remove from pitch</button><a class="b p" href="/leads/{{ lead.id }}/pitch">Go to pitch</a>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  var lid = {{ lead.id|tojson }};
+  var nodes = $$('#map [data-node]'), edges = $$('#map .e');
+  function pre(q, p){ return q.length <= p.length && q.every(function(x,i){ return p[i]===x; }); }
+  function sel(btn){
+    var p = btn.getAttribute('data-node').split(' ');
+    nodes.forEach(function(n){ n.classList.toggle('sel', pre(n.getAttribute('data-node').split(' '), p)); });
+    edges.forEach(function(e){ var on = pre(e.getAttribute('data-path').split(' '), p); e.style.borderLeftColor = on ? '#E30613' : ''; e.style.borderTopColor = on ? '#E30613' : ''; });
+    document.getElementById('d-label').textContent = btn.dataset.label;
+    document.getElementById('d-kind').textContent = btn.dataset.kind || '';
+    document.getElementById('d-quote').textContent = btn.dataset.quote ? ('quote “' + btn.dataset.quote.slice(0,160) + '”' + (btn.dataset.m ? ' · ' + btn.dataset.m : '')) : '';
+    var o = document.getElementById('d-open'); if (btn.dataset.url){ o.href = btn.dataset.url; o.classList.remove('hidden'); } else o.classList.add('hidden');
+    var r = document.getElementById('d-remove'); r.classList.toggle('hidden', !btn.dataset.entity); r.dataset.entity = btn.dataset.entity || ''; r.dataset.need = p[0];
+    window.mutzSelect && window.mutzSelect({entity_id: btn.dataset.entity, name: btn.dataset.label});
+  }
+  nodes.forEach(function(n){ if (n.tagName==='BUTTON') n.addEventListener('click', function(){ sel(n); }); });
+  var rm = document.getElementById('d-remove');
+  if (rm) rm.addEventListener('click', function(){ mutzPost('/api/decide', {lead: lid, need: rm.dataset.need, entity: rm.dataset.entity, decision: null}).then(function(){ location.reload(); }); });
+  var first = document.querySelector('#map button[data-k=fact]'); if (first) sel(first);
+})();
+</script>
+{% endblock %}
