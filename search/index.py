@@ -110,10 +110,10 @@ def pick_device(want: str | None = None) -> str:
 
 
 def _cpu_dtype():
-    """Query time on CPU (the container): bfloat16 halves memory (two ~2.2 GB models -> ~1.1 GB each),
-    so the app and a CLI query fit in the Docker VM together. MUTZ_CPU_DTYPE=float32 to turn it off."""
+    """CPU dtype. float32 by default: bfloat16 on ARM CPUs (Docker on a Mac) made the cross encoder ~15x
+    slower (128 s vs 8 s for 24 pairs). Half precision is only used on MPS/CUDA."""
     import torch
-    return getattr(torch, os.environ.get("MUTZ_CPU_DTYPE", "bfloat16"))
+    return getattr(torch, os.environ.get("MUTZ_CPU_DTYPE", "float32"))
 
 
 def load_embedder(device=None, half=False, wait=True):
@@ -135,7 +135,8 @@ def load_reranker(device=None, wait=True):
     import torch
     from sentence_transformers import CrossEncoder
     dev = pick_device(device)
-    m = CrossEncoder(str(cached_snapshot(RERANK_MODEL)), device=dev, max_length=384, local_files_only=True)
+    m = CrossEncoder(str(cached_snapshot(RERANK_MODEL)), device=dev, local_files_only=True,
+                     max_length=int(os.environ.get("MUTZ_RERANK_MAXLEN", "256" if dev == "cpu" else "384")))
     if dev == "cpu" and _cpu_dtype() != torch.float32:
         m.model.to(_cpu_dtype())
     return m
@@ -148,7 +149,7 @@ def encode(model, texts, batch=16):
     return t.float().cpu().numpy()
 
 
-def rerank_logits(model, pairs, batch=16):
+def rerank_logits(model, pairs, batch=8):
     import torch
     kw = dict(batch_size=batch, show_progress_bar=False, convert_to_tensor=True)
     try:

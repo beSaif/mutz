@@ -35,7 +35,8 @@ RANKLOG = DATA / "ranklog.sqlite"
 RRF_K = 60
 TOP_CHUNKS = 200          # per ranked list
 TOP_ENTITIES_RERANK = 50
-MAX_RERANK_CHUNKS = int(os.environ.get("MUTZ_MAX_RERANK", "64"))
+MAX_RERANK_CHUNKS = int(os.environ.get("MUTZ_MAX_RERANK", "20"))
+RERANK_BUDGET = float(os.environ.get("MUTZ_RERANK_BUDGET", "6"))   # seconds per query for the cross encoder
 RANKLOG_N = 200
 UNIT_CAP = 3              # max results per unit in the top k (fair exposure)
 SHOW_BAR = float(os.environ.get("MUTZ_SHOW_BAR", "0.20"))      # reranker prob below which a result is not shown
@@ -424,17 +425,29 @@ def _recency(res, eid, contrib):
 def _rerank(res, qtext, chunk_ids, rrf=None, qstrings=()):
     if not chunk_ids:
         return {}
-    if os.environ.get("MUTZ_NO_RERANK") == "1":   # tests without model weights
+    if os.environ.get("MUTZ_NO_RERANK") == "1" or os.environ.get("MUTZ_CROSS_ENCODER") == "0":
+        if os.environ.get("MUTZ_CROSS_ENCODER") == "0":
+            res.degraded.add("reranker unavailable: cross encoder switched off (MUTZ_CROSS_ENCODER=0)")
         return _proxy_rerank(res, qstrings, chunk_ids, rrf)
     try:
         model = res.get_reranker()
     except Exception as e:
         res.degraded.add(f"reranker unavailable, term coverage proxy used: {type(e).__name__}: {e}"[:200])
         return _proxy_rerank(res, qstrings, chunk_ids, rrf)
-    pairs = [(qtext, ix.chunk_text_for_index(res.chunks[i], res.pages.get(res.chunks[i]["page_id"]))[:2000])
+    cap = 1000 if str(getattr(model, "device", "cpu")).startswith("cpu") else 2000   # CPU: shorter passages
+    pairs = [(qtext, ix.chunk_text_for_index(res.chunks[i], res.pages.get(res.chunks[i]["page_id"]))[:cap])
              for i in chunk_ids]
-    logits = ix.rerank_logits(model, pairs)
-    lg = np.asarray(logits, dtype=np.float64)
+    # time budget: batches of 8; stop as soon as the budget is spent or the first batch shows it will be
+    t0, out, B = time.time(), [], 8
+    for b in range(0, len(pairs), B):
+        out.extend(ix.rerank_logits(model, pairs[b:b + B], batch=B))
+        spent = time.time() - t0
+        left = len(pairs) - len(out)
+        if left and (spent > RERANK_BUDGET or spent / len(out) * left + spent > RERANK_BUDGET * 1.5):
+            res.degraded.add(f"reranker unavailable: cross encoder over its {RERANK_BUDGET:.0f}s budget "
+                             f"({len(out)} of {len(pairs)} pairs in {spent:.1f}s), Apertus grade used")
+            return _proxy_rerank(res, qstrings, chunk_ids, rrf)
+    lg = np.asarray(out, dtype=np.float64)
     probs = 1 / (1 + np.exp(-lg))
     # bge-reranker-v2-m3 gives keyword style needs very low absolute probabilities (a clear match can be
     # logit -4), so blend the absolute probability with this query's min-max position. Acceptance and

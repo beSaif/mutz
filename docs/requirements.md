@@ -15,7 +15,7 @@ Sources read: `research/hackapertus-notion-site-bern-economic-development-agency
 
 | Topic | Playbook | Guide / case page | Decision |
 |---|---|---|---|
-| Deadline | "Submission: tonight", plan assumes ~22:00 | **Not stated** in either file | Keep the playbook schedule; **human must confirm the exact deadline** |
+| Deadline | "Submission: tonight", plan assumes ~22:00 | **Not stated** in either file | **Confirmed by the human: tonight, 22:00.** Hand back at 21:30 |
 | Submission format | Repo, 2 min video, slides | **Not stated** | Prepare repo, video and deck; human confirms the format before submitting |
 | Gateway | Keera at `gateway.keera.ch/api/v1`, CSCS | **Not mentioned**; guide lists the Hugging Face model pages as sources | Use Keera (smoke test passed, see docs/gateway.md); keep the vLLM "sovereign" profile as proof the stack can run without it |
 | Model names | `apertus-v1-5-8b`, `apertus-v1-5-70b`, `apertus-v1-5-70b-thinking` | "Apertus 8B or 70B (v1.5)" | Same models. Gateway ids confirmed: `apertus-v1-5-8b`, `apertus-v1-5-70b`, plus `-thinking` variants of both. Thinking variants reject forced tool_choice |
@@ -28,4 +28,4 @@ Nothing in the guide changes the plan in a big way. Open questions for the organ
 
 ## Repo hygiene note
 
-`research/supporting materials/` (logo, pptx template, xlsx) was committed in d3a4eba **and that commit is already on the public GitHub repo**. It is now untracked and gitignored; removing it from history needs a force push, which the human must approve.
+`research/supporting materials/` (logo, pptx template, xlsx) was committed in d3a4eba **and that commit is already on the public GitHub repo**. It is now untracked and gitignored. The human decided (16:45) to keep it in the history; no rewrite.
