@@ -414,6 +414,39 @@ def _call_model(sendable):
 
 # --------------------------------------------------------------------------- grounding
 
+STOP = {"the", "and", "for", "with", "von", "und", "der", "die", "das", "des", "les", "pour", "avec", "of", "in", "a", "an",
+        "to", "on", "at", "or", "im", "am", "zu", "et", "de", "la", "le", "du"}
+
+
+def _words(s):
+    return [w for w in _norm(s).split() if w not in STOP and len(w) >= 2]
+
+
+def grounded_terms(terms, passage_text, limit=8):
+    """Keep only search terms whose words mostly occur in the need's own passage (5 letter stem match),
+    so a term cannot drift in from another need."""
+    stems = {w[:5] for w in _words(passage_text)}
+    out = []
+    for t in terms or []:
+        t = str(t).strip()
+        ws = _words(t)
+        if ws and sum(w[:5] in stems for w in ws) * 2 >= len(ws) and t.lower() not in (x.lower() for x in out):
+            out.append(t)
+    return out[:limit]
+
+
+def verbatim_name(name, passages):
+    """profile.name only if it occurs verbatim (case and whitespace insensitive) in a usable passage, else None."""
+    if not isinstance(name, str) or not name.strip():
+        return None
+    rx = re.compile(r"\s+".join(re.escape(w) for w in name.split()), re.I)
+    for p in passages:
+        m = rx.search(p["text"]) if p.get("status") != "struck" else None
+        if m:
+            return m.group(0)                       # as written in the input
+    return None
+
+
 def _norm(s):
     return re.sub(r"\W+", " ", (s or "").lower()).strip()
 
@@ -560,7 +593,7 @@ def needs(one_pager_text=None, pdf_path=None, website=None, keywords=None, *, st
         pr = n.get("priority") if n.get("priority") in PRIORITIES else "medium"
         need = {"id": f"n{len(out_needs) + 1}", "text": text, "type": t, "priority": pr,
                 "from_sentence": src["text"], "passage_id": src["id"], "source": src["source"],
-                "terms": [str(x) for x in (n.get("terms") or [])][:8], "shareable": True}
+                "terms": grounded_terms(n.get("terms"), src["text"]), "shareable": True}
         if src.get("page"):
             need["page"] = src["page"]
         if src.get("url"):
@@ -574,6 +607,9 @@ def needs(one_pager_text=None, pdf_path=None, website=None, keywords=None, *, st
             if p["id"] == pid and p.get("status") != "struck":
                 p["status"] = "used"
                 p.setdefault("_profile", True)
+
+    if "name" in profile or model_used:
+        profile["name"] = verbatim_name(profile.get("name"), passages)
 
     # keywords: deterministic, never sent anywhere
     kw_passages = []
@@ -634,6 +670,15 @@ ROUTE_NOTES = {
 }
 
 
+KIND_HINTS = [(k, re.compile(p, re.I)) for k, p in [
+    ("talent", r"\b(hir\w*|recruit\w*|talent|staff|engineers|specialists|fachkr\w*|people)\b"),
+    ("space", r"\b(space|office|premises|m2|m²|real estate|b[üu]ro|fl[äa]che)\b"),
+    ("clinical_trials", r"\b(clinical|trial|study|studie)\b"),
+    ("funding", r"\b(fund\w*|grant|innosuisse|f[öo]rder\w*|financ\w*)\b"),
+    ("transfer", r"\b(licen\w*|patent\w*|transfer|spin)\b"),
+]]
+
+
 def load_curated(path=None):
     path = Path(path or os.environ.get("MUTZ_CURATED", CURATED_PATH))
     if not path.exists():
@@ -660,11 +705,16 @@ def route(need, curated_path=None):
     hits = [e for e in curated if isinstance(e, dict) and t in (e.get("need_types") or [])]
     words = set(_norm((need.get("text", "") + " " + " ".join(need.get("terms") or [])) if isinstance(need, dict) else "").split())
 
+    text = need.get("text", "") if isinstance(need, dict) else ""
+    want = {k for k, rx in KIND_HINTS if rx.search(text)}
+
     def score(e):
         blob = set(_norm(" ".join(str(e.get(k, "")) for k in ("name", "kind", "description"))).split())
-        return len(words & blob)
+        return (e.get("kind") in want) * 10 + len(words & blob)
 
     hits.sort(key=score, reverse=True)
+    if hits and score(hits[0]) > 0:
+        hits = [e for e in hits if score(e) > 0]          # no unrelated padding when something fits
     out = {"kind": "curated", "entries": hits[:6]}
     if not hits:
         out["note"] = ROUTE_NOTES["empty"]

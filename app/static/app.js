@@ -232,6 +232,20 @@
         });
       });
     });
+    $$("[data-anyway]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var m = JSON.parse(b.getAttribute("data-anyway"));
+        if (!m.reasons || !m.reasons.length) { b.insertAdjacentHTML("afterend", '<span class="lb"> No quote for this need: a pitch card needs a source. Add one on the Pitch screen.</span>'); }
+        post("/api/decide", {lead: lid, need: (document.querySelector("#mutz") || {}).dataset.need, entity: m.entity_id, decision: "accept", match: m, added_by: "added by you"})
+          .then(function () { b.outerHTML = '<span style="font-size:13px;font-weight:700">Added by you</span>'; });
+      });
+    });
+    $$("[data-missed]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        post("/api/missed", {name: b.dataset.missed, entity_id: b.dataset.eid, query: b.dataset.q})
+          .then(function () { b.outerHTML = '<span class="lb">Saved as a new test case.</span>'; });
+      });
+    });
     $$("[data-leave]").forEach(function (b) {
       b.addEventListener("click", function () { post("/api/needs/" + b.dataset.leave, {delete: true}).then(function () { location.href = location.pathname; }); });
     });

@@ -28,7 +28,29 @@ LOGO = Path("assets/private/Logo_SF_BE_EN.png")
 EXPORTS = Path("data/app_exports")
 UPLOADS = Path("data/app_uploads")
 
-app = FastAPI(title="mutz Expertise Navigator")
+def _warmup():
+    """Load the search index and local models once, so the first real query is not cold. Never blocks /health."""
+    if {"query", "all"} & contracts.FORCE:
+        return
+    try:
+        import search.query as sq
+        t0 = datetime.now()
+        st = sq.warmup()
+        log.warning("search warmup done in %ss: %s", (datetime.now() - t0).seconds, st)
+    except Exception as e:  # missing module or models: the stub answers instead
+        log.warning("search warmup skipped: %r", e)
+
+
+from contextlib import asynccontextmanager
+
+
+@asynccontextmanager
+async def lifespan(_app):
+    threading.Thread(target=_warmup, name="search-warmup", daemon=True).start()
+    yield
+
+
+app = FastAPI(title="mutz Expertise Navigator", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 T = Jinja2Templates(directory=ROOT / "templates")
 db.init()
@@ -98,6 +120,28 @@ T.env.filters["nlabel"] = lambda t: NEED_LABEL.get(t, (t or "").capitalize())
 T.env.filters["num"] = lambda n: f"{n:,}" if isinstance(n, int) else n
 T.env.globals["now"] = lambda: datetime.now()
 T.env.filters["cq"] = stubs.clean_quote
+def cite_html(text, reasons):
+    """Escape a grounded explanation and turn its [k] (k-th quote of this result) into links numbered for the page."""
+    from markupsafe import Markup, escape
+    h = str(escape(text or ""))
+    def rep(m):
+        k = int(m.group(1))
+        if 1 <= k <= len(reasons):
+            s = reasons[k - 1]
+            return f'<a href="{escape(s.get("deep_link") or s.get("url"))}" target="_blank" rel="noopener">[{s.get("n", k)}]</a>'
+        return ""
+    return Markup(re.sub(r"\[(\d+)\]", rep, h))
+
+
+T.env.filters["cite"] = cite_html
+
+
+def _archives(ids):
+    from app.mutz import archives_label
+    return archives_label(ids)
+
+
+T.env.filters["archives"] = _archives
 SRC_NAMES = {"artorg": "ARTORG Center", "dcb": "Diabetes Center Berne", "unibe": "University of Bern"}
 T.env.filters["srcname"] = lambda s: SRC_NAMES.get(s) or (f"unibe {s[6:]}" if str(s).startswith("unibe_") else s)
 
@@ -272,6 +316,7 @@ def _search_job(lid, only):
 
 
 FIELDS = [  # normalized concepts for the lead log (no free text from the one pager)
+    ("talent", "Hiring and talent", r"\bhir(e|es|ing)\b|talent|recruitment of|recruit(ing)? (staff|people|engineers)|employees|data scientists"),
     ("diabetes-technology", "Diabetes technology", r"diabet|glucose|glyc|insulin|cgm|blutzucker"),
     ("clinical-trials", "Clinical trial support", r"clinical (trial|study|validation)|klinische|essais|recruit"),
     ("biomedical-engineering", "Biomedical engineering", r"sensor|device|implant|biomed|engineering"),
@@ -358,10 +403,17 @@ def lead_new(title: str = Form("New lead"), origin: str = Form("S-GE")):
     return RedirectResponse(f"/leads/{lid}/brief", 303)
 
 
+DEMO_FIXTURE = Path("needs/fixtures/demo_onepager.txt")
+
+
 @app.post("/leads/demo")
 def lead_demo():
-    lid = db.create_lead("Sport wearable lead", input_text=DEMO_TEXT, origin="S-GE", sector="medtech",
-                         summary="Skin patch for glucose and lactate, women in sport", demo=1)
+    """The demo case is agent E's fixture (Kestrelyn Health Oy, invented), so demo, eval and pitch line up."""
+    text, title = DEMO_TEXT, "Sport wearable lead"
+    if DEMO_FIXTURE.exists():
+        text, title = DEMO_FIXTURE.read_text().strip(), "Kestrelyn Health Oy"
+    lid = db.create_lead(title, input_text=text, origin="S-GE", sector="medtech",
+                         summary="Glucose and lactate patch for women in endurance sport", demo=1)
     db.update_lead(lid, opened=1)
     return RedirectResponse(f"/leads/{lid}/brief?extract=1", 303)
 
@@ -453,6 +505,10 @@ async def brief_submit(request: Request, lid: str, text: str = Form(""), website
 
 def need_label(n):
     t = (n.get("text") or "").lower()
+    if n.get("type") in ("other", None) or n.get("type") not in NEED_LABEL:
+        cid = concept_id({"text": n.get("text", ""), "terms": n.get("terms") or []})
+        if cid in FIELD_NAME:
+            return FIELD_NAME[cid]
     if n.get("type") in ("research", "infrastructure", None) and re.search(r"clinical|study|trial|studie|essai", t):
         return "Clinical study" if n.get("type") != "infrastructure" else "Clinical trial support"
     return NEED_LABEL.get(n.get("type"), "Need")
@@ -579,6 +635,24 @@ def search_status(lid: str):
 
 # ---------------------------------------------------------------- matches
 
+GENERIC = set(stubs.tokens("study research project development analysis clinical patients health bern swiss "
+                           "university new novel role context based using approach data system systems"))
+
+
+def relevant_grants(grants, n):
+    """At most 2 grants whose title shares a term with the need or its terms; the rest are only counted."""
+    words = " ".join([n.get("text", "")] + [t["t"] for t in n.get("terms", []) if t.get("on")] +
+                     list(((n.get("result") or {}).get("expansions") or [])))
+    need_t = set(stubs.tokens(words)) - GENERIC
+    keep, other = [], 0
+    for g in grants:
+        if len(keep) < 2 and need_t & (set(stubs.tokens(g.get("title") or "")) - GENERIC):
+            keep.append(g)
+        else:
+            other += 1
+    return keep, other
+
+
 def decorate(n, lid):
     """Results of one need with decisions, numbering and grants."""
     dec = {(d["need_id"], d["entity_id"]): d for d in db.decisions(lid)}
@@ -586,23 +660,37 @@ def decorate(n, lid):
     out = []
     for r in res:
         r = dict(r)
+        seen_q, reasons = set(), []
+        for x in r.get("reasons") or []:
+            k = stubs.clean_quote(x.get("quote", "")).lower()
+            if k not in seen_q:
+                seen_q.add(k)
+                reasons.append(x)
+        r["reasons"] = reasons
+        expl = r.get("explanation") or r.get("reason") or ""
+        cited = {int(k) for k in re.findall(r"\[(\d+)\]", expl) if 1 <= int(k) <= len(reasons)}
+        r["cited"] = sorted(cited) if cited else list(range(1, min(2, len(reasons)) + 1))
         r["ftype"] = ftype(r.get("type"))
         d = dec.get((n["id"], r["entity_id"]))
         r["decision"] = d["decision"] if d else None
         r["added_by"] = d["added_by"] if d else None
-        r["grants"] = contracts.grants_for(r["entity_id"]) if r.get("entity_id") else []
+        g = contracts.grants_for(r["entity_id"]) if r.get("entity_id") else []
+        r["grants"], r["grants_other"] = relevant_grants(g, n)
         out.append(r)
     # matches the officer added anyway (why not) that are not in the list
     for (nid, eid), d in dec.items():
         if nid == n["id"] and d["decision"] == "accept" and d["match"] and all(x["entity_id"] != eid for x in out):
             m = dict(d["match"])
-            m.update(ftype=ftype(m.get("type")), decision="accept", added_by=d["added_by"], grants=[])
+            m.update(ftype=ftype(m.get("type")), decision="accept", added_by=d["added_by"], grants=[], grants_other=0)
             out.append(m)
+    for r in out:
+        r["is_adjacent"] = bool(r.get("adjacent") or "adjacent" in (r.get("tags") or []))
+    out.sort(key=lambda r: r["is_adjacent"])  # direct matches first, adjacent after (stable keeps the rank)
     return out
 
 
 @app.get("/leads/{lid}/matches", response_class=HTMLResponse)
-def matches(request: Request, lid: str, need: str = "", type: str = "all"):
+def matches(request: Request, lid: str, need: str = "", type: str = "all", why: str = ""):
     l = get_lead(lid)
     ns = db.needs(lid)
     if not ns:
@@ -631,11 +719,20 @@ def matches(request: Request, lid: str, need: str = "", type: str = "all"):
     if not curated:
         curated = [e for e in contracts.curated() if set(e.get("need_types", [])) & {n["type"] for n in ns}][:1]
     searching = l["search_state"] == "running" or any(not n.get("searched_at") for n in ns)
+    whynot = None
+    if why.strip() and cur.get("searched_at"):
+        try:
+            whynot = contracts.why_not(why.strip(), need_query_text(cur))
+            if whynot and whynot.get("entity_id") and any(r["entity_id"] == whynot["entity_id"] for r in shown):
+                whynot["shown"] = True
+        except Exception:
+            whynot = {"name": why, "in_index": None, "reason": "The ranking log did not answer. Try again in a minute.", "stages": []}
     arch = archive_stats()
     pending = [n for n in ns if not n.get("searched_at")]
     return render(request, "matches.html", lead=l, needs=ns, cur=cur, results=shown, counts=counts, total=len(results),
-                  ftype=type, filters=TYPE_FILTER, bid=bid, n_acc=n_acc, curated=curated[:2], searching=searching,
-                  pending=pending, arch=arch, case=case_ctx(l, "matches"),
+                  ftype=type, filters=TYPE_FILTER, bid=bid,
+                  any_grants=any(r.get("grants") or r.get("grants_other") for r in shown), n_acc=n_acc, curated=curated[:2], searching=searching,
+                  pending=pending, arch=arch, case=case_ctx(l, "matches"), whynot=whynot, why=why,
                   mutz={"screen": "Matches", "lead": lid, "need": cur["id"], "need_text": cur["text"],
                         "pot": cur.get("coverage") if cur.get("searched_at") else None,
                         "bubble": ("Search finished." if not searching and request.query_params.get("fresh") else None)})
@@ -821,7 +918,7 @@ def review(request: Request, lid: str, done: int = 0, err: str = ""):
     srcs, seen = [], {}
     for c in cards:
         for s in c.get("sources", []):
-            k = (s.get("url"), s.get("quote"))
+            k = (host(s.get("url", "")), stubs.clean_quote(s.get("quote") or "").lower() or s.get("url"))
             if k in seen:
                 continue
             seen[k] = len(srcs) + 1
@@ -1028,22 +1125,26 @@ def propose_source(url):
 
 @app.get("/eval", response_class=HTMLResponse)
 def evaluation(request: Request):
-    p = Path("data/eval/latest.json")
-    ev = None
-    if p.exists():
+    """Reads agent D's results: data/eval/latest.json plus the per split files when present."""
+    def load(name):
+        p = Path("data/eval") / name
         try:
-            ev = json.loads(p.read_text())
+            return json.loads(p.read_text()) if p.exists() else None
         except Exception:
-            ev = None
-    tests = []
-    pt = Path("data/eval/pipeline_tests.json")
-    if pt.exists():
-        try:
-            tests = json.loads(pt.read_text())
-        except Exception:
-            tests = []
-    usage = gateway_usage()
-    return render(request, "eval.html", ev=ev, tests=tests, arch=archive_stats(), usage=usage, mutz={"screen": "Evaluation"})
+            return None
+    ev = load("latest.json")
+    splits = {k: load(f"latest_{k}.json") for k in ("heldout", "synthetic", "dev")}
+    tests = load("pipeline_tests.json") or []
+    weakest = None
+    rbc = ((ev or {}).get("metrics") or {}).get("recall_by_category") or {}
+    if rbc:
+        weakest = min(rbc.items(), key=lambda kv: kv[1])
+    missed = 0
+    mp = Path("data/eval/missed_experts.jsonl")
+    if mp.exists():
+        missed = sum(1 for _ in open(mp))
+    return render(request, "eval.html", ev=ev, splits=splits, tests=tests, weakest=weakest, missed=missed,
+                  arch=archive_stats(), usage=gateway_usage(), mutz={"screen": "Evaluation"})
 
 
 def gateway_usage():

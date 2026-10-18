@@ -123,7 +123,7 @@ footer.ft .stub{border:1px dashed var(--grey);padding:0 6px}
 #mutz.left{right:auto;left:24px;flex-direction:row-reverse}
 #mutz .peek{border:0;background:none;padding:0;cursor:pointer;transition:transform .15s}
 #mutz .peek:hover{transform:translateY(-4px)}
-#mutz .bubble{margin:0 0 40px;max-width:260px;background:#fff;border:1px solid var(--black);padding:10px 12px;font-size:13px}
+#mutz .bubble{margin:0 0 4px;max-width:260px;background:#fff;border:1px solid var(--black);padding:10px 12px;font-size:13px}
 #mutz .bubble button{border:0;background:none;padding:0 0 0 6px;cursor:pointer;color:var(--grey);font-size:13px}
 #mutzcard{position:fixed;right:24px;bottom:72px;width:400px;height:540px;max-height:calc(100vh - 90px);background:#fff;border:2px solid var(--black);display:flex;flex-direction:column;box-shadow:0 2px 0 var(--black);z-index:60}
 #mutzcard.left{right:auto;left:24px}

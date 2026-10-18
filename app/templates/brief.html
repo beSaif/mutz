@@ -50,11 +50,11 @@
 <div aria-hidden="true" class="vr"></div>
 <section style="flex:999 1 520px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:12px">
 <div id="reading" class="hidden" role="status" aria-live="polite" style="display:flex;gap:20px;align-items:flex-start"><span>{{ ui.mutz("search", 64, 54) }}</span><div><h2 style="margin:0 0 6px;font-size:21px">Bear with me…</h2><p style="margin:0;font-size:14px">Reading the brief and listing the needs. About 10 seconds.</p></div></div>
-{% if lead.profile and (lead.profile.name or lead.profile.product) %}
+{% if lead.profile and (lead.profile.name or lead.profile.product or lead.profile.sector) %}
 <div>
 <h2 style="margin:0 0 10px;font-size:21px">Company profile</h2>
 <dl class="pr">
-{% for k, label in [('name','Name'),('sector','Sector'),('stage','Stage'),('product','Product')] %}{% if lead.profile.get(k) %}<dt>{{ label }}</dt><dd>{{ lead.profile[k] }}</dd><dd class="lb">{{ {'pdf':'PDF','website':'Website'}.get(lead.input_kind, 'Text') }}</dd>{% endif %}{% endfor %}
+{% for k, label in [('name','Name'),('sector','Sector'),('stage','Stage'),('product','Product')] %}<dt>{{ label }}</dt>{% if lead.profile.get(k) %}<dd>{{ lead.profile[k] }}</dd><dd class="lb">{{ {'pdf':'PDF','website':'Website'}.get(lead.input_kind, 'Text') }}</dd>{% else %}<dd></dd><dd class="lb">not stated in the input</dd>{% endif %}{% endfor %}
 </dl>
 </div>
 {% endif %}

@@ -16,7 +16,7 @@ project and infrastructure row has at least one `evidence` row with `verified=1`
 | unit | `unit:<source_group>:<slug>` | none, slug of unit name or URL group segment (e.g. `unit:artorg:aihn`, `unit:dcb:precisionlab`, `unit:unibe_dbmr:root`) |
 | expertise | `expertise:<slug(label)>` | none |
 | project | `project:<source_group>:<slug(title)[:40]>-<h6>` | `norm(title)` |
-| infrastructure | `infra:<source_group>:<slug(name)[:40]>-<h6>` | `norm(name)` |
+| infrastructure | `infra:<source_group>:<slug(name)[:40]>-<h6>` (LLM) or `infra:<source_group>:<h6>` (service pages) | `norm(name)`, or the page's `sibling_group` so DE/EN/FR are one entity |
 
 `slug` = NFKD, ascii, lower, non alnum -> `-`. `source_group` is `artorg`, `dcb`, or the unibe site id (`unibe_dbmr`, ...).
 When two persons merge, the kept id is the email based one, else the lexicographically smaller id;
@@ -31,7 +31,7 @@ person(id TEXT PRIMARY KEY, name TEXT, name_norm TEXT, titles TEXT /*json*/, ema
 unit(id TEXT PRIMARY KEY, name TEXT, type TEXT /*faculty|institute|centre|group|lab|platform|team*/,
      parent_id TEXT, source TEXT, url TEXT)
 affiliation(person_id TEXT, unit_id TEXT, function TEXT /*as written, e.g. "Group Head"*/,
-            function_class TEXT /*head|professor|senior|postdoc|phd|student|staff|other*/,
+            function_class TEXT /*head|professor|senior|postdoc|phd|student|staff|other|collaborator|emeritus*/,
             seniority REAL, source TEXT, url TEXT, page_id TEXT,
             PRIMARY KEY(person_id, unit_id, function))
 expertise(id TEXT PRIMARY KEY, label TEXT, mesh_id TEXT, synonyms TEXT /*json*/)
@@ -67,8 +67,10 @@ Only `evidence.verified=1` rows are written today (dropped facts are only counte
 | phd | PhD student/candidate, doctoral student, Doktorand/in, doctorant | 0.4 |
 | student | master/bachelor student, intern, Praktikant, student | 0.2 |
 | other | anything else, or no function on the page | 0.5 |
+| collaborator | listed under a partner/collaborator/external section of the unit's team page (even with a profile page there), or named only in a project team line: **not a member** | 0.5 |
+| emeritus | "Prof. em.", "emeritus" in name or function | 0.5 |
 
-The first matching class from the top wins. Students still show under their group; ranking multiplies by the weight.
+The first matching class from the top wins; collaborator and emeritus override the function text. Students still show under their group; ranking multiplies by the weight.
 
 ## Unit names (fixed 15:20)
 
@@ -79,12 +81,25 @@ the `team-<slug>` class of the DCB grid). Names, best first:
 3. the h1 of the unit's own index page.
 Never a sub page title ("Teaching", "Publications", "Job Vacancies" were a bug in the first build).
 
+## Infrastructure and projects (fixed 15:45 / 16:00)
+
+Infrastructure = a facility, platform or service people outside the group can use. Sources: (a) rules: every
+unibe page under `/services/`, `/dienstleistungen/`, `/core_facilities/`... is one service (name = breadcrumb,
+description = first sentence, English name/URL preferred, unit = site root); (b) the 8B, filtered by
+`verify.is_infrastructure` (facility/platform/service word in the name, or "available to/open to" in the quote;
+devices, sensors, apps, materials, methods are rejected). Rejected study devices on a project page become
+`evidence(field='device')` on that project. Project `status`/`start`/`end` are set only when a page sentence
+states them (evidence rows with fields status/start/end); dates must contain a year.
+unibe research groups: `/research/<group>/` and `/forschung/<group>/` give one unit `unit:<site>:<slug(group)>`.
+DCB project pages: "Project Team: A, B, C" lines yield persons (merged into the same name team member if any).
+
 ## Merge rules (resolve.py), all logged in merge_log.rule
 
 `email` (same personal email, similar names; generic inboxes never merge), `unit+name` (same unit, token sort
 ratio >= 95), `profile_url` (listing links to the profile page), `name+email_local` (exact full name and same
 email local part on two domains), `exact_name_cross_source` (exact full name on two different sources, no
-conflicting emails: e.g. one person on ARTORG and DCB). Same full name in two units of one source with
+conflicting emails: e.g. one person on ARTORG and DCB), `project_team+name` (a project team name joins the one
+same-source person with that exact name). Same full name in two units of one source with
 different emails stays two people plus a `possible_same` row. Former members and external partners from
 team listings, and people on publications/news pages, go to `mention`, never `person`.
 

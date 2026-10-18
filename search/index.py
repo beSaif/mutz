@@ -82,6 +82,8 @@ def ensure_models(repos=(EMBED_MODEL, RERANK_MODEL), wait=True):
             raise RuntimeError(f"models not cached: {missing}. Run: python -m search.index --download-models")
         env = {k: v for k, v in os.environ.items() if k != "HF_HUB_OFFLINE"}
         cmd = [sys.executable, "-m", "search.index", "--download-models", *missing]
+        if not wait and os.environ.get("MUTZ_ALLOW_MODEL_DOWNLOAD") != "1":
+            raise RuntimeError(f"models not cached: {missing}. Run: python -m search.index --download-models")
         if not wait:
             key = tuple(missing)
             p = _bg_download.get(key)

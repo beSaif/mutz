@@ -10,7 +10,7 @@ from search.index import EMBED_MODEL, RERANK_MODEL, cached_snapshot
 ROOT = Path(__file__).resolve().parents[2]
 
 
-@pytest.mark.skipif(not (cached_snapshot(EMBED_MODEL) and cached_snapshot(RERANK_MODEL)), reason="models not cached")
+@pytest.mark.skipif(not cached_snapshot(EMBED_MODEL), reason="BGE-M3 not cached")
 def test_query_makes_no_hf_calls():
     env = {k: v for k, v in os.environ.items() if not k.startswith(("MUTZ_NO_", "HF_HUB_OFFLINE"))}
     p = subprocess.run([sys.executable, "-m", "search.netcheck", "glucose sensors"], cwd=ROOT, env=env,

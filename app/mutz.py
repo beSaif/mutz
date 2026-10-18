@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from urllib.parse import urlparse
+from urllib.parse import quote as quote_url, urlparse
 
 from app import contracts, db
 
@@ -320,6 +320,9 @@ def ask(body):
                  "reasons": [{"url": e["url"], "quote": e.get("quote", ""), "deep_link": e["url"]} for e in ev if e.get("url")]}
         if match["reasons"]:
             actions.append({"kind": "add_anyway", "label": "Add anyway", "items": [{"entity_id": w["entity_id"], "match": match}]})
+        if ctx.get("need"):
+            actions.insert(0, {"kind": "link", "label": "Show in the ranked list", "primary": False,
+                               "href": f"/leads/{ctx['lead']}/matches?need={ctx['need']}&why=" + quote_url(w.get("name") or "")})
         actions.append({"kind": "missed", "label": "This is a missed expert", "primary": False, "name": w.get("name"),
                         "entity_id": w.get("entity_id"), "query": ctx.get("need_text") or ""})
     elif sources and ctx.get("lead") and turn.matches:

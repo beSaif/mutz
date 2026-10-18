@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from rapidfuzz import fuzz
+from rapidfuzz.distance import Levenshtein
 
 from ingest import verify as V
 
@@ -23,7 +24,8 @@ KG = Path("data/kg.sqlite")
 STATS = Path("logs/extract_stats.json")
 
 SENIORITY = {"head": 1.0, "professor": 1.0, "senior": 0.8, "postdoc": 0.6, "staff": 0.5, "phd": 0.4,
-             "student": 0.2, "other": 0.5}
+             "student": 0.2, "other": 0.5, "collaborator": 0.5, "emeritus": 0.5}
+EMERITUS_RX = re.compile(r"\bem(er)?\.|emerit", re.I)
 _FUNC_RX = [
     ("postdoc", r"post-?doc|postdoctoral"),
     ("phd", r"\bph\.?\s?d\b|doctoral|doktorand|doctorant|graduate student"),
@@ -73,6 +75,15 @@ def split_titles(name):
     m = TITLE_PREFIX.match(name.strip())
     titles = [t for t in re.split(r"[\s,]+", m.group(0)) if t] if m else []
     return titles, V.strip_titles(name)
+
+
+def spelling_variant(a, b):
+    """Same given name(s), surname within edit distance 1 (2 for surnames of 8+ letters): 'Kokona' / 'Kokana'."""
+    ta, tb = a.split(), b.split()
+    if a == b or len(ta) != len(tb) or len(ta) < 2 or ta[:-1] != tb[:-1]:
+        return False
+    la, lb = ta[-1], tb[-1]
+    return Levenshtein.distance(la, lb) <= (2 if min(len(la), len(lb)) >= 8 else 1)
 
 
 def person_id(name, email=None, unit_id=None):
@@ -304,10 +315,48 @@ def build(records, out=KG, stats=None):
                 else:
                     possible.append((a["pid"], b["pid"], f"same full name, units {a['unit_id']} / {b['unit_id']}", 0.7))
 
+    # project team names (no unit function, no email) join the one same-source person with that exact name
+    for c in cands:
+        if c.get("relation") != "project_team":
+            continue
+        others = {uf.find(o["pid"]) for o in by_name[c["nn"]]
+                  if o["source"] == c["source"] and o.get("relation") != "project_team"}
+        if len(others) == 1:
+            join(c["pid"], others.pop(), "project_team+name")
+
+    # spelling variants (playbook data traps): same given name, surname edit distance <= 1 (2 if long).
+    # Same unit -> merge; a project team name -> the one same-source member with that variant; else review.
+    names_list = sorted(by_name)
+    for i, na in enumerate(names_list):
+        for nb in names_list[i + 1:]:
+            if not spelling_variant(na, nb):
+                continue
+            for a in by_name[na]:
+                for b in by_name[nb]:
+                    if uf.find(a["pid"]) == uf.find(b["pid"]):
+                        continue
+                    if a["email"] and b["email"] and a["email"] != b["email"]:
+                        possible.append((a["pid"], b["pid"], f"spelling variant {na} / {nb}, different emails", 0.6))
+                    elif a["unit_id"] == b["unit_id"]:
+                        join(a["pid"], b["pid"], "spelling_variant")
+                    elif a["source"] == b["source"] and "project_team" in (a.get("relation"), b.get("relation")) \
+                            and not (a.get("relation") == b.get("relation") == "project_team"):
+                        join(a["pid"], b["pid"], "spelling_variant")
+                    else:
+                        possible.append((a["pid"], b["pid"], f"spelling variant {na} / {nb}, units "
+                                         f"{a['unit_id']} / {b['unit_id']}", 0.6))
+
     clusters = defaultdict(list)
     for c in cands:
         clusters[uf.find(c["pid"])].append(c)
 
+    # people listed under external/partner sections of a unit's team page are collaborators of that unit,
+    # even when they also have a profile page there (gap 13)
+    collab_keys = set()
+    for r in records:
+        for m in r.get("mentions") or []:
+            if str(m.get("context") or "").startswith("external"):
+                collab_keys.add((r["unit_id"], name_norm(m["name"])))
     pid_map = {}
     persons = 0
     for root, cs in clusters.items():
@@ -331,9 +380,15 @@ def build(records, out=KG, stats=None):
         for c in cs:
             func = c.get("function") or ""
             cls, w = function_class(func)
+            if c.get("relation") == "project_team" or (c["unit_id"], c["nn"]) in collab_keys:
+                cls, w = "collaborator", SENIORITY["collaborator"]     # not a member of this unit
+            elif EMERITUS_RX.search(c["name"]) or EMERITUS_RX.search(func):
+                cls, w = "emeritus", SENIORITY["emeritus"]
             key = (c["unit_id"], func)
             if key not in affs:
                 affs[key] = (cls, w, c)
+        if any(c.get("relation") != "project_team" for c in cs):
+            affs = {k: v for k, v in affs.items() if v[2].get("relation") != "project_team"}
         # drop the empty function row when the same unit has a real function
         for (u, fn) in list(affs):
             if fn == "" and any(k[0] == u and k[1] for k in affs):
@@ -407,7 +462,27 @@ def build(records, out=KG, stats=None):
                                   f.get("status"), r["url"], r["source"]))
                     n_proj += 1
                 ev(pid, "title", f["title"], f["quote"], r, "llm")
+                for fld in ("status", "start", "end"):
+                    if f.get(fld):
+                        ev(pid, fld, f[fld], f.get(fld + "_quote") or f["quote"], r, "llm")
+                        conn.execute(f'UPDATE project SET "{fld}"=coalesce("{fld}", ?) WHERE id=?', (f[fld], pid))
                 conn.execute("INSERT OR IGNORE INTO page_entity VALUES(?,?,?)", (r["page_id"], pid, "subject"))
+            elif k == "infrastructure" and f.get("method") == "rules":
+                # service pages: one entity per sibling group (DE/EN/FR), English name and URL preferred
+                iid = f"infra:{r['source']}:{h6(f.get('key') or r['page_id'])}"
+                row = conn.execute("SELECT 1 FROM infrastructure WHERE id=?", (iid,)).fetchone()
+                if row is None:
+                    conn.execute("INSERT INTO infrastructure VALUES(?,?,?,?,?,?,?)",
+                                 (iid, f["name"], "service", f"unit:{r['source']}:root", f.get("description"),
+                                  r["url"], r["source"]))
+                    n_inf += 1
+                elif r.get("lang") == "en":
+                    conn.execute("UPDATE infrastructure SET name=?, url=?, description=coalesce(?, description) "
+                                 "WHERE id=?", (f["name"], r["url"], f.get("description"), iid))
+                ev(iid, "name", f["name"], f["quote"], r, "rules")
+                if f.get("description"):
+                    ev(iid, "description", f["description"][:200], f["description"], r, "rules")
+                conn.execute("INSERT OR IGNORE INTO page_entity VALUES(?,?,?)", (r["page_id"], iid, "subject"))
             elif k == "infrastructure":
                 iid = f"infra:{r['source']}:{slug(f['name'])[:40]}-{h6(V.fold(f['name']))}"
                 if conn.execute("SELECT 1 FROM infrastructure WHERE id=?", (iid,)).fetchone() is None:

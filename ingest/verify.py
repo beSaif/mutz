@@ -178,8 +178,28 @@ def check_llm_fact(fact, page_text, page_type=None):
         return {**f, "kind": "device"}, "ok", None        # resolve.py attaches it to the page's project, if any
     if kind == "project":
         for fld in ("start", "end", "status"):
-            if f.get(fld) and not contains_value(quote, str(f[fld]), ratio=100):
+            v = str(f.get(fld) or "").strip()
+            if not v:
+                continue
+            if fld == "status":
+                rx = STATUS_RX.get(v.lower())
+                hit = rx and (rx.search(quote) and quote or next((x for x in SENT_SPLIT.split(page_text) if rx.search(x)), None))
+            else:
+                y = re.search(r"(19|20)\d{2}", v)
+                if not y:                                     # dates must contain a year
+                    f[fld] = None
+                    continue
+                rx = re.compile(re.escape(y.group(0)))
+                hit = rx.search(quote) and quote or (page_type == "project" and next(
+                    (x for x in SENT_SPLIT.split(page_text) if rx.search(x) and words(x) >= 4), None))
+            if hit:
+                f[fld + "_quote"] = hit.strip() if isinstance(hit, str) else quote
+            else:
                 f[fld] = None
+        if not f.get("status"):                               # rules: the page itself says it is recruiting
+            hit = next((x for x in SENT_SPLIT.split(page_text) if STATUS_RX["recruiting"].search(x)), None)
+            if hit and page_type == "project":
+                f["status"], f["status_quote"] = "recruiting", hit.strip()
     return f, "ok", None
 
 
@@ -212,6 +232,15 @@ def is_infrastructure(name, quote):
     # a named thing called a facility/platform/service right next to its name: "imaging platform (ACTIO)"
     esc = re.escape(n)
     return bool(re.search(rf"(?:{INFRA_WORD})[^.]{{0,40}}{esc}|{esc}[^.]{{0,40}}(?:{INFRA_WORD})", quote or "", re.I))
+
+
+STATUS_RX = {
+    "recruiting": re.compile(r"recruit|rekrutier|teilnehmende gesucht|participants? (are )?(wanted|sought|needed)|"
+                             r"looking for (study )?participants|take part|teilnehmen|mitmachen|participer|"
+                             r"sign up for the study|currently enrolling", re.I),
+    "ongoing": re.compile(r"ongoing|currently running|läuft|laufend|in progress|en cours|is running", re.I),
+    "completed": re.compile(r"completed|abgeschlossen|finished|termin[ée]|has ended|concluded", re.I),
+}
 
 
 def check_rules_fact(fact, visible_text):

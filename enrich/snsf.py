@@ -31,10 +31,15 @@ Matching rule (gap 12: no merge on surname alone, ambiguous means no link)
    full: "Hans" never matches "Hans-Peter", and a surname alone never matches.
    A kg person (all kg people are Bern people) is linked to a Bern candidate with the same key
    only when the match is unique in both directions:
-     - exactly one Bern SNSF candidate has the key -> rule "name+institution";
+     - exactly one Bern SNSF candidate has the key, and the name occurs only once among all
+       SNSF persons in Switzerland -> rule "name+institution";
+     - exactly one Bern candidate, but the name occurs more than once in SNSF nationwide:
+       linked only if the unit test passes -> rule "name+institution+unit";
      - several candidates, but exactly one also matches the person's unit (a distinctive
-       word of a kg unit name, such as "ARTORG", appears in the candidate's SNSF institute
-       texts) -> rule "name+institution+unit";
+       word of a kg unit name, such as "ARTORG", appears in the candidate's own SNSF institute
+       or the institute of a Bern grant they lead or are employed on; project partner and
+       co-applicant grants do not count, they are often held elsewhere)
+       -> rule "name+institution+unit";
      - otherwise no link.
    If two kg people would link to the same SNSF person (e.g. two records for one name),
    the unit test decides; if it cannot, none of them is linked.
@@ -99,7 +104,9 @@ UNIT_STOPWORDS = {
     "research", "lab", "laboratory", "clinic", "klinik", "faculty", "fakultat", "medical",
     "medicine", "medizin", "medizinische", "biomedical", "engineering", "science", "sciences",
     "unit", "team", "division", "platform", "root", "hospital", "spital", "inselspital", "head",
+    "unibe", "core",
 }
+OWN_SITE_ROLES = {"responsible applicant", "employee"}   # roles that sit at the grant's institute
 
 
 # ---------------------------------------------------------------- normalisation
@@ -254,7 +261,11 @@ def load_bern_grants(path: Path | None = None) -> dict[str, dict]:
 def load_bern_people(grants: dict[str, dict], path: Path | None = None) -> list[dict]:
     """SNSF persons who hold a role on a Bern grant, or whose own institution is Bern."""
     people = []
+    name_count = defaultdict(int)          # key -> number of SNSF persons in all of Switzerland
     for r in _read_csv(path or RAW / "persons.csv"):
+        k = snsf_key(r.get("FirstName", ""), r.get("LastName", ""))
+        if k:
+            name_count[k] += 1
         roles = {}
         for col, role in ROLE_COLUMNS.items():
             for n in re.split(r"[;,\s]+", r.get(col) or ""):
@@ -275,6 +286,8 @@ def load_bern_people(grants: dict[str, dict], path: Path | None = None) -> list[
             "key": key,
             "roles": roles,                       # grant number -> role, Bern grants only
         })
+    for sp in people:
+        sp["name_count"] = name_count[sp["key"]]
     return people
 
 
@@ -355,6 +368,8 @@ def match(kg_people: list[dict], snsf_people: list[dict]) -> dict[str, tuple[dic
         if len(cands) == 1:
             sp = cands[0]
             ok = bool(unit_ok)
+            if not ok and sp.get("name_count", 1) > 1:
+                continue      # name occurs more than once in SNSF nationwide: unit must confirm
             proposals[kp["entity_id"]] = (sp, "name+institution+unit" if ok else "name+institution", ok)
         elif len(unit_ok) == 1:
             proposals[kp["entity_id"]] = (unit_ok[0], "name+institution+unit", True)
@@ -383,7 +398,10 @@ def _institute_texts(sp: dict) -> list[str]:
 
 def attach_grant_institutes(snsf_people: list[dict], grants: dict[str, dict]) -> None:
     for sp in snsf_people:
-        sp["_grant_institutes"] = sorted({grants[n]["institute"] for n in sp["roles"] if n in grants})
+        # only roles held at the grant's own institute say where the person works; a project
+        # partner or co-applicant on someone else's grant may sit elsewhere
+        sp["_grant_institutes"] = sorted({grants[n]["institute"] for n, role in sp["roles"].items()
+                                          if n in grants and role in OWN_SITE_ROLES})
 
 
 def link_records(links, grants) -> list[dict]:
@@ -394,7 +412,8 @@ def link_records(links, grants) -> list[dict]:
             if not g:
                 continue
             rows.append({"entity_id": eid, "snsf_person_number": sp["person_number"],
-                         "match_rule": rule, "role": role, "source": SOURCE_LABEL, **g})
+                         "match_rule": rule, "role": role, "source": SOURCE_LABEL,
+                         "person_institute": sp.get("institute") or "", **g})
     return rows
 
 
@@ -474,7 +493,10 @@ def _resolve(entity_id: str) -> str:
 def grants_for(entity_id: str, path: Path | None = None) -> list[dict]:
     """[{"title", "number", "start", "end", "amount_chf", "role", "url"}], newest first; [] when unknown.
     Extra fields: source ("SNSF"), match_rule, state, funding_instrument, institute, status
-    (active|quiet|past, from the end date, as in the Studies section)."""
+    (active|quiet|past, from the end date, as in the Studies section), person_institute.
+    Note: `institute` is where the grant is held (the responsible applicant's institute), which
+    for a co-applicant or project partner can differ from the person's own unit;
+    `person_institute` is the person's institute as SNSF lists it."""
     idx = _index(path or OUT)
     rows = idx.get(entity_id)
     if rows is None:
@@ -484,7 +506,8 @@ def grants_for(entity_id: str, path: Path | None = None) -> list[dict]:
         g = {k: r.get(k) for k in CONTRACT_FIELDS}
         g.update({"source": r.get("source", SOURCE_LABEL), "match_rule": r.get("match_rule"),
                   "state": r.get("state"), "funding_instrument": r.get("funding_instrument"),
-                  "institute": r.get("institute"), "status": recency(r.get("end"))})
+                  "institute": r.get("institute"), "person_institute": r.get("person_institute"),
+                  "status": recency(r.get("end"))})
         out.append(g)
     out.sort(key=lambda g: (g["start"] or "", g["number"]), reverse=True)
     return out

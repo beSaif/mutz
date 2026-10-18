@@ -107,6 +107,7 @@ def best_quote(text: str, terms: set[str], min_words=6, max_words=45) -> str:
         score = hits * 2 + (0.5 if n >= min_words else 0) - 0.01 * i  # prefer early ties
         if n < 3:
             score -= 1
+        score -= 0.5 * s.count(";")      # journal lists and keyword lists make poor quotes
         if score > best_score:
             best, best_score = s, score
     best = best or sents[0]

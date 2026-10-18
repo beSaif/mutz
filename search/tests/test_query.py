@@ -14,6 +14,7 @@ pytestmark = pytest.mark.skipif(not (ROOT / "data" / "chunks.jsonl").exists(), r
 if os.environ.get("MUTZ_TEST_MODELS") != "1":
     os.environ["MUTZ_NO_RERANK"] = "1"
     os.environ["MUTZ_NO_DENSE"] = "1"
+    os.environ["MUTZ_NO_JUDGE"] = "1"
 os.chdir(ROOT)
 
 from search import query as Q  # noqa: E402

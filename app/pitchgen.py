@@ -71,18 +71,27 @@ def _llm_cards(items, company, lang="en"):
         "type": "object", "properties": {"cards": {"type": "array", "items": {"type": "object", "properties": {
             "id": {"type": "string"}, "text": {"type": "string"}}, "required": ["id", "text"]}}}, "required": ["cards"]})
     lines = []
-    for it in items:
+    for k, it in enumerate(items, 1):
+        it = dict(it, id=f"card{k}")
         qs = " | ".join(f"“{q}”" for q in it["quotes"] if q)
         lines.append(f"id={it['id']} · {it['type']} · {it['name']} ({it['unit']}) · need: {it['need']} · quotes: {qs}")
     lang_name = {"de": "German", "fr": "French"}.get(lang, "English")
     r = llm.chat(llm.LARGE, [
-        {"role": "system", "content": STYLE + f" Write in {lang_name}. The company: {company}. Say in one clause why it fits the company's need."},
+        {"role": "system", "content": STYLE + f" Write in {lang_name}. The company: {company}. Say in one clause why it fits the company's need. "
+         "Return exactly one card per id given (card1, card2, ...), with that id. Never state anything the quotes do not say."},
         {"role": "user", "content": "\n".join(lines)}],
         tools=[tool], tool_choice=llm.force("write_cards"), tag="app.pitch_cards", temperature=0.2)
-    out = {}
+    got = []
     if r["tool_calls"] and isinstance(r["tool_calls"][0]["arguments"], dict):
-        for c in r["tool_calls"][0]["arguments"].get("cards", []):
-            out[str(c.get("id"))] = _clean(c.get("text"))
+        got = [c for c in r["tool_calls"][0]["arguments"].get("cards", []) if isinstance(c, dict)]
+    by_id = {str(c.get("id")): _clean(c.get("text")) for c in got}
+    out = {}
+    for k, it in enumerate(items, 1):
+        t = by_id.get(f"card{k}") or by_id.get(str(k))
+        if t is None and len(got) == len(items):
+            t = _clean(got[k - 1].get("text"))
+        if t:
+            out[it["id"]] = t
     return out
 
 
@@ -95,7 +104,9 @@ def _card(r, n, section, text=None):
 
 
 def _write(cards, lead, lang):
-    items = [{"id": c["card_id"], "name": c["name"], "unit": c["unit"], "type": c["type"], "need": c["need"],
+    items = [{"id": c["card_id"], "need": c["need"], "type": "research group" if c["type"] == "person" else c["type"],
+              "name": f"a research group at {c['unit'] or 'the University of Bern'}" if c["type"] == "person" and not c.get("show_person_name") else c["name"],
+              "unit": c["unit"],
               "quotes": [s["quote"] for s in c["sources"]]} for c in cards if c["sources"]]
     if not items:
         return
@@ -207,10 +218,7 @@ def to_contract(draft, lead):
     cards = []
     for c in visible_cards(draft):
         text = c["text"]
-        if c["type"] == "person" and not c.get("show_person_name"):
-            name = f"Group at {c['unit']}" if c.get("unit") else "Research group"
-        else:
-            name = c["name"]
+        name = c["name"]  # pitch.build hides a person's name itself unless show_person_name is on
         cards.append({"entity_id": c.get("entity_id"), "type": c["type"], "name": name, "unit": c.get("unit", ""),
                       "person": c["name"] if c["type"] == "person" else None, "included": True,
                       "show_person_name": bool(c.get("show_person_name")), "text": text,

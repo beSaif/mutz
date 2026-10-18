@@ -85,37 +85,37 @@ for that reason.
 
 ### Dev (tuning set)
 <!-- results:dev -->
-Run 2026-10-18T13:44:45+00:00, backend `search.query`, k=10. **degraded: BM25 + expansions, no dense/rerank**.
+Run 2026-10-18T14:29:59+00:00, backend `search.query`, k=10. **C: bge-m3 + bge-reranker blended + 70B grade/reason; idf need coverage**.
 
 ```
-split dev | backend search.query (degraded: BM25 + expansions, no dense/rerank) | kg yes | 46 recall queries, 5 skipped (manual/needs), 0 errors
-Recall@10            52%   (hit rate 56%, target >= 80%; adjacent excluded)
-Synonym parity       Jaccard 0.2, overlap 0.4 over 3 groups
+split dev | backend search.query (C: bge-m3 + bge-reranker blended + 70B grade/reason; idf need coverage) | kg yes | 46 recall queries, 5 skipped (manual/needs), 0 errors
+Recall@10            88%   (hit rate 89%, target >= 80%; adjacent excluded)
+Synonym parity       Jaccard 0.358, overlap 0.471 over 3 groups
 Citation validity    100% of reasons quote their page; 100% of results fully cited; failures none
-Field completeness   78%  name 100% unit 100% source_link 100% function 100% email 0% phone 0%
-Exposure             48 units shown, gini 0.553, top1 12%, top5 38%, entropy 0.865, 21% of index units ever shown
-Checks               abstain:pass=1, entity_resolution:fail=2, recency_active:fail=1
-Recall by category   infrastructure 75%, lay 42%, multilingual 36%, person 100%, service 100%, site_term 61%, synonym 33%, typo 50%
+Field completeness   100%  name 100% unit 100% source_link 100% function 100% email 100% phone 100%
+Exposure             88 units shown, gini 0.503, top1 10%, top5 25%, entropy 0.897, 26% of index units ever shown
+Checks               abstain:pass=1, entity_resolution:pass=2, recency_active:pass=1
+Recall by category   infrastructure 100%, lay 83%, multilingual 100%, person 100%, service 50%, site_term 89%, synonym 67%, typo 100%
 ```
 
 | source | pages | entities | gold targets | recall@10 | results shown |
 |---|---|---|---|---|---|
-| artorg | 363 | 253 | 19 | 47% | 66 |
-| dcb | 450 | 70 | 7 | 71% | 9 |
-| unibe_bcpm | 183 | 139 | 2 | 100% | 33 |
-| unibe_dbmr | 199 | 279 | 2 | 100% | 22 |
-| unibe_dcbp | 199 | 166 | 2 | 0% | 8 |
-| unibe_iap | 131 | 105 | 2 | 0% | 16 |
-| unibe_ibmm | 134 | 102 | 2 | 100% | 11 |
-| unibe_ifik | 197 | 136 | 2 | 0% | 15 |
-| unibe_ispm | 198 | 217 | 2 | 100% | 11 |
-| unibe_izb | 199 | 113 | 2 | 0% | 6 |
-| unibe_medizin | 198 | 184 | 2 | 50% | 17 |
-| unibe_mic | 96 | 61 | 2 | 0% | 4 |
-| unibe_neuroscience | 158 | 189 | 2 | 50% | 19 |
-| unibe_ngs | 28 | 18 | 2 | 50% | 2 |
-| unibe_pki | 190 | 80 | 2 | 50% | 4 |
-| unibe_tki | 103 | 78 | 2 | 50% | 5 |
+| artorg | 363 | 253 | 19 | 79% | 58 |
+| dcb | 450 | 86 | 7 | 71% | 24 |
+| unibe_bcpm | 183 | 150 | 2 | 100% | 14 |
+| unibe_dbmr | 199 | 245 | 2 | 100% | 26 |
+| unibe_dcbp | 199 | 164 | 2 | 100% | 17 |
+| unibe_iap | 131 | 102 | 2 | 100% | 15 |
+| unibe_ibmm | 134 | 109 | 2 | 100% | 16 |
+| unibe_ifik | 197 | 162 | 2 | 50% | 12 |
+| unibe_ispm | 198 | 228 | 2 | 100% | 11 |
+| unibe_izb | 199 | 120 | 2 | 100% | 6 |
+| unibe_medizin | 198 | 143 | 2 | 100% | 15 |
+| unibe_mic | 96 | 50 | 2 | 100% | 10 |
+| unibe_neuroscience | 158 | 146 | 2 | 100% | 21 |
+| unibe_ngs | 28 | 20 | 2 | 100% | 4 |
+| unibe_pki | 190 | 76 | 2 | 100% | 12 |
+| unibe_tki | 103 | 54 | 2 | 100% | 7 |
 <!-- /results:dev -->
 
 Stub backend (keyword baseline, harness floor only):
@@ -152,6 +152,19 @@ Recall by category   infrastructure 100%, lay 50%, multilingual 18%, person 0%, 
 | unibe_pki | 190 | 65 | 2 | 50% | 16 |
 | unibe_tki | 103 | 48 | 2 | 50% | 14 |
 <!-- /results:dev:stub -->
+
+Dev progression, real `search.query` (the 15:44 degraded run was BM25 + 70B expansions with no dense or rerank; the 16:05 run added dense bge-m3, the Apertus 70B judge and the 16:00 KG rebuild; no cross encoder):
+
+| metric | 15:44 degraded | 16:05 dense + 70B judge |
+|---|---|---|
+| Recall@10 (hit rate) | 52% (56%) | 91% (94%) |
+| Synonym parity Jaccard / overlap | 0.20 / 0.40 | 0.48 / 0.60 |
+| Citation validity | 100% | 100% |
+| Field completeness | 78% (email, phone 0%) | 100% |
+| Exposure: units shown, Gini, top 5 share, share of KG units shown | 48, 0.55, 38%, 21% | 107, 0.52, 23%, 32% |
+| Checks failed | tc26, tc27, tc36 | tc27 (Kokona and Kokana are still two people), tc36 (no project results) |
+
+The 16:05 run returned 16 results with `adjacent: true`. All 16 were dropped before scoring.
 
 ### Held out (run once after the freeze)
 <!-- results:heldout -->

@@ -36,7 +36,7 @@
 <span><b{% if kind == 'closed' %} style="color:#111"{% endif %}>{{ r.title }}</b><span class="lb" style="display:block">{{ r.summary or (r.sector or 'No summary yet') }}{% if r.demo %} · demo{% endif %}</span></span>
 <span class="lb">{{ r.origin }} · {{ r.created_at|date }}</span>
 {% if kind == 'new' %}
-<span style="display:inline-flex;gap:8px;align-items:center;font-size:14px">{{ ui.pot(p.pot, 18, 20, False) }}{% if p.pot %}{{ {"strong":"Likely strong","thin":"Thin","none":"Kei Hung"}[p.pot] }}{% else %}Not checked{% endif %}</span>
+<span style="display:inline-flex;gap:8px;align-items:center;font-size:14px">{{ ui.pot(p.pot, 18, 20, False) }}{% if p.pot %}{{ {"strong":"Likely strong","thin":"Thin","none":"No match"}[p.pot] }}{% else %}Not checked{% endif %}</span>
 {% elif kind == 'draft' %}
 <span style="font-size:14px">{% if p.cards %}Pitch · {{ p.checked }} of {{ p.cards }} checked<span class="bar" style="width:150px"><i style="width:{{ (100 * p.checked / p.cards)|int }}%"></i></span>{% elif p.accepted or p.searched %}Matches · {{ p.accepted }} accepted<span class="bar" style="width:150px"><i style="width:40%"></i></span>{% elif p.needs %}Brief · {{ p.needs }} needs<span class="bar" style="width:150px"><i style="width:15%"></i></span>{% else %}Brief · not read yet{% endif %}</span>
 {% else %}

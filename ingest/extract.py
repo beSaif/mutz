@@ -87,7 +87,40 @@ def page_unit(page):
     m = UNIT_SEG.search(path)
     if m:
         return f"unit:{src}:{slug(m.group(1))}", None, root
+    # unibe CMS: /research/<group>/ (EN) and /forschung/<group>/ (DE) are one group, same id
+    m = re.match(r"^/(?:research|forschung|recherche)/([a-z0-9_\-]+)/", path, re.I)
+    if m and not GENERIC_DIR.match(m.group(1)):
+        return f"unit:{src}:{slug(m.group(1))}", None, root
     return root, ROOTS.get(src), None
+
+
+GENERIC_DIR = re.compile(r"^(index[\w.]*|research_programs|research_groups|research_group|groups|gruppen|projects|"
+                         r"projekte|publications|publikationen|news|events|seminars?|awards?|prizes?|"
+                         r"research_support|research_areas|forschungsschwerpunkte|schwerpunkte|"
+                         r"media_release_archive|core_facilities|platforms?|links|contact|kontakt)$", re.I)
+SERVICE_RX = re.compile(r"^/(services|dienstleistungen|prestations|core_facilities|facilities|plattformen|"
+                        r"platforms|infrastructure|infrastruktur)/(.+?)/?(index_\w+\.html)?$", re.I)
+SERVICE_LEAF_SKIP = re.compile(r"^(kontakt|contact|links|fact_sheets|faq|preise|prices|tarife|forms?|formulare|"
+                               r"downloads?|team|news|anfahrt|how_to_find_us|it_services|meeting_room\w*|"
+                               r"administrative_support|supply_center|dbmr_website)$", re.I)
+
+
+def service_infra(page):
+    """A page under /services/... or /dienstleistungen/... is a service or facility of the unit (rules)."""
+    path = urlparse(page["url"]).path
+    m = SERVICE_RX.match(path)
+    if not m or page.get("page_type") in ("news", "publications", "person"):
+        return None
+    dirs = [d for d in m.group(2).split("/") if d]
+    if not dirs or SERVICE_LEAF_SKIP.match(dirs[-1]):
+        return None
+    bcs = page.get("breadcrumbs") or []
+    name = bcs[-1] if bcs else None
+    if not name or len(name) > 90 or name.lower() in GENERIC_BC:
+        name = (page.get("h1") or page.get("title") or "").strip()
+    if not name or len(name) > 90:
+        return None
+    return name
 
 
 # ---------------------------------------------------------------- raw HTML access (local only)
@@ -166,6 +199,11 @@ GENERIC_BC = {"research", "forschung", "recherche", "group members", "team", "st
 FORMER_RX = re.compile(r"former|alumni|ehemalige|anciens|past members", re.I)
 EXTERNAL_HEAD_RX = re.compile(r"partner|collaborat|kooperation|advisory|beirat|board|extern|external|"
                               r"guest|gäste|visiting|clinical (partners|collaborators)", re.I)
+
+
+EXT_ORG_RX = re.compile(r"\b(AG|GmbH|SA|Ltd|Inc|LLC)\b|founder|gründer|ceo\b|cso\b|cto\b|cco\b|consultant|"
+                        r"\beth\b|ethz|epfl|st\.? ?gallen|fachhochschul|zhaw|bfh|comerge|qumea|operations|"
+                        r"business development|content development|designer", re.I)
 
 
 def name_like(name):
@@ -254,6 +292,40 @@ def rules_extract(page, html):
             facts.append({**base, "kind": "person", "relation": "member", "name": name, "function": func,
                           "unit_id": guid, "unit_parent": "unit:dcb:root", "email": mail, "phone": None,
                           "profile_url": None, "quote": " ".join(x for x in (func, name) if x)})
+
+    # services and facilities from the URL structure (unibe CMS)
+    sname = service_infra(page)
+    if sname and not name_like(sname):
+        first = next((x.strip() for x in V.SENT_SPLIT.split(page.get("text") or "")
+                      if V.words(x) >= 6 and not x.strip().startswith("#")), "")
+        facts.append({**base, "kind": "infrastructure", "name": sname, "infra_kind": "service",
+                      "description": first[:400] or None, "quote": sname, "key": page.get("sibling_group") or page["page_id"]})
+
+    # project team lines on project pages: "Project Team: Dr. A B, Dr. C D, E F"
+    if page.get("page_type") == "project" or "/project/" in page["url"]:
+        for line in (page.get("text") or "").splitlines():
+            m = re.match(r"^\s*(?:project team|projektteam|study team|studienteam|équipe du projet|team)\s*:\s*(.+)$",
+                         line.strip(), re.I)
+            if not m:
+                continue
+            body = m.group(1)
+            if ";" in body:          # "Prof. Dr. A B, Inselspital und Universität Bern (Projektleitung); ..."
+                items = [(seg.split(",", 1)[0], seg.split(",", 1)[1] if "," in seg else "") for seg in body.split(";")]
+            else:                    # "A B (Product Manager, DCB), C D & E F (Projektleiter, comerge AG)"
+                items = []
+                for seg in re.findall(r"[^,(]+(?:\([^)]*\))?", body):
+                    role = re.search(r"\(([^)]*)\)", seg)
+                    for nm in re.split(r"\s*&\s*|\s+(?:and|und|et)\s+", re.sub(r"\([^)]*\)", "", seg)):
+                        items.append((nm, role.group(1) if role else ""))
+            for nm, role in items:
+                nm, role = nm.strip(" .;"), role.strip(" .;")
+                if not name_like(nm):
+                    continue
+                external = bool(EXT_ORG_RX.search(role))
+                facts.append({**base, "kind": "person", "relation": "external" if external else "project_team",
+                              "section": "project team", "name": nm, "function": role or "Project team member",
+                              "unit_id": uid, "email": None, "phone": None, "profile_url": None,
+                              "quote": line.strip()})
 
     # ARTORG style "Affiliated research groups" sections: "<Group>, Prof. Dr. <Name>" one per line
     section = None

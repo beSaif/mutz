@@ -274,3 +274,45 @@ def test_live_demo_and_injection():
     assert {"research", "infrastructure", "funding"} <= {n["type"] for n in out["needs"]}
     inj = needs(one_pager_text=INJ)
     assert "acme" not in json.dumps(inj["needs"]).lower()
+
+
+# ------------------------------------------------------------------ grounding of profile name and terms (agent F follow up)
+
+def test_invented_profile_name_is_null_and_terms_stay_in_their_passage(monkeypatch):
+    from common import llm
+    resp = {"profile": {"name": "GlucoseLactatePatch", "country": "Finland"},
+            "needs": [
+                {"text": "Clinical study with women with type 1 diabetes", "type": "research", "priority": "high",
+                 "from_sentence": "Clinical validation of the patch with women who have type 1 diabetes, including how "
+                                  "glucose and lactate change across the menstrual cycle and during exercise.",
+                 "passage_id": "p20",
+                 "terms": ["type 1 diabetes clinical study", "menstrual cycle exercise",
+                           "manufacturing partner medical device", "glucose lactate"]}],
+            "instruction_ids": []}
+    monkeypatch.setattr(llm, "chat", fake_chat(resp, []))
+    out = needs(one_pager_text=DEMO)
+    assert out["profile"]["name"] is None
+    assert out["needs"][0]["terms"] == ["type 1 diabetes clinical study", "menstrual cycle exercise", "glucose lactate"]
+
+
+def test_profile_name_kept_when_verbatim(monkeypatch):
+    from common import llm
+    resp = {"profile": {"name": "kestrelyn health  oy"}, "needs": [], "instruction_ids": []}
+    monkeypatch.setattr(llm, "chat", fake_chat(resp, []))
+    assert needs(one_pager_text=DEMO)["profile"]["name"] == "Kestrelyn Health Oy"
+
+
+REAL_CURATED = Path(__file__).resolve().parents[2] / "enrich" / "curated.json"
+
+
+@pytest.mark.skipif(not REAL_CURATED.exists(), reason="enrich/curated.json not written yet")
+def test_route_against_real_curated_file(no_gateway, monkeypatch):
+    monkeypatch.delenv("MUTZ_CURATED", raising=False)
+    demo = needs(one_pager_text=DEMO, use_model=False)
+    by_type = {n["type"]: n for n in demo["needs"]}
+    for t in ("funding", "transfer", "other"):
+        r = route(by_type[t])
+        assert r["kind"] == "curated" and r["entries"], t
+        assert all(t in e["need_types"] and e["source_url"] for e in r["entries"])
+    assert route(by_type["supplier"])["kind"] == "not_covered"
+    assert route(by_type["research"])["kind"] == "search"

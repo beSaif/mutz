@@ -174,3 +174,23 @@ def test_real_grants_show_for_kg_people():
     eid = sorted(linked_in_kg)[0]
     gs = snsf.grants_for(eid)
     assert gs and all(g["url"].startswith("https://data.snf.ch/grants/grant/") for g in gs)
+
+
+def test_name_common_in_switzerland_needs_unit_confirmation():
+    one = sp("1", "Thomas", "Geiser", "Universitätsklinik für Pneumologie Inselspital")
+    one["name_count"] = 2            # a second Thomas Geiser exists elsewhere in SNSF
+    assert snsf.match([kp("person:a", "Thomas Geiser", ["Bern Center for Precision Medicine"])], [one]) == {}
+    links = snsf.match([kp("person:a", "Thomas Geiser", ["Pneumologie"])], [one])
+    assert links["person:a"][1] == "name+institution+unit"
+    one["name_count"] = 1            # unique nationwide: name + Bern institution is enough
+    assert snsf.match([kp("person:a", "Thomas Geiser", ["Bern Center for Precision Medicine"])], [one])
+
+
+def test_partner_grant_institute_does_not_confirm_unit():
+    g = {"7": {"institute": "ARTORG Center Universität Bern"}}
+    p = sp("1", "Anna", "Müller", "Departement Biologie", roles={"7": "project partner"})
+    snsf.attach_grant_institutes([p], g)
+    assert p["_grant_institutes"] == []
+    q = sp("2", "Anna", "Müller", "", roles={"7": "employee"})
+    snsf.attach_grant_institutes([q], g)
+    assert q["_grant_institutes"] == ["ARTORG Center Universität Bern"]
