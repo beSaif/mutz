@@ -4,7 +4,8 @@ german", "make it more formal", "kürzer").
 A translation switches the whole document: draft["lang"] (and the lead's pitch language), so the fixed words the
 editor and the PDF take from pitch/locales follow; the fixed words stored in the draft (default section titles, the
 how text, "Bern for {name}", the visit day) are swapped from the same catalogs, without a model. Everything else goes
-to Apertus, one call per section. Each field is checked in code: the same [n] markers in the same order, no figure the
+to Apertus, one call per section. A field's trailing markers ("… together. [1]") stay out of the call and are put back
+after it, since the model tends to drop them. Each field is checked in code: the same [n] markers in the same order, no figure the
 old text and its quotes do not have, no new banned word or promise, and the pitch passes the export checks it passed before.
 If anything fails, the old draft stays. MUTZ_STUB=rewrite_pitch (or all) answers from _stub, without the gateway."""
 from __future__ import annotations
@@ -132,6 +133,17 @@ def _fields(draft, scope):
     return out, locked
 
 
+TAIL = re.compile(r"(?:\s*\[\s*\d+(?:\s*,\s*\d+)*\s*\])+\s*$")
+
+
+def _tail(t):
+    """(text, its trailing markers): "Funds projects. [1]" → ("Funds projects.", " [1]")."""
+    m = TAIL.search(t or "")
+    if not m or not t[:m.start()].strip():
+        return t, ""
+    return t[:m.start()], m.group(0)
+
+
 def _marks(t):
     t = re.sub(r"\[\s*(\d+(?:\s*,\s*\d+)*)\s*\]", lambda m: "".join(f"[{x.strip()}]" for x in m.group(1).split(",")), t or "")
     return t, re.findall(r"\[(\d+)\]", t)
@@ -225,13 +237,20 @@ def _stub(fields, instruction, to, src, cool=False):
 
 def _rewrite_fields(todo, instruction, to, src):
     """All chunks at once; fields that fail the checks get one more, cooler call. Returns ({id: text}, {id: problem})."""
-    call = _stub if ("rewrite_pitch" in contracts.FORCE or "all" in contracts.FORCE) else _call
+    stub = "rewrite_pitch" in contracts.FORCE or "all" in contracts.FORCE
+    tails = {f["id"]: _tail(f["text"])[1] for f in todo}
+    sent = {f["id"]: {**f, "text": _tail(f["text"])[0]} for f in todo}
+
+    def call(fs, cool=False):  # the fields without their trailing markers, which go back on the answers
+        r = (_stub if stub else _call)([sent[f["id"]] for f in fs], instruction, to, src, cool=cool)
+        return {k: (_tail(v)[0].rstrip() + tails[k] if v is not None and tails.get(k) else v) for k, v in r.items()}
+
     chunks = {}
     for f in todo:
         chunks.setdefault(f["chunk"], []).append(f)
     got = {}
     with ThreadPoolExecutor(max_workers=4) as ex:
-        for r in ex.map(lambda fs: call(fs, instruction, to, src), chunks.values()):
+        for r in ex.map(call, chunks.values()):
             got.update(r)
     bad = {}
     for f in todo:
@@ -243,7 +262,7 @@ def _rewrite_fields(todo, instruction, to, src):
         if p:
             bad[f["id"]] = p
     if bad:
-        again = call([f for f in todo if f["id"] in bad], instruction, to, src, cool=True)
+        again = call([f for f in todo if f["id"] in bad], cool=True)
         for f in todo:
             if f["id"] in bad and again.get(f["id"]) is not None and not _problem(f, again[f["id"]]):
                 got[f["id"]] = again[f["id"]]

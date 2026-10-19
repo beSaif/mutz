@@ -1,37 +1,47 @@
 /**
- * The mutz walkthrough, filmed: one officer takes the Kestrelyn one pager from paste to sent pitch.
+ * The mutz walkthrough, filmed: one officer takes the Kestrelyn one pager from paste to the CEO's yes, a quick
+ * look at Insights and Sources, then the bear (hidden until then) drafts a second company's pitch from its PDF.
  *
- *   pnpm record     (the app must run at DEMO_BASE on a fresh app DB; the gateway cache makes Apertus calls fast)
+ *   pnpm record     (the app must run at DEMO_BASE on a fresh app DB, see capture/fresh.sh; the gateway cache makes
+ *                    the Kestrelyn calls fast, the Veyra run in the finale is live and filmed as a time-lapse)
  *
- * Each roll(page, name, who) starts a clip; narration lines in voice/lines.json point at these names.
+ * Each roll(page, name) starts a clip; narration lines in voice/lines.json point at these names.
  * Clips are padded to their narration (voice/manifest.json), so run `pnpm voice` first.
- * Slow or flaky things (Mutz's reply, checking the remaining cards, building the PDF) happen off camera.
+ * Slow things (the search, building and writing the pitch, the emails, Mutz's run) are cut, not sped up,
+ * except Mutz's run, which plays as a labelled time-lapse.
  */
 import 'dotenv/config'
-import { execFileSync } from 'node:child_process'
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium, type Locator, type Page } from 'playwright'
-import { DPR, SIZE, click, cut, drop, finish, hold, moveTo, point, prepare, roll, sleep, type } from './film'
+import { DPR, SIZE, click, cut, finish, hold, moveTo, point, prepare, roll, sleep, type } from './film'
 
 const BASE = process.env.DEMO_BASE ?? 'http://localhost:8100'
 const ROOT = new URL('..', import.meta.url).pathname
 const APP = join(ROOT, '..')
 const ONE_PAGER = readFileSync(join(APP, 'needs/fixtures/demo_onepager.txt'), 'utf8').trim()
+const SECOND = 'Veyra_Vision_one_pager.pdf'
+const SECOND_PDF = readFileSync(join(ROOT, 'capture/fixtures', SECOND)).toString('base64')
+/** The finale's time-lapse: real seconds per second of video, and the longest it may run on screen. */
+const LAPSE = 3
+const LAPSE_MAX = 22
 
 // --- pacing against the narration ---------------------------------------------------------------
 const lines: { id: string; clip: string; offset?: number }[] = JSON.parse(readFileSync(join(ROOT, 'voice/lines.json'), 'utf8'))
 const voice: Record<string, { seconds: number }> = JSON.parse(readFileSync(join(ROOT, 'voice/manifest.json'), 'utf8'))
 let rolledAt = 0
 let rolledName = ''
+let rolledSpeed = 1
 
-async function shoot(page: Page, name: string, who: string) {
-  await roll(page, name, who)
+async function shoot(page: Page, name: string, speed = 1) {
+  await roll(page, name, '', speed)
   rolledAt = Date.now()
   rolledName = name
+  rolledSpeed = speed
 }
 
-const elapsed = () => (Date.now() - rolledAt) / 1000
+/** Seconds of video so far in the current clip. */
+const elapsed = () => (Date.now() - rolledAt) / 1000 / rolledSpeed
 
 /** Moments inside a clip, in seconds from its start, for zooms in src/data.ts (capture/marks.json). */
 const marks: Record<string, number> = {}
@@ -49,7 +59,7 @@ function needed(extra: number) {
 /** Hold until the clip is long enough for its line (or for `carry` s left over from a line that began in the clip before), then cut. */
 async function wrap(extra = 0.7, carry = 0) {
   const left = Math.max(needed(extra), carry) - elapsed()
-  if (left > 0) await hold(left * 1000)
+  if (left > 0) await hold(left * 1000 * rolledSpeed)
   return await cut()
 }
 
@@ -75,6 +85,68 @@ async function needTab(page: Page, label: string) {
   await sleep(500)
 }
 
+// --- the bear stays off screen until the finale ---------------------------------------------------
+// Capture-time CSS only: the app is unchanged. A flag in localStorage lifts it, so it survives navigation.
+const HIDE_MUTZ = `
+  (() => {
+    let shown = false
+    try { shown = localStorage.getItem('demo-mutz') === '1' } catch (e) {}
+    if (shown) return
+    const s = document.createElement('style')
+    s.id = 'demo-hide-mutz'
+    // the corner bear and its chat, and the little bears in the loading states; the sidebar logo stays
+    s.textContent = '#mutz, #mutzcard, .mutz-svg { display: none !important } .rl-mz .mutz-svg { display: inline !important }'
+    // added before the parser has made <head>, the tag is lost: put it in as soon as <head> exists
+    const add = () => {
+      if (!document.head || s.isConnected) return !!document.head
+      document.head.appendChild(s)
+      return true
+    }
+    if (!add()) {
+      const mo = new MutationObserver(() => { if (add()) mo.disconnect() })
+      mo.observe(document, { childList: true, subtree: true })
+      document.addEventListener('DOMContentLoaded', add)
+    }
+  })()
+`
+const SHOW_MUTZ = `
+  (() => {
+    try { localStorage.setItem('demo-mutz', '1') } catch (e) {}
+    const a = document.createElement('style')
+    a.textContent = '@keyframes demoPop { 0% { opacity: 0; transform: translateY(60px) scale(.6) } 70% { opacity: 1; transform: translateY(-6px) scale(1.06) } 100% { transform: none } } #mutz { animation: demoPop .8s cubic-bezier(.3,1.2,.4,1) both }'
+    document.head.appendChild(a)
+    document.getElementById('demo-hide-mutz')?.remove()
+  })()
+`
+
+/** A file icon that follows the cursor, as a PDF dragged in from the desktop looks. */
+const GHOST = (name: string) => `
+  (() => {
+    const g = document.createElement('div')
+    g.id = '__ghost'
+    g.style.cssText = 'position:fixed;left:0;top:0;z-index:2147483646;pointer-events:none;display:flex;align-items:center;gap:8px;padding:8px 12px 8px 8px;background:#fff;border:1px solid #111;box-shadow:0 8px 24px rgba(0,0,0,.18);font:13px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;opacity:.94'
+    g.innerHTML = '<svg width="22" height="28" viewBox="0 0 22 28"><path d="M1 1h13l7 7v19H1z" fill="#fff" stroke="#111" stroke-width="1.4"/><path d="M14 1v7h7" fill="none" stroke="#111" stroke-width="1.4"/><rect x="3" y="16" width="16" height="7" fill="#E30613"/><text x="11" y="21.6" font-size="5.6" font-family="Helvetica" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg><span>${name}</span>'
+    document.documentElement.appendChild(g)
+    const move = (e) => { g.style.transform = 'translate(' + (e.clientX + 14) + 'px,' + (e.clientY + 10) + 'px)' }
+    window.addEventListener('mousemove', move, true)
+    g.__off = () => window.removeEventListener('mousemove', move, true)
+  })()
+`
+
+/** Drop the PDF on the chat card the way the browser would: a dragover (the card lights up), then the drop. */
+const DROP = (name: string, phase: 'over' | 'drop') => `
+  (() => {
+    const bin = atob('${SECOND_PDF}'); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i)
+    const dt = new DataTransfer(); dt.items.add(new File([u], '${name}', { type: 'application/pdf' }))
+    const card = document.querySelector('#mutzcard')
+    card.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true }))
+    if ('${phase}' === 'drop') {
+      card.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }))
+      const g = document.getElementById('__ghost'); if (g) { g.__off(); g.remove() }
+    }
+  })()
+`
+
 async function main() {
   // fresh state: four other leads so the list looks lived in
   const seeded = await fetch(`${BASE}/leads/seed`, { method: 'POST', redirect: 'manual' })
@@ -94,8 +166,9 @@ async function main() {
   const browser = await chromium.launch()
   const ctx = await browser.newContext({ viewport: SIZE, deviceScaleFactor: DPR })
   await prepare(ctx)
-  // the opening splash plays once per browser; mark it seen so the walkthrough starts on the lead list
+  // the app's own opening splash plays once per browser; the video opens with it (pnpm intro), so mark it seen
   await ctx.addInitScript(`try { localStorage.setItem('mutz-intro', '1') } catch (e) {}`)
+  await ctx.addInitScript(HIDE_MUTZ)
   const page = await ctx.newPage()
   page.on('dialog', (d) => d.accept())
 
@@ -104,22 +177,22 @@ async function main() {
   await moveTo(page, 760, 520)
 
   // 1. leads: the list, then a new lead -----------------------------------------------------------
-  await shoot(page, 'leads', 'Officer')
+  await shoot(page, 'leads')
   await hold(1500)
-  for (const t of ['Imaging tools for tumour surgery', 'Hearing implant software', 'Lithium battery recycling plant']) {
+  for (const t of ['Imaging tools for tumour surgery', 'Hearing implant software']) {
     await point(page, page.getByText(t).first())
     await hold(900)
   }
-  await hold(600)
-  await click(page, page.locator('a, button', { hasText: 'New lead' }).first())
+  await hold(500)
+  await click(page, page.locator('form[action="/leads/new"] button').first())
   await page.waitForSelector('#op')
   await hold(700)
   await page.locator('#title').fill('')
   await type(page, page.locator('#title'), 'Kestrelyn Health Oy', { cps: 14, lead: 9 })
   await wrap()
 
-  // 2. paste: the one pager as it came, scrolled to its financials --------------------------------
-  await shoot(page, 'paste', 'Officer')
+  // 2. paste: the one pager as it came, then Find needs --------------------------------------------
+  await shoot(page, 'paste')
   await click(page, page.locator('#op'))
   await hold(400)
   await page.locator('#op').fill(ONE_PAGER) // a paste lands all at once
@@ -129,86 +202,56 @@ async function main() {
     const y = ta.scrollHeight * (i / ta.value.length) - 20
     ta.scrollTo({ top: y, behavior: 'smooth' })
   })()`)
-  await hold(2200)
+  await hold(1600)
   await click(page, page.locator('#readbtn'))
-  await hold(900)
-  await wrap(0.3)
+  await hold(1500)
+  const pasteCarry = await cutCarry()
 
   await page.waitForSelector('text=Step 2 of 2', { timeout: 240_000 })
   await page.waitForLoadState('networkidle')
   await moveTo(page, 900, 300)
 
-  // 3. needs: seven of them, a source sentence, then what was ignored and struck -------------------
-  await shoot(page, 'needs', 'Officer')
-  await hold(1600)
+  // 3. needs: seven of them, one source sentence, then what was struck ------------------------------
+  await shoot(page, 'needs')
+  await hold(1400)
+  await point(page, page.getByText('Clinical study with women', { exact: false }).first())
+  await hold(1200)
   await click(page, page.locator('#needs summary').first())
   await hold(2400)
   await click(page, page.locator('summary', { hasText: 'What was used' }))
-  await reveal(page.locator('.ps', { hasText: 'We are passionate' }), 'start', 1300)
-  await moveTo(page, 820, 260)
-  await hold(2600)
   await reveal(page.locator('.ps.x').first(), 'center', 1300)
   await point(page, page.locator('.ps.x').nth(1))
-  await hold(3000)
-  await wrap()
+  await hold(2600)
+  await wrap(0.7, pasteCarry)
 
-  // 4. search, then matches: the "Bear with me" screen on camera, the wait off camera -------------
-  await shoot(page, 'search', 'Officer')
+  // 4. search: the progress on camera, the wait off camera ------------------------------------------
+  await shoot(page, 'search')
   await hold(500)
   await click(page, page.getByRole('button', { name: 'Find matches' }))
   await page.waitForURL('**/matches**')
-  await hold(3500)
-  const searchCarry = await cutCarry()
+  await moveTo(page, 760, 360)
+  // the progress runs live until the line is done; if the search ends sooner, the matches arrive on camera
+  await hold(5500)
+  await wrap(0.3)
 
   await page.waitForFunction(`!document.body.innerText.includes('Searching…')`, undefined, { timeout: 600_000 })
   await page.waitForLoadState('networkidle')
 
-  await shoot(page, 'matches', 'Officer')
+  // 5. matches: quotes, coverage, units ------------------------------------------------------------
+  await shoot(page, 'matches')
   await hold(1200)
   await click(page, page.locator('summary', { hasText: 'Why it matches' }).first())
   mark('why')
   await moveTo(page, 900, 470)
-  await hold(4000)
-  await wrap(0.7, searchCarry)
+  await hold(3600)
+  await point(page, page.getByText('Strong · 10 matches').first())
+  await hold(1600)
+  await point(page, page.getByText('No match · nothing with evidence').first())
+  await hold(1800)
+  await wrap()
 
-  // 5. mutz: ask why the first match is first ------------------------------------------------------
-  await shoot(page, 'mutz', 'Officer')
-  await click(page, page.locator('#mutzbtn'))
-  await hold(700)
-  await type(page, page.locator('#mutzask'), 'Why is the Diabetes Center Berne ranked first?', { cps: 95, lead: 14 })
-  await hold(300)
-  await page.keyboard.press('Enter')
-  await hold(900)
-  const carry = await cutCarry()
-
-  await page.locator('#mutzmsgs', { hasText: /ranking log/i }).waitFor({ timeout: 120_000 })
-  await sleep(800)
-  // start at the top of the answer, then let the table come into view
-  await page.evaluate(`(() => {
-    const m = document.querySelector('#mutzmsgs'); const blocks = m.children
-    const last = blocks[blocks.length - 1]; m.scrollTop = Math.max(0, last.offsetTop - m.offsetTop - 60)
-  })()`)
-
-  await shoot(page, 'mutzreply', 'Officer')
-  await moveTo(page, 1200, 420)
-  await hold(2600)
-  await page.evaluate(`document.querySelector('#mutzmsgs').scrollBy({ top: 320, behavior: 'smooth' })`)
-  await hold(2600)
-  await click(page, page.locator('#mutzclose'))
-  await hold(500)
-  await wrap(0.7, carry)
-
-  // 6. nomatch: Infrastructure has nothing with evidence ------------------------------------------
-  await shoot(page, 'nomatch', 'Officer')
-  await needTab(page, 'Infrastructure')
-  await moveTo(page, 760, 330)
-  await hold(3200)
-  await point(page, page.getByText('ARTORG Center, Diabetes Center Berne, University of Bern').first())
-  await hold(2000)
-  await wrap(0.5)
-
-  // 7. accept: one pick per need -------------------------------------------------------------------
-  await shoot(page, 'accept', 'Officer')
+  // 6. accept: one pick per need -------------------------------------------------------------------
+  await shoot(page, 'accept')
   await needTab(page, 'Clinical study')
   await click(page, acceptFor(page, 'Diabetes Center Berne'), { settle: 700 })
   await needTab(page, 'R&D partner')
@@ -219,168 +262,193 @@ async function main() {
   await click(page, page.getByRole('button', { name: 'Accept' }).first(), { settle: 900 })
   await wrap(0.4)
 
-  // 8. map: need → match → fact → page -------------------------------------------------------------
-  await shoot(page, 'map', 'Officer')
+  // 7. map: one claim back to its quote and page ----------------------------------------------------
+  await shoot(page, 'map')
   await click(page, page.getByRole('link', { name: 'Open evidence map' }).or(page.getByRole('button', { name: 'Open evidence map' })).first())
   await page.waitForURL('**/map**')
   await hold(1200)
   await click(page, page.getByText('Diabetes Center Berne').first())
-  await hold(1500)
+  await hold(1200)
   await point(page, page.locator('#detail .qt').first())
+  mark('quote')
   await hold(2200)
-  // the knowledge graph around the match: who leads it, colleagues, projects
-  const graph = page.locator('#detail h3', { hasText: /Connected to|Works with/ })
-  if (await graph.count()) {
-    await reveal(graph, 'start', 1200)
-    await point(page, page.locator('#detail dl.sd').last())
-    await hold(2600)
-  }
+  await point(page, page.locator('#detail .src a').first()) // the page the quote was read on
+  await hold(2000)
   await wrap()
 
-  // off camera: the map's hover handlers make the cursor crawl, so go to the pitch here and cut to it
+  // off camera: the map's hover handlers make the cursor crawl, so leave it with a plain click
   await page.getByRole('link', { name: 'Go to pitch' }).or(page.getByRole('button', { name: 'Go to pitch' })).first().click()
   await page.waitForURL('**/pitch**')
-  await page.waitForSelector('[data-next]')
-  await page.waitForLoadState('networkidle')
+  await page.waitForSelector('#pwait:not(.hidden)', { timeout: 20_000 }).catch(() => {})
   await moveTo(page, 1100, 600)
 
-  // 9. pitch: check two cards against their sources on camera -------------------------------------
-  await shoot(page, 'pitch', 'Officer')
-  await hold(1200)
-  for (let i = 0; i < 2; i++) {
-    await click(page, page.locator('[data-next]').first())
-    await hold(i === 0 ? 2200 : 1500)
-    await click(page, page.getByRole('button', { name: 'Yes, looks right' }).first())
-    await hold(700)
-  }
-  await wrap(0.4)
-
-  // the rest of the cards, off camera
-  for (let i = 0; i < 20 && (await page.locator('[data-next]').count()); i++) {
-    await page.locator('[data-next]').first().click()
-    await sleep(500)
-    const yes = page.getByRole('button', { name: 'Yes, looks right' })
-    if (await yes.count()) await yes.first().click()
-    await sleep(500)
-  }
-  const lid = new URL(page.url()).pathname.split('/')[2]
-  await page.goto(`${BASE}/leads/${lid}/export`)
+  // 8. pitch: the facts being read out of the matches ------------------------------------------------
+  await shoot(page, 'brief')
+  await hold(3800)
+  await wrap(0.3)
+  await page.waitForSelector('#pwait.hidden', { state: 'attached', timeout: 300_000 })
   await page.waitForLoadState('networkidle')
-  await moveTo(page, 760, 300)
 
-  // 10. export ------------------------------------------------------------------------------------
-  await shoot(page, 'export', 'Officer')
+  // 9. check: every card against its source, on camera ----------------------------------------------
+  await shoot(page, 'check')
+  await hold(900)
+  for (let i = 0; i < 30 && (await page.locator('[data-next]').count()); i++) {
+    await click(page, page.locator('[data-next]').first(), { settle: i === 0 ? 2200 : 300 })
+    const yes = page.getByRole('button', { name: 'Yes, looks right' })
+    if (!(await yes.count())) continue
+    await click(page, yes.first(), { settle: 250 })
+  }
+  // "Once they're all ticked, Apertus writes the pitch": the click comes as that line ends
+  const writeLine = lines.find((l) => l.id === 'l10')!
+  await hold(Math.max(600, ((writeLine.offset ?? 0.3) + voice[writeLine.id].seconds - 0.4 - elapsed()) * 1000))
+  await click(page, page.locator('[data-write]'))
+  await hold(3200)
+  const checkCarry = await cutCarry(0.4)
+  await page.waitForSelector('#pwait.hidden', { state: 'attached', timeout: 400_000 })
+  await page.waitForLoadState('networkidle')
+  await moveTo(page, 1250, 600)
+
+  // 10. export: the written pitch, export, the after-sending screen -----------------------------------
+  await shoot(page, 'export')
+  await hold(1800)
+  await click(page, page.getByRole('link', { name: 'Continue to export' }))
+  await page.waitForURL('**/export')
   await hold(1000)
   await click(page, page.getByRole('button', { name: 'Export', exact: true }))
   await page.waitForURL('**/after**') // the click also downloads the clean PDF, which the context accepts
-  await hold(1600)
+  await moveTo(page, 760, 260)
+  await hold(2400)
+  await wrap(0.5, checkCarry)
+
+  // 11. accepted: the CEO says yes, the researcher emails are drafted ---------------------------------
+  await shoot(page, 'accepted')
+  await hold(500)
+  await click(page, page.getByRole('button', { name: 'CEO accepted the intro' }))
+  await page.waitForURL('**/after#emails')
+  // the email is drafted live while the line runs; whatever is left of the wait is cut
+  await hold(2200)
+  await wrap(0.3)
+  await page.waitForSelector('.ml-wait', { state: 'hidden', timeout: 180_000 })
+  await sleep(600)
+
+  await shoot(page, 'emails')
+  await hold(1200)
+  await point(page, page.locator('textarea').first())
+  await hold(3000)
+  await wrap()
+
+  // 12. capability map and pipeline, through the sidebar ---------------------------------------------
+  const side = (name: string) => page.locator('aside a', { hasText: name }).first()
+  await page.goto(`${BASE}/insights/capability`)
+  await page.waitForSelector('#cloud')
+  await page.waitForLoadState('networkidle')
+  await moveTo(page, 900, 420)
+
+  await shoot(page, 'capability')
+  await hold(1400)
+  for (const w of ['Diabetes technology', 'Cardiology']) {
+    await point(page, page.locator('#cloud .cw', { hasText: w }).first())
+    await hold(1100)
+  }
+  await click(page, page.locator('#cloud .cw.none').first())
+  await hold(500)
+  await reveal(page.locator('#cwd'), 'center', 1200)
+  await hold(1800)
   await wrap(0.4)
 
-  // the clean PDF the company gets, rendered page by page into a plain viewer
-  const pdfDir = join(ROOT, 'out', 'pdf')
-  rmSync(pdfDir, { recursive: true, force: true })
-  mkdirSync(pdfDir, { recursive: true })
-  const pdf = await (await fetch(`${BASE}/leads/${lid}/export/v1/clean.pdf`)).arrayBuffer()
-  writeFileSync(join(pdfDir, 'clean.pdf'), Buffer.from(pdf))
-  execFileSync('pdftoppm', ['-r', '160', '-png', join(pdfDir, 'clean.pdf'), join(pdfDir, 'p')])
-  const pages = readdirSync(pdfDir).filter((f) => f.startsWith('p') && f.endsWith('.png')).sort()
-  writeFileSync(
-    join(pdfDir, 'view.html'),
-    `<!doctype html><meta charset="utf-8"><title>Bern for Kestrelyn Health Oy.pdf</title>
-<style>html,body{margin:0;background:#E6E6E6;font:13px/1.4 "Helvetica Neue",Helvetica,Arial,sans-serif;color:#111}
-.bar{position:fixed;top:0;left:0;right:0;height:44px;background:#fff;border-bottom:1px solid #D9D9D9;display:flex;align-items:center;gap:12px;padding:0 20px;z-index:2}
-.bar b{font-size:14px}.bar span{color:#5E5E5E}main{padding:68px 0 40px;display:flex;flex-direction:column;align-items:center;gap:20px}
-img{width:1000px;display:block;box-shadow:0 1px 3px rgba(0,0,0,.18);scroll-margin-top:64px}</style>
-<div class="bar"><b>Bern for Kestrelyn Health Oy.pdf</b><span>${pages.length} pages · A4</span></div>
-<main>${pages.map((p) => `<img src="${p}">`).join('')}</main>`,
-  )
-  const pv = await ctx.newPage()
-  await pv.goto(`file://${join(pdfDir, 'view.html')}`)
-  await pv.waitForLoadState('load')
-  await moveTo(pv, 1330, 640)
+  await shoot(page, 'pipeline')
+  await click(page, side('Pipeline'))
+  await page.waitForURL('**/pipeline')
+  await hold(1200)
+  await point(page, page.getByText('Kestrelyn Health Oy').first())
+  await hold(2000)
+  await wrap(0.4)
 
-  // 11. pdf: what Kestrelyn gets ------------------------------------------------------------------
-  await shoot(pv, 'pdf', 'Company')
+  // 13. a new source -------------------------------------------------------------------------------
+  await shoot(page, 'source')
+  await click(page, side('Add a source'))
+  await page.waitForSelector('#url')
+  await type(page, page.locator('#url'), 'sitem-insel.ch', { cps: 22, lead: 6 })
+  await click(page, page.getByRole('button', { name: 'Check this site' }))
+  await page.waitForLoadState('networkidle')
+  await moveTo(page, 900, 420)
+  await hold(2400)
+  await wrap(0.6)
+
+  // 14. finale: the bear appears, takes the PDF, drafts the pitch -------------------------------------
+  await page.goto(`${BASE}/`)
+  await page.waitForLoadState('networkidle')
+  await moveTo(page, 820, 420)
+
+  await shoot(page, 'reveal')
+  await hold(1200)
+  await page.evaluate(SHOW_MUTZ)
+  await hold(2600) // a beat on the bear
+  await click(page, page.locator('#mutzbtn'))
+  await page.locator('#mutzcard:not(.hidden)').waitFor()
+  await hold(1000)
+  // the PDF comes in from the left of the screen and is dropped on the chat
+  await moveTo(page, 420, 640)
+  await page.evaluate(GHOST(SECOND))
+  await moveTo(page, 430, 636)
+  await hold(300)
+  const card = await page.locator('#mutzmsgs').boundingBox()
+  if (!card) throw new Error('no chat card')
+  await moveTo(page, card.x + card.width / 2 - 40, card.y + card.height / 2)
+  await page.evaluate(DROP(SECOND, 'over'))
+  await hold(500)
+  await page.evaluate(DROP(SECOND, 'drop'))
+  await page.locator('#mutzfile:not(.hidden)').waitFor()
+  await hold(1600)
+  const started = page.waitForResponse((r) => r.url().endsWith('/api/mutz/pitch') && r.request().method() === 'POST')
+  await click(page, page.locator('#mutzform button[type=submit]'))
+  const lid: string = (await (await started).json()).lead
+  await hold(3500)
+  const revealCarry = await cutCarry()
+
+  // the run itself, as a time-lapse; the moment it is done is filmed at normal speed
+  const status = async () => (await (await fetch(`${BASE}/api/mutz/pitch/${lid}`)).json()).step as string
+  await shoot(page, 'drafting', LAPSE)
+  while (elapsed() < LAPSE_MAX && (await status()) !== 'done') await sleep(1000)
+  await cut()
+  while ((await status()) !== 'done') await sleep(1000)
+
+  await shoot(page, 'drafted')
+  await page.waitForURL(`**/leads/${lid}/pitch`, { timeout: 30_000 })
+  await page.waitForLoadState('networkidle')
+  await page.waitForSelector('#pwait.hidden', { state: 'attached', timeout: 60_000 })
   await hold(1500)
-  await reveal(pv.locator('img').nth(1), 'start', 1300)
-  await hold(1400)
-  await reveal(pv.locator('img').last(), 'start', 1500)
-  await wrap(0.5)
-  await pv.close()
-  await page.bringToFront() // a background tab is throttled and films at ~1 fps
+  // the chat opens over the page on this screen; drag it by its header to the right-hand corner, where it snaps
+  const hd = await page.locator('#mutzhd').boundingBox()
+  if (!hd) throw new Error('no chat header')
+  await moveTo(page, hd.x + 120, hd.y + hd.height / 2)
+  await hold(250)
+  await page.mouse.down()
+  await moveTo(page, 1180, 560)
+  await page.mouse.up()
+  await hold(900)
+  await point(page, page.getByText('Picked by Bärner Mutz').first())
+  mark('picked')
+  await hold(3000)
+  await wrap(0.7, revealCarry)
 
-  // Insights, Archives and Evaluation through the sidebar. These clips only navigate, so a clip that a
-  // memory stall drops to a few fps is filmed again from the page it starts on.
-  const side = (name: string) => page.locator('aside a', { hasText: name }).first()
-  async function retake(name: string, from: string, body: () => Promise<number | undefined>) {
-    for (let attempt = 0; ; attempt++) {
-      await page.goto(`${BASE}${from}`)
-      await page.waitForLoadState('networkidle')
-      await moveTo(page, 700, 520)
-      await shoot(page, name, 'Officer')
-      const fps = (await body()) ?? 0
-      if (fps >= 15 || attempt === 2) return
-      drop()
-    }
-  }
+  // 15. the same chat, in German -------------------------------------------------------------------
+  await shoot(page, 'german')
+  if (await page.locator('#mutzcard.hidden').count()) await click(page, page.locator('#mutzbtn'))
+  await type(page, page.locator('#mutzask'), 'change the pitch to German', { cps: 90, lead: 12 })
+  await hold(300)
+  await click(page, page.locator('#mutzform button[type=submit]'))
+  await hold(2600)
+  const germanCarry = await cutCarry()
+  await page.waitForFunction(`document.documentElement.lang === 'de' || document.body.innerText.includes('Bern für')`, undefined, { timeout: 300_000 })
+  await page.waitForLoadState('networkidle')
+  await sleep(1500)
 
-  // 12. gaps: what leads asked for that Bern could not answer --------------------------------------
-  await retake('gaps', '/', async () => {
-    await hold(600)
-    await click(page, side('Gap report'))
-    await page.waitForURL('**/insights')
-    await hold(1500)
-    await point(page, page.getByText('Battery technology').first())
-    await hold(2200)
-    await moveTo(page, 1050, 240)
-    await hold(1800)
-    return wrap(0.5)
-  })
-
-  // 13. cloud: the capability map as a word map ----------------------------------------------------
-  await retake('cloud', '/insights', async () => {
-    await click(page, side('Capability map'))
-    await page.waitForSelector('#cloud')
-    await hold(1400)
-    for (const w of ['Diabetes technology', 'Cardiology']) {
-      await point(page, page.locator('#cloud .cw', { hasText: w }).first())
-      await hold(1300)
-    }
-    await click(page, page.locator('#cloud .cw', { hasText: 'Cosmetics and packaging' }).first())
-    await hold(500)
-    await reveal(page.locator('#cwd'), 'center', 1200)
-    await hold(2200)
-    return wrap(0.5)
-  })
-
-  // 14. archive: the sources, then a new site in one step ------------------------------------------
-  await retake('archive', '/insights/capability', async () => {
-    await click(page, side('All sources'))
-    await page.waitForURL('**/archives')
-    await hold(1800)
-    await click(page, side('Add a source'))
-    await page.waitForSelector('#url')
-    await type(page, page.locator('#url'), 'sitem-insel.ch', { cps: 22, lead: 6 })
-    await click(page, page.getByRole('button', { name: 'Check this site' }))
-    await page.waitForLoadState('networkidle')
-    await hold(2200)
-    return wrap(0.5)
-  })
-
-  // 15. eval: search quality, then checks and cost; the last frame holds under the closing line -----
-  await retake('eval', '/archives/add?url=sitem-insel.ch', async () => {
-    await click(page, side('Search quality'))
-    await page.waitForURL('**/eval')
-    await hold(900)
-    await point(page, page.getByText('Expected experts in top 10').first())
-    await hold(2600)
-    await click(page, side('Checks and cost'))
-    await page.waitForURL('**/eval/checks')
-    await hold(900)
-    await point(page, page.getByText('Cost and sovereignty').first())
-    await hold(1500)
-    return cut()
-  })
+  await shoot(page, 'deutsch')
+  await hold(1500)
+  await point(page, page.getByText('Bern für').first())
+  await hold(2500)
+  await wrap(0.7, germanCarry)
 
   await browser.close()
   finish()

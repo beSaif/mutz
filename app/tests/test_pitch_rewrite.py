@@ -80,7 +80,7 @@ def test_failed_check_keeps_the_old_draft(pitch_lead, monkeypatch):
     from common import llm
     before, _ = db.pitch_draft(lid)
 
-    def answer(drop=False, word=None):
+    def answer(drop=False, stray=False, word=None):
         def fake(model, messages, **kw):
             ids = re.findall(r"^id=(\S+): ", messages[-1]["content"], re.M)
             out = []
@@ -88,13 +88,15 @@ def test_failed_check_keeps_the_old_draft(pitch_lead, monkeypatch):
                 t = re.search(rf"^id={re.escape(i)}: (.*)$", messages[-1]["content"], re.M).group(1)
                 if drop:
                     t = re.sub(r"\s*\[\d+\]", "", t)                        # loses the markers
+                if stray:
+                    t = f"[7] {t}"                                          # a marker the old text did not have
                 if word:
                     t = f"{word} {t}"
                 out.append({"id": i, "text": "Tradotto: " + t})
             return {"content": "", "tool_calls": [{"name": "rewrite_fields", "arguments": {"fields": out}}]}
         return fake
 
-    monkeypatch.setattr(llm, "chat", answer(drop=True))
+    monkeypatch.setattr(llm, "chat", answer(stray=True))
     r = say(lid, "traduci il pitch in italiano")
     assert r["text"] == "I kept the old draft: the new text lost or moved a citation." and not r.get("reload")
     assert db.pitch_draft(lid)[0] == before and db.lead(lid)["lang"] == "en"
@@ -107,8 +109,9 @@ def test_failed_check_keeps_the_old_draft(pitch_lead, monkeypatch):
     r = say(lid, "make it more formal")
     assert "unchanged" in r["text"] and db.pitch_draft(lid)[0] == before
 
-    monkeypatch.setattr(llm, "chat", answer())
-    r = say(lid, "in italiano")                                              # the same request, checks pass
+    monkeypatch.setattr(llm, "chat", answer(drop=True))
+    r = say(lid, "in italiano")                                              # the same request, checks pass: the
+                                                                             # trailing markers it dropped go back
     d = db.pitch_draft(lid)[0]
     assert r["reload"] and d["lang"] == "it" and d["sections"][1]["title"] == "Perché Berna per Lei"
     assert all(marks(c["text"]) == marks(o["text"]) for c, o in zip(d["cards"], before["cards"]))

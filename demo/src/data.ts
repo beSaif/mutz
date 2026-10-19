@@ -34,7 +34,7 @@ export const SUBTITLES = false
 export const ROLE_COLORS: Record<string, string> = { Officer: C.accent, Company: C.navy }
 
 // --- clips ------------------------------------------------------------------------------------
-export type Cut = { name: string; who: string; from: number; until: number }
+export type Cut = { name: string; who: string; speed?: number; from: number; until: number }
 export const CUTS = cutsJson as unknown as Cut[]
 export const VIDEO_END = CUTS.at(-1)?.until ?? 0
 
@@ -99,28 +99,21 @@ function at(clipName: string, label: string): number {
 }
 
 /**
- * Four zooms, all on text the narration is about. At s = 1.25 the point must stay within
+ * Zooms only on text the narration is about. At s = 1.25 the point must stay within
  * x 768–1152 and y 432–648 (at 1.2: 800–1120, 450–630), or the frame shows past the footage's edge.
- * - the quotes under "Why it matches": eased in once the row opens, out on the cut to Mutz
- * - Mutz's answer: in on the cut to the reply, out on the cut to Infrastructure
- * - the gap report table: eased in once the page is up (~2 s into the clip), out on the cut to the map
- * - Checks and cost: eased in on the held last frame, under the closing line
+ * - the quotes under "Why it matches": eased in once the row opens, eased out before the cursor goes to the sidebar
+ * - "Picked by Bärner Mutz" on the first card: eased in as the cursor gets there, out on the cut to the German request
  */
 const QUOTES = { x: 1100, y: 560, s: 1.2 }
-const MUTZ = { x: 1150, y: 600, s: 1.25 }
-const GAPS = { x: 1120, y: 450, s: 1.2 }
-const CHECKS = { x: 1000, y: 450, s: 1.2 }
+const PICKED = { x: 800, y: 600, s: 1.25 }
 export const CAMERA: Key[] = [
   k(0, WIDE),
   k(at('matches', 'why') + 0.4, WIDE),
   k(at('matches', 'why') + 1.2, QUOTES),
-  k(after('mutz', 0), QUOTES),
-  k(after('mutz', 0), WIDE),
-  ...zoom(after('mutzreply', 0), MUTZ, after('nomatch', 0), 0),
-  k(after('gaps', 2.3), WIDE),
-  k(after('gaps', 3.1), GAPS),
-  k(after('cloud', 0), GAPS),
-  k(after('cloud', 0), WIDE),
-  k(VIDEO_END + 0.3, WIDE),
-  k(VIDEO_END + 1.3, CHECKS),
+  k(at('matches', 'why') + 4.2, QUOTES),
+  k(at('matches', 'why') + 5.0, WIDE),
+  k(at('drafted', 'picked'), WIDE),
+  k(at('drafted', 'picked') + 0.8, PICKED),
+  k(after('german', 0), PICKED),
+  k(after('german', 0), WIDE),
 ]

@@ -58,6 +58,32 @@ const TAGS = CUTS.filter((c) => c.who).reduce<{ who: string; from: number; until
 }, [])
 if (TAGS.length) TAGS[TAGS.length - 1].until = CARD_AT
 
+/** Time-lapse clips (roll(..., speed)) say so, bottom-right under the screen box. */
+function SpedUp({ from, until, speed }: { from: number; until: number; speed: number }) {
+  const t = useT()
+  if (t < from || t > until) return null
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        right: 1920 - SCREEN.x - SCREEN.w,
+        top: SCREEN.y + SCREEN.h + 22,
+        border: `1.5px solid ${C.muted}`,
+        color: C.body,
+        fontFamily: font.mono,
+        fontSize: 20,
+        letterSpacing: 1.6,
+        textTransform: 'uppercase',
+        padding: '7px 14px',
+        borderRadius: 8,
+        ...fadeSlide(t, from, until),
+      }}
+    >
+      Sped up ×{speed}
+    </div>
+  )
+}
+
 function Subtitles() {
   const t = useT()
   const cue = CUES.find((c) => t >= c.from && t < c.until)
@@ -152,6 +178,9 @@ function Main() {
         <Tag key={tag.from} from={tag.from} until={tag.until} color={ROLE_COLORS[tag.who] ?? C.navy}>
           {tag.who} view
         </Tag>
+      ))}
+      {CUTS.filter((c) => (c.speed ?? 1) > 1).map((c) => (
+        <SpedUp key={c.name} from={c.from} until={c.until} speed={c.speed!} />
       ))}
       <Sequence from={f(CARD_AT)} name="end card">
         <EndCard />

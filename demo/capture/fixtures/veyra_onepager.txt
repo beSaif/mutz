@@ -1,0 +1,20 @@
+CONFIDENTIAL - Company one pager
+Invented demo case, no real company or person.
+
+Veyra Vision ApS
+
+The company
+Veyra Vision ApS was founded in 2022 in Aarhus, Denmark, and employs 18 people. It builds Iris One, a handheld eye camera that screens for glaucoma and macular degeneration in a pharmacy or GP practice in two minutes. An AI model reads the retina images and refers patients who need an eye doctor.
+
+We are on a mission to end preventable blindness, and we believe Iris One will change eye care forever.
+
+Financials
+Revenue 2025: EUR 0.9 million. Seed round of EUR 5 million closed in February 2026.
+
+What the company is looking for
+- A clinical study partner in ophthalmology at a university hospital, to validate glaucoma screening against a full eye exam.
+- A research partner in medical image analysis and machine learning for retina images.
+- Non-dilutive funding for a joint project with a Swiss research partner.
+
+Timeline
+The company wants to open a Swiss office in 2027 and is talking to two cantons.

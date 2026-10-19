@@ -114,15 +114,18 @@ export async function smoothScroll(page: Page, dy: number, ms = 1200) {
 
 // --- filming -----------------------------------------------------------------------------------
 type Frame = { file: string; t: number }
-type Rolling = { name: string; who: string; dir: string; t0: number; frames: Frame[]; stop: { v: boolean }; loop: Promise<void> }
-type Clip = { name: string; who: string; file: string; dir: string }
+type Rolling = { name: string; who: string; speed: number; dir: string; t0: number; frames: Frame[]; stop: { v: boolean }; loop: Promise<void> }
+type Clip = { name: string; who: string; speed: number; file: string; dir: string }
 
 let rolling: Rolling | null = null
 const clips: Clip[] = []
 rmSync(CLIPS, { recursive: true, force: true })
 
-/** Start filming `page` as a new clip. `who` is the role tag shown under the screen ('' for none). */
-export async function roll(page: Page, name: string, who = '') {
+/**
+ * Start filming `page` as a new clip. `who` is the role tag shown under the screen ('' for none).
+ * `speed` > 1 films a time-lapse: frames are taken sparsely and play back `speed` times faster (labelled on screen).
+ */
+export async function roll(page: Page, name: string, who = '', speed = 1) {
   if (rolling) await cut()
   if (clips.some((c) => c.name === name)) throw new Error(`clip name "${name}" used twice`)
   const dir = join(CLIPS, `${String(clips.length).padStart(2, '0')}-${name}`)
@@ -143,10 +146,11 @@ export async function roll(page: Page, name: string, who = '') {
         continue
       }
       frames.push({ file, t })
+      if (speed > 1) await sleep((1000 / 30) * speed)
     }
   })()
-  rolling = { name, who, dir, t0, frames, stop, loop }
-  log(`roll ${name}`)
+  rolling = { name, who, speed, dir, t0, frames, stop, loop }
+  log(`roll ${name}${speed > 1 ? ` (×${speed})` : ''}`)
 }
 
 /** Stop filming and encode the clip. Everything until the next roll() stays off camera. */
@@ -159,7 +163,7 @@ export async function cut() {
   const end = (Date.now() - r.t0) / 1000
   if (!r.frames.length) throw new Error(`clip ${r.name} has no frames`)
   // concat list with per-frame durations, so the clip plays in real time
-  const list = r.frames.map((f, i) => `file '${f.file}'\nduration ${((r.frames[i + 1]?.t ?? end) - f.t).toFixed(3)}`).join('\n')
+  const list = r.frames.map((f, i) => `file '${f.file}'\nduration ${(((r.frames[i + 1]?.t ?? end) - f.t) / r.speed).toFixed(3)}`).join('\n')
   writeFileSync(join(r.dir, 'list.txt'), `${list}\nfile '${r.frames.at(-1)!.file}'\n`)
   const file = join(CLIPS, `${String(clips.length).padStart(2, '0')}-${r.name}.mp4`)
   execFileSync('ffmpeg', [
@@ -167,9 +171,9 @@ export async function cut() {
     '-vf', 'fps=30,crop=trunc(iw/2)*2:trunc(ih/2)*2:0:0,format=yuv420p',
     '-c:v', 'libx264', '-preset', 'slow', '-crf', '14', '-movflags', '+faststart', file,
   ])
-  clips.push({ name: r.name, who: r.who, file, dir: r.dir })
-  const fps = r.frames.length / end
-  log(`cut  ${r.name}: ${end.toFixed(1)} s, ${fps.toFixed(1)} fps captured${fps < 20 ? '  (low: lower DPR or QUALITY in film.ts)' : ''}`)
+  clips.push({ name: r.name, who: r.who, speed: r.speed, file, dir: r.dir })
+  const fps = (r.frames.length / end) * r.speed
+  log(`cut  ${r.name}: ${(end / r.speed).toFixed(1)} s, ${fps.toFixed(1)} fps captured${fps < 20 ? '  (low: lower DPR or QUALITY in film.ts)' : ''}`)
   return fps
 }
 
@@ -196,7 +200,7 @@ export function finish() {
   let at = 0
   const cuts = clips.map((c) => {
     const d = duration(c.file)
-    const cut = { name: c.name, who: c.who, from: +at.toFixed(3), until: +(at + d).toFixed(3) }
+    const cut = { name: c.name, who: c.who, ...(c.speed > 1 ? { speed: c.speed } : {}), from: +at.toFixed(3), until: +(at + d).toFixed(3) }
     at += d
     return cut
   })
