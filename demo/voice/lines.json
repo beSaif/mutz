@@ -1,13 +1,17 @@
 [
-  { "id": "l01", "clip": "leads", "offset": 0.5, "text": "So this is the agency's lead list. A new one just came in through S-GE... Kestrelyn, a Finnish company making a glucose and lactate patch for women in endurance sport." },
-  { "id": "l02", "clip": "paste", "text": "I paste their one pager in exactly as it arrived... confidential figures and all." },
-  { "id": "l03", "clip": "needs", "text": "Apertus reads it into seven needs, each tied to the sentence it came from. And down here... the marketing lines are ignored, and the revenue and valuation were struck on this machine, before anything went out." },
-  { "id": "l04", "clip": "matches", "text": "Then it searches about three thousand pages from the university, ARTORG and the Diabetes Center. For the clinical study, the Diabetes Center Berne comes out on top... and these aren't summaries, they're quotes from their own pages, with the links." },
-  { "id": "l05", "clip": "mutz", "text": "If I want to know why it's first, I can ask Mutz, the bear in the corner. It answers from the ranking log of this exact search." },
-  { "id": "l06", "clip": "nomatch", "text": "And when Bern doesn't have something, it says so. Nothing on cleanroom capacity has evidence behind it, so it's no match, not a weak guess." },
-  { "id": "l07", "clip": "accept", "text": "I accept the ones I'd actually put in front of their CEO. The AI in Health and Nutrition group for the algorithms, a pilot study at the Diabetes Center, and Innosuisse for the funding." },
-  { "id": "l08", "clip": "map", "text": "The evidence map draws each match back to where it came from... the need, the fact, and the page it was read on." },
-  { "id": "l09", "clip": "pitch", "text": "Then the pitch. Apertus drafts each card only from that card's own quotes, and I check every one against its source. Nothing goes out until they're all ticked." },
-  { "id": "l10", "clip": "export", "text": "Then I export it, and the lead moves on to sent." },
-  { "id": "l11", "clip": "pdf", "text": "And this is what Kestrelyn gets. The people in Bern who fit, and a source for every line. All of it ran on Apertus, hosted at CSCS in Switzerland." }
+  {"id": "l01", "clip": "leads", "offset": 0.5, "text": "So this is the agency's lead list. A new one just came in through S-GE... Kestrelyn, a Finnish company making a glucose and lactate patch for women in endurance sport."},
+  {"id": "l02", "clip": "paste", "text": "I paste their one pager in exactly as it arrived... confidential figures and all."},
+  {"id": "l03", "clip": "needs", "text": "Apertus reads it into seven needs, each tied to the sentence it came from. And down here... the marketing lines are ignored, and the revenue and valuation were struck on this machine, before anything went out."},
+  {"id": "l04", "clip": "search", "text": "Then it searches about three thousand pages from the university, ARTORG and the Diabetes Center. For the clinical study, the Diabetes Center Berne comes out on top... and these aren't summaries, they're quotes from their own pages, with the links."},
+  {"id": "l05", "clip": "mutz", "text": "If I want to know why it's first, I can ask Mutz, the bear in the corner. It answers from the ranking log of this exact search."},
+  {"id": "l06", "clip": "nomatch", "text": "And when Bern doesn't have something, it says so. Nothing on cleanroom capacity has evidence behind it, so it's no match, not a weak guess."},
+  {"id": "l07", "clip": "accept", "text": "I accept the ones I'd actually put in front of their CEO. The AI in Health and Nutrition group for the algorithms, a pilot study at the Diabetes Center, and Innosuisse for the funding."},
+  {"id": "l08", "clip": "map", "text": "The evidence map draws each match back to where it came from... the need, the fact, and the page it was read on."},
+  {"id": "l09", "clip": "pitch", "text": "Then the pitch. Apertus drafts each card only from that card's own quotes, and I check every one against its source. Nothing goes out until they're all ticked."},
+  {"id": "l10", "clip": "export", "text": "Then I export it, and the lead moves on to sent."},
+  {"id": "l11", "clip": "pdf", "text": "And this is what Kestrelyn gets. The people in Bern who fit, and a source for every line."},
+  {"id": "l12", "clip": "gaps", "text": "That's one lead. Insights adds them all up... the gap report shows what companies asked for that Bern couldn't answer. Nine battery leads this year, and nothing to offer any of them."},
+  {"id": "l13", "clip": "cloud", "text": "The capability map is the same picture as words. Big and dark is where Bern is strong, faint is thin... and the underlined ones are where Bern has nothing at all."},
+  {"id": "l14", "clip": "archive", "text": "And if a gap is really a site we haven't read yet, adding it is one step... public pages only, one request a second."},
+  {"id": "l15", "clip": "eval", "text": "We measure ourselves too: eighty-eight percent of the expected experts land in the top ten. And all of it ran on Apertus, hosted at CSCS in Switzerland."}
 ]

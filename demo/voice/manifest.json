@@ -40,7 +40,23 @@
     "hash": "7ede771eb92a"
   },
   "l11": {
-    "seconds": 11.36,
-    "hash": "49a394642717"
+    "seconds": 7.44,
+    "hash": "7152e72de059"
+  },
+  "l12": {
+    "seconds": 12.4,
+    "hash": "ddda9d3a8c85"
+  },
+  "l13": {
+    "seconds": 11.12,
+    "hash": "16165404c1ac"
+  },
+  "l14": {
+    "seconds": 8.08,
+    "hash": "10afbb03aa29"
+  },
+  "l15": {
+    "seconds": 11.68,
+    "hash": "86773843aec3"
   }
 }

@@ -115,7 +115,7 @@ export async function smoothScroll(page: Page, dy: number, ms = 1200) {
 // --- filming -----------------------------------------------------------------------------------
 type Frame = { file: string; t: number }
 type Rolling = { name: string; who: string; dir: string; t0: number; frames: Frame[]; stop: { v: boolean }; loop: Promise<void> }
-type Clip = { name: string; who: string; file: string }
+type Clip = { name: string; who: string; file: string; dir: string }
 
 let rolling: Rolling | null = null
 const clips: Clip[] = []
@@ -166,9 +166,19 @@ export async function cut() {
     '-vf', 'fps=30,crop=trunc(iw/2)*2:trunc(ih/2)*2:0:0,format=yuv420p',
     '-c:v', 'libx264', '-preset', 'slow', '-crf', '14', '-movflags', '+faststart', file,
   ])
-  clips.push({ name: r.name, who: r.who, file })
+  clips.push({ name: r.name, who: r.who, file, dir: r.dir })
   const fps = r.frames.length / end
   log(`cut  ${r.name}: ${end.toFixed(1)} s, ${fps.toFixed(1)} fps captured${fps < 20 ? '  (low: lower DPR or QUALITY in film.ts)' : ''}`)
+  return fps
+}
+
+/** Throw away the clip just cut, so it can be filmed again (a stall from memory pressure can drop a clip to ~1 fps). */
+export function drop() {
+  const c = clips.pop()
+  if (!c) return
+  rmSync(c.file, { force: true })
+  rmSync(c.dir, { recursive: true, force: true })
+  log(`drop ${c.name}`)
 }
 
 const duration = (file: string) =>

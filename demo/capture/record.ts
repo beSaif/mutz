@@ -12,7 +12,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium, type Locator, type Page } from 'playwright'
-import { DPR, SIZE, click, cut, finish, hold, moveTo, point, prepare, roll, sleep, type } from './film'
+import { DPR, SIZE, click, cut, drop, finish, hold, moveTo, point, prepare, roll, sleep, type } from './film'
 
 const BASE = process.env.DEMO_BASE ?? 'http://localhost:8100'
 const ROOT = new URL('..', import.meta.url).pathname
@@ -50,7 +50,7 @@ function needed(extra: number) {
 async function wrap(extra = 0.7, carry = 0) {
   const left = Math.max(needed(extra), carry) - elapsed()
   if (left > 0) await hold(left * 1000)
-  await cut()
+  return await cut()
 }
 
 /** Cut now; the line still running is padded in the next clip. Returns the seconds it still needs. */
@@ -79,6 +79,17 @@ async function main() {
   // fresh state: four other leads so the list looks lived in
   const seeded = await fetch(`${BASE}/leads/seed`, { method: 'POST', redirect: 'manual' })
   if (seeded.status !== 303) throw new Error(`seed failed: ${seeded.status}`)
+  // demo rows for the gap report and the capability map (labelled demo on screen), and the map computed once
+  const signals = await fetch(`${BASE}/insights/seed`, { method: 'POST', redirect: 'manual' })
+  if (signals.status !== 303) throw new Error(`insights seed failed: ${signals.status}`)
+  const warm = await (await fetch(`${BASE}/insights/capability`)).text()
+  if (!warm.includes('id="cloud"')) {
+    // the map computes in the background; wait for it off camera
+    for (let i = 0; i < 120; i++) {
+      await sleep(2000)
+      if ((await (await fetch(`${BASE}/insights/capability`)).text()).includes('id="cloud"')) break
+    }
+  }
 
   const browser = await chromium.launch()
   const ctx = await browser.newContext({ viewport: SIZE, deviceScaleFactor: DPR })
@@ -139,18 +150,24 @@ async function main() {
   await hold(3000)
   await wrap()
 
-  // 4. matches: the search fills in need by need; why the top match is there -----------------------
-  await shoot(page, 'matches', 'Officer')
+  // 4. search, then matches: the "Bear with me" screen on camera, the wait off camera -------------
+  await shoot(page, 'search', 'Officer')
   await hold(500)
   await click(page, page.getByRole('button', { name: 'Find matches' }))
   await page.waitForURL('**/matches**')
-  await page.waitForFunction(`!document.body.innerText.includes('Searching…')`, undefined, { timeout: 120_000 })
-  await hold(1800)
+  await hold(3500)
+  const searchCarry = await cutCarry()
+
+  await page.waitForFunction(`!document.body.innerText.includes('Searching…')`, undefined, { timeout: 600_000 })
+  await page.waitForLoadState('networkidle')
+
+  await shoot(page, 'matches', 'Officer')
+  await hold(1200)
   await click(page, page.locator('summary', { hasText: 'Why it matches' }).first())
   mark('why')
   await moveTo(page, 900, 470)
   await hold(4000)
-  await wrap()
+  await wrap(0.7, searchCarry)
 
   // 5. mutz: ask why the first match is first ------------------------------------------------------
   await shoot(page, 'mutz', 'Officer')
@@ -273,16 +290,88 @@ img{width:1000px;display:block;box-shadow:0 1px 3px rgba(0,0,0,.18);scroll-margi
   await pv.waitForLoadState('load')
   await moveTo(pv, 1330, 640)
 
-  // 11. pdf: what Kestrelyn gets; the last frame holds under the closing line ------------------------
+  // 11. pdf: what Kestrelyn gets ------------------------------------------------------------------
   await shoot(pv, 'pdf', 'Company')
-  await hold(1800)
-  for (const i of [1, 2]) {
-    await reveal(pv.locator('img').nth(i), 'start', 1300)
-    await hold(1500)
-  }
+  await hold(1500)
+  await reveal(pv.locator('img').nth(1), 'start', 1300)
+  await hold(1400)
   await reveal(pv.locator('img').last(), 'start', 1500)
-  await hold(1200)
-  await cut()
+  await wrap(0.5)
+  await pv.close()
+  await page.bringToFront() // a background tab is throttled and films at ~1 fps
+
+  // Insights, Archives and Evaluation through the sidebar. These clips only navigate, so a clip that a
+  // memory stall drops to a few fps is filmed again from the page it starts on.
+  const side = (name: string) => page.locator('aside a', { hasText: name }).first()
+  async function retake(name: string, from: string, body: () => Promise<number | undefined>) {
+    for (let attempt = 0; ; attempt++) {
+      await page.goto(`${BASE}${from}`)
+      await page.waitForLoadState('networkidle')
+      await moveTo(page, 700, 520)
+      await shoot(page, name, 'Officer')
+      const fps = (await body()) ?? 0
+      if (fps >= 15 || attempt === 2) return
+      drop()
+    }
+  }
+
+  // 12. gaps: what leads asked for that Bern could not answer --------------------------------------
+  await retake('gaps', '/', async () => {
+    await hold(600)
+    await click(page, side('Gap report'))
+    await page.waitForURL('**/insights')
+    await hold(1500)
+    await point(page, page.getByText('Battery technology').first())
+    await hold(2200)
+    await moveTo(page, 1050, 240)
+    await hold(1800)
+    return wrap(0.5)
+  })
+
+  // 13. cloud: the capability map as a word map ----------------------------------------------------
+  await retake('cloud', '/insights', async () => {
+    await click(page, side('Capability map'))
+    await page.waitForSelector('#cloud')
+    await hold(1400)
+    for (const w of ['Diabetes technology', 'Cardiology']) {
+      await point(page, page.locator('#cloud .cw', { hasText: w }).first())
+      await hold(1300)
+    }
+    await click(page, page.locator('#cloud .cw', { hasText: 'Cosmetics and packaging' }).first())
+    await hold(500)
+    await reveal(page.locator('#cwd'), 'center', 1200)
+    await hold(2200)
+    return wrap(0.5)
+  })
+
+  // 14. archive: the sources, then a new site in one step ------------------------------------------
+  await retake('archive', '/insights/capability', async () => {
+    await click(page, side('Sources'))
+    await page.waitForURL('**/archives')
+    await hold(1800)
+    await click(page, side('Add an archive'))
+    await page.waitForSelector('#url')
+    await type(page, page.locator('#url'), 'sitem-insel.ch', { cps: 22, lead: 6 })
+    await click(page, page.getByRole('button', { name: 'Check this site' }))
+    await page.waitForLoadState('networkidle')
+    await hold(2200)
+    return wrap(0.5)
+  })
+
+  // 15. eval: search quality, then checks and cost; the last frame holds under the closing line -----
+  await retake('eval', '/archives/add?url=sitem-insel.ch', async () => {
+    await click(page, side('Search quality'))
+    await page.waitForURL('**/eval')
+    await hold(900)
+    await point(page, page.getByText('Expected experts in top 10').first())
+    await hold(2600)
+    await click(page, side('Checks and cost'))
+    await page.waitForURL('**/eval/checks')
+    await hold(900)
+    await point(page, page.getByText('Cost and sovereignty').first())
+    await hold(1500)
+    return cut()
+  })
 
   await browser.close()
   finish()
