@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Bärner Mutz{% endblock %} · Bern</title>
 <link rel="stylesheet" href="/static/app.css">
+<script>try{if(/[?&]intro=1/.test(location.search)||!localStorage.getItem("mutz-intro"))document.documentElement.classList.add("intro")}catch(e){}</script>
 </head>
 <body{% if (mutz or {}).corner == 'left' %} class="mzl"{% endif %}>
 {% set nav = active_page|default('leads') %}{% set sub = active_sub|default('') %}{% set nc = navc or {} %}
@@ -57,6 +58,7 @@
 <a class="sov" href="/eval/checks#sovereignty" title="Briefs are read by Apertus 70B on CSCS in Switzerland. Confidential figures and contact data are struck on this machine first."><span class="ring" aria-hidden="true"></span>Apertus on CSCS, Switzerland</a>
 <span class="sbm">Team <b>control-free</b></span>
 {% if stubbed %}<span class="stub" title="These contracts are served by app/stubs.py over the crawled pages until the real module answers">stub: {{ stubbed|join(", ") }}</span>{% endif %}
+<span class="sbm"><a href="/?intro=1">Replay intro</a></span>
 </div>
 </aside>
 <div class="wrap">
@@ -85,8 +87,10 @@
 <button class="b" type="submit">Ask</button>
 </form>
 </div>
+{% include "_splash.html" %}
 <template id="tpl-search">{{ ui.mutz("search", 64, 54) }}</template>
 <script src="/static/app.js"></script>
+<script src="/static/intro.js"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
