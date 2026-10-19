@@ -25,14 +25,14 @@
 <p align="center">From a company's one pager to the right experts in Bern, every claim traced to its page.</p>
 
 <p align="center">
-  <a href="docs/media/mutz-demo.mp4"><b>▶ Demo video</b></a> (4 min) ·
+  <a href="https://youtu.be/5ywKrGxzQlk"><b>▶ Demo video</b></a> (4 min) ·
   <a href="docs/media/mutz-slides.pdf"><b>Slides</b></a> (PDF) ·
   <a href="https://mutz-117983845448.europe-west6.run.app"><b>Live demo</b></a> (login <code>mutz</code> / <code>bearlikeshoney</code>) ·
   <a href="LICENSE">MIT License</a>
 </p>
 
 <p align="center">
-  <a href="docs/media/mutz-demo.mp4"><img src="docs/media/mutz-demo-poster.jpg" width="900" alt="Watch the demo video" /></a>
+  <a href="https://youtu.be/5ywKrGxzQlk"><img src="docs/media/mutz-demo-poster.jpg" width="900" alt="Watch the demo video" /></a>
 </p>
 
 Built for the Bern Economic Development Agency case *Research & Expertise Navigator* at «Hack Apertus» Liebefeld 2026.
