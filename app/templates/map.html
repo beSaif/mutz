@@ -9,7 +9,7 @@
 <span class="kk"><i style="border-top:2px solid #111"></i>Quoted on page</span>
 <span class="kk"><i style="border-top:2px dashed #111"></i>Inferred</span>
 <span class="kk"><i style="border-top:2px dotted #9A9A9A"></i>No source</span>
-<span class="kk"><i style="border-top:4px solid #111"></i>Selected</span>
+<span class="kk"><i style="border-top:4px solid var(--red)"></i>Selected</span>
 <span style="flex:1"></span>
 <label class="lb"><input type="checkbox" {% if not all %}checked{% endif %} onchange="location.search=this.checked?'':'?all=1'"> Accepted matches only</label>
 </div>
@@ -105,6 +105,40 @@
       '<div class="rlg">' + leg + '</div><p class="lb" style="margin:0">Each axis runs from 0 at the centre to 1. The score multiplies the first four, so a larger shape is not always a higher score.</p>' +
       '<details><summary class="lb" style="cursor:pointer">Show as table</summary>' + tbl + '</details>';
   }
+  /* knowledge graph around a match: the match on the left, one row per neighbour on the right.
+     A filled dot is also a match on this map and opens it; the others open their page. */
+  var MORE = {'Colleague': 'colleagues', 'People': 'people', 'Project': 'projects', 'Facility': 'facilities', 'Has group': 'groups'};
+  function cut(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+  function wrap(s, n, lines){ var out = [], line = '';
+    String(s).split(/\s+/).forEach(function(w){ if ((line + ' ' + w).trim().length > n && line) { out.push(line); line = w; } else line = (line + ' ' + w).trim(); });
+    if (line) out.push(line);
+    if (out.length > lines) { out = out.slice(0, lines); out[lines - 1] = cut(out[lines - 1] + ' …', n); }
+    return out; }
+  function kg(d){
+    var k = d.kg; if (!k || !k.links.length) return '';
+    var L = k.links, RH = 36, W = 352, H = Math.max(L.length * RH, 64), cy = H / 2, X = 138, g = '';
+    L.forEach(function(n, i){
+      var y = i * RH + RH / 2;
+      if (n.more) { g += '<text x="' + X + '" y="' + (y + 4) + '" font-size="12" fill="#5E5E5E">+ ' + n.more + ' more ' + esc(MORE[n.rel] || '') + '</text>'; return; }
+      var on = !!n.go, tip = n.rel + ': ' + n.name + (n.sub ? ' (' + n.sub + ')' : '');
+      g += '<path d="M110,' + cy + ' C124,' + cy + ' 120,' + y + ' ' + (X - 4) + ',' + y + '" fill="none" stroke="' + (on ? '#111' : '#9A9A9A') + '" stroke-width="' + (on ? 1.5 : 1) + '"/>';
+      var a = on ? '<a href="#" data-go="' + esc(n.go) + '">' : n.url ? '<a href="' + esc(n.url) + '" target="_blank" rel="noopener">' : '<g>';
+      g += a + '<title>' + esc(tip) + '</title><rect x="' + (X - 8) + '" y="' + (y - RH / 2) + '" width="' + (W - X + 8) + '" height="' + RH + '" fill="transparent"/>' +
+        '<circle cx="' + X + '" cy="' + y + '" r="3.5" fill="' + (on ? '#111' : '#fff') + '" stroke="#111" stroke-width="1.5"/>' +
+        '<text x="' + (X + 10) + '" y="' + (y - 2) + '" font-size="13" fill="#111"' + (on ? ' font-weight="700"' : '') + ' lang="de">' + esc(cut(n.name, 29)) + '</text>' +
+        '<text x="' + (X + 10) + '" y="' + (y + 12) + '" font-size="11" fill="#5E5E5E">' + esc(cut(n.rel + (n.sub ? ' · ' + n.sub : ''), 36)) + '</text>' + (a === '<g>' ? '</g>' : '</a>');
+    });
+    var t = wrap(d.title, 14, 3), th = t.length * 15 + 16;
+    g += '<rect x="1" y="' + (cy - th / 2) + '" width="108" height="' + th + '" fill="#fff" stroke="#111" stroke-width="2"/>' +
+      t.map(function(s, i){ return '<text x="10" y="' + (cy - th / 2 + 20 + i * 15) + '" font-size="12" font-weight="700" fill="#111" lang="de">' + esc(s) + '</text>'; }).join('');
+    var rows = L.filter(function(n){ return !n.more; }).map(function(n){
+      return '<tr><td>' + esc(n.rel) + '</td><td lang="de">' + (n.go ? go(n.go, n.name) : n.url ? link(n.url, n.name) : esc(n.name)) + (n.go ? ' <span class="lb">on this map</span>' : '') + (n.sub ? '<span class="lb" style="display:block">' + esc(n.sub) + '</span>' : '') + '</td></tr>'; }).join('');
+    return '<h3 class="rh">In the knowledge graph</h3><svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-width:' + W + 'px" role="group" aria-label="Knowledge graph around ' + esc(d.title) + '">' + g + '</svg>' +
+      '<div class="rlg"><span class="rl"><svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#111"/></svg>Also a match on this map</span><span class="rl"><svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#fff" stroke="#111" stroke-width="1.5"/></svg>Opens its page</span></div>' +
+      '<p class="lb" style="margin:0">Linked from ' + k.pages + ' crawled page' + (k.pages === 1 ? '' : 's') + (k.expertise.length ? ' · expertise: ' + esc(k.expertise.slice(0, 3).join(', ')) : '') + '</p>' +
+      k.possible_same.map(function(s){ return '<p class="lb" style="margin:0"><b>Possibly the same person as ' + esc(s.name) + '</b> (' + esc(s.reason.split(',')[0]) + '). Check before use.</p>'; }).join('') +
+      '<details><summary class="lb" style="cursor:pointer">Show as list</summary><table class="sc"><tbody>' + rows + '</tbody></table></details>';
+  }
   function go(id, label){ return '<a href="#" data-go="' + esc(id) + '">' + esc(label) + '</a>'; }
   function body(d){
     var h = '';
@@ -122,6 +156,7 @@
         row('Needs', d.needs.map(function(n){ return 'Need ' + n.i + ' · ' + esc(n.label) + (n.accepted ? '' : ' <span class="lb">suggested</span>'); }).join('<br>')) + '</dl>';
       h += radar(d);
       if (d.why) h += '<h3 class="rh">Why it matches</h3><p style="margin:0;font-size:14px">' + esc(d.why) + '</p>';
+      h += kg(d);
       h += list('Facts and quotes', d.facts.map(function(f){ return (f.quote ? '<p class="qt" style="font-size:14px">“' + esc(f.quote) + '”</p>' : '') + '<p style="margin:4px 0 0">' + page(f) + link(f.deep_link, f.quote ? 'Open at quote' : 'Open page') + '</p>'; }));
       h += list(d.person ? 'Contacts' : 'People', d.people.map(function(p){ return '<b lang="de">' + esc(p.name) + '</b>' + (p.role ? '<span class="lb" style="display:block">' + esc(p.role) + '</span>' : ''); }));
       h += list('SNSF grants', d.grants.map(function(g){ return esc(g.title) + '<span class="lb" style="display:block">' + (g.year ? 'from ' + esc(g.year) + ' · ' : '') + link(g.url, 'Open on data.snf.ch') + '</span>'; }));

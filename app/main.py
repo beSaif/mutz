@@ -21,7 +21,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app import contracts, db, pitchgen, stubs
-from search.query import RECENCY_MULT, SMALL_UNIT_BOOST, TYPE_W
+from search.query import KG, RECENCY_MULT, SMALL_UNIT_BOOST, TYPE_W
 
 log = logging.getLogger("mutz.app")
 ROOT = Path(__file__).parent
@@ -962,6 +962,104 @@ def _src(url, quote=None, deep_link=None):
     return {"url": url, "host": host(url or ""), "quote": quote, "deep_link": deep_link or url, **page_meta(url)}
 
 
+def kg_connections(eids, on_map):
+    """The knowledge graph around each match: its units, the heads, colleagues, projects and facilities of
+    those units, expertise labels and how many crawled pages link it. on_map maps entity_id -> the map node id
+    of that entity, so a neighbour that is also a match on this map links to it. {} when kg.sqlite is missing."""
+    if not KG.exists() or not eids:
+        return {}
+    import sqlite3
+    try:
+        c = sqlite3.connect(f"file:{KG}?mode=ro", uri=True)
+    except sqlite3.Error:
+        return {}
+    c.row_factory = sqlite3.Row
+    q = lambda sql, *a: c.execute(sql, a).fetchall()
+
+    def unit(uid):
+        r = q("SELECT id, name, type, parent_id, url FROM unit WHERE id=?", uid)
+        return dict(r[0]) if r else None
+
+    def node(rel, kind, eid, name, sub=None, url=None):
+        name = re.sub(r"\s*<br\s*/?>\s*", " · ", name or "").strip()
+        return {"rel": rel, "kind": kind, "name": name, "sub": sub or None, "url": url or None, "go": on_map.get(eid)}
+
+    out = {}
+    try:
+        for eid in eids:
+            kind = eid.split(":", 1)[0]
+            groups, units = [], []
+            if kind == "person":
+                p = q("SELECT primary_unit_id FROM person WHERE id=?", eid)
+                if not p:
+                    continue
+                # the most specific unit first (a group before its institute), then the primary one
+                affs = q("""SELECT a.unit_id, a.function FROM affiliation a LEFT JOIN unit u ON u.id=a.unit_id WHERE a.person_id=?
+                            ORDER BY COALESCE(u.parent_id, '')<>'' DESC, a.unit_id=? DESC, a.seniority DESC""",
+                         eid, p[0]["primary_unit_id"] or "")
+                for a in affs:
+                    u = unit(a["unit_id"])
+                    if u and u["id"] not in {x["id"] for x in units}:
+                        units.append(u)
+                par = unit(units[0]["parent_id"]) if units and units[0]["parent_id"] else None
+                # a second unit only from another branch: the same group often has a German and an English unit
+                member = units[:1] + [u for u in units[1:] if u["id"] != (par or {}).get("id")
+                                      and u["parent_id"] != units[0]["parent_id"]][:1]
+                groups.append([node("Member of", "unit", u["id"], u["name"], next((a["function"] for a in affs if a["unit_id"] == u["id"] and a["function"]), None), u["url"])
+                               for u in member])
+                if par:
+                    groups.append([node("Part of", "unit", par["id"], par["name"], par["type"], par["url"])])
+                scope = [u["id"] for u in units[:1]]
+            elif kind == "unit":
+                u = unit(eid)
+                if not u:
+                    continue
+                if u["parent_id"]:
+                    par = unit(u["parent_id"])
+                    if par:
+                        groups.append([node("Part of", "unit", par["id"], par["name"], par["type"], par["url"])])
+                kids = q("SELECT id, name, type, url FROM unit WHERE parent_id=? ORDER BY name", eid)
+                groups.append([node("Has group", "unit", k["id"], k["name"], k["type"], k["url"]) for k in kids[:3]] +
+                              ([{"rel": "Has group", "more": len(kids) - 3}] if len(kids) > 3 else []))
+                scope = [eid] + [k["id"] for k in kids]
+            else:   # project or infrastructure: the unit that runs it
+                t = "project" if kind == "project" else "infrastructure"
+                r = q(f"SELECT unit_id FROM {t} WHERE id=?", eid)
+                u = unit(r[0]["unit_id"]) if r and r[0]["unit_id"] else None
+                if not u:
+                    continue
+                groups.append([node("Run by", "unit", u["id"], u["name"], u["type"], u["url"])])
+                scope = [u["id"]]
+            if scope:
+                ph = ",".join("?" * len(scope))
+                ppl = q(f"""SELECT p.id, p.name, p.profile_url, MAX(a.seniority) sen, MAX(a.function_class IN ('head','professor')) head,
+                                   MAX(a.function) fn FROM affiliation a JOIN person p ON p.id=a.person_id
+                            WHERE a.unit_id IN ({ph}) AND p.id<>? GROUP BY p.id""", *scope, eid)
+                ppl = sorted(ppl, key=lambda r: (r["id"] not in on_map, -(r["head"] or 0), -(r["sen"] or 0), r["name"]))
+                heads = [r for r in ppl if r["head"]][:2]
+                rest = [r for r in ppl if r not in heads]
+                groups.append([node("Head", "person", r["id"], r["name"], r["fn"], r["profile_url"]) for r in heads])
+                groups.append([node("Colleague" if kind == "person" else "People", "person", r["id"], r["name"], r["fn"], r["profile_url"])
+                               for r in rest[:4]] + ([{"rel": "Colleague" if kind == "person" else "People", "more": len(rest) - 4}] if len(rest) > 4 else []))
+                for t, rel, col in (("project", "Project", "title"), ("infrastructure", "Facility", "name")):
+                    if t == kind:
+                        continue
+                    rows = q(f"SELECT id, {col} AS name, url FROM {t} WHERE unit_id IN ({ph}) ORDER BY {col}", *scope)
+                    groups.append([node(rel, t, r["id"], r["name"], None, r["url"]) for r in rows[:3]] +
+                                  ([{"rel": rel, "more": len(rows) - 3}] if len(rows) > 3 else []))
+            exp = [r["label"] for r in q("""SELECT e.label FROM entity_expertise x JOIN expertise e ON e.id=x.expertise_id
+                                            WHERE x.entity_id=? ORDER BY e.label LIMIT 8""", eid)]
+            npages = q("SELECT COUNT(DISTINCT page_id) n FROM page_entity WHERE entity_id=?", eid)[0]["n"]
+            same = [dict(r) for r in q("""SELECT p.name, s.reason FROM possible_same s JOIN person p ON p.id = CASE WHEN s.a_id=? THEN s.b_id ELSE s.a_id END
+                                          WHERE ? IN (s.a_id, s.b_id)""", eid, eid)]
+            out[eid] = {"links": [n for g in groups for n in g], "expertise": exp, "pages": npages, "possible_same": same}
+    except sqlite3.Error:
+        log.exception("knowledge graph lookup failed")
+    finally:
+        c.close()
+    return out
+
+
 def profile(r):
     """A match's ranking factors on one 0-1 scale, for the radar: score_parts' rows plus the Apertus grade."""
     parts = {k: v for k, v, _ in ((r.get("parts") or {}).get("rows") or [])}
@@ -1057,6 +1155,14 @@ def build_map(lid, only_accepted=True):
                        "terms": [t["t"] for t in n.get("terms") or [] if t.get("on")]}
         needs_out.append({"id": n["id"], "nid": nid, "i": ni + 1, "label": n["label"], "text": n["text"],
                           "cov": n.get("coverage") or "none", "matches": matches_out})
+    on_map = {}
+    for n in needs_out:
+        for mt in n["matches"]:
+            on_map.setdefault(mt["entity"], mt["id"])
+    kg = kg_connections(list(on_map), on_map)
+    for d in detail.values():
+        if d["kind"] == "Match":
+            d["kg"] = kg.get(d["entity"])
     return {"needs": needs_out, "detail": detail}
 
 

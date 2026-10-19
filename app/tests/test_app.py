@@ -37,7 +37,7 @@ def test_empty_state_offers_demo():
     for l in db.leads():
         db.delete_lead(l["id"])
     r = client.get("/")
-    assert "try the demo case" in r.text and "Load the sport wearable demo" in r.text
+    assert "No leads yet" in r.text and "Load the sport wearable demo" in r.text
 
 
 def test_stub_query_contract():
@@ -150,6 +150,10 @@ def test_matches_sort_filter_and_map_render():
     assert mt["needs"] and mt["accepted"] and "facts" in mt and "pages" in mt
     assert [a for a, _ in mt["profile"]] == ["Evidence", "Role", "Recency", "Type", "AI check"]   # radar axes
     assert all(v is None or 0 <= v <= 1 for _, v in mt["profile"]) and all(p in detail for p in mt["peers"])
+    for d in detail.values():   # knowledge graph neighbours: map links point at map nodes
+        if d["kind"] == "Match" and d.get("kg"):
+            assert all(n.get("go") in detail for n in d["kg"]["links"] if n.get("go"))
+            assert all(n.get("more") or n["name"] for n in d["kg"]["links"])
     r = client.get(f"/leads/{lid}/pitch")
     assert r.status_code == 200 and f"/leads/{lid}/export" in r.text and "Export and mark as sent" not in r.text
 

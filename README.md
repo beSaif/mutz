@@ -77,14 +77,15 @@ built it around: **Apertus reads and writes, code checks every quote, the office
 
 ## How well it works
 
-About 3,000 pages from 16 sites (ARTORG, DCB and 14 UniBE institutes). On the dev split of our gold
-set (84 cases, 55 dev, 29 held out and hash locked):
+About 3,000 pages from 16 sites (ARTORG, DCB and 14 UniBE institutes). On our gold set (84 cases,
+55 dev, 29 held out and hash locked; the held out split was run once, after the freeze):
 
-| | mutz | keyword baseline |
-|---|---|---|
-| Recall@10 (target ≥ 80%) | 84% | 54% |
-| Quotes found on the cited page | 100% | 100% |
-| Required fields filled where the source has them | 100% | 100% |
+| | mutz, held out | mutz, dev | keyword baseline, dev |
+|---|---|---|---|
+| Recall@10 (target ≥ 80%) | 89% | 88% | 54% |
+| Questions with a right expert in the top 10 | 91% (21 of 23) | 89% | |
+| Quotes found on the cited page | 100% | 100% | 100% |
+| Required fields filled where the source has them | 100% | 100% | 100% |
 
 Recall@10 only says whether the groups we picked come back in the top 10, not whether a company would
 find them useful. The full numbers, by source and by query type, with synonym parity and exposure, are

@@ -208,7 +208,37 @@ not run yet
 
 ### Synthetic
 <!-- results:synthetic -->
-not run yet
+Run 2026-10-19T08:42:14+00:00, backend `search.query`, k=10.
+
+```
+split synthetic | backend search.query | kg yes | 47 recall queries, 0 skipped (manual/needs), 0 errors
+Recall@10            68%   (hit rate 68%, target >= 80%; adjacent excluded)
+Synonym parity       Jaccard 0.369, overlap 0.534 over 23 groups
+Citation validity    100% of reasons quote their page; 100% of results fully cited; failures none
+Field completeness   100%  name 100% unit 100% source_link 100% function 100% email 100% phone 100%
+Exposure             77 units shown, gini 0.479, top1 6%, top5 26%, entropy 0.91, 23% of index units ever shown
+Checks               none
+Recall by category   synthetic_site 72%, synthetic_unit 66%
+```
+
+| source | pages | entities | gold targets | recall@10 | results shown |
+|---|---|---|---|---|---|
+| artorg | 363 | 253 | 6 | 83% | 26 |
+| dcb | 450 | 86 | 2 | 0% | 0 |
+| unibe_bcpm | 183 | 150 | 2 | 100% | 38 |
+| unibe_dbmr | 199 | 245 | 6 | 17% | 20 |
+| unibe_dcbp | 199 | 164 | 6 | 83% | 27 |
+| unibe_iap | 131 | 102 | 2 | 50% | 5 |
+| unibe_ibmm | 134 | 109 | 2 | 100% | 6 |
+| unibe_ifik | 197 | 162 | 2 | 50% | 6 |
+| unibe_ispm | 198 | 228 | 2 | 100% | 17 |
+| unibe_izb | 199 | 120 | 2 | 100% | 5 |
+| unibe_medizin | 198 | 143 | 0 | n/a | 3 |
+| unibe_mic | 96 | 50 | 2 | 100% | 7 |
+| unibe_neuroscience | 158 | 146 | 3 | 67% | 26 |
+| unibe_ngs | 28 | 20 | 2 | 50% | 1 |
+| unibe_pki | 190 | 76 | 4 | 50% | 24 |
+| unibe_tki | 103 | 54 | 4 | 100% | 11 |
 <!-- /results:synthetic -->
 
 Stub backend (keyword baseline, harness floor only):
