@@ -1,10 +1,5 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/sprintd-on-dark.svg" />
-    <img src="docs/brand/sprintd.svg" height="44" alt="sprintd" />
-  </picture>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/brand/bern-agency-on-dark.png" />
     <img src="docs/brand/bern-agency.png" height="44" alt="Bern Economic Development Agency" />
   </picture>
@@ -12,6 +7,11 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/brand/apertus-on-dark.png" />
     <img src="docs/brand/apertus.png" height="18" alt="Apertus" />
+  </picture>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/sprintd-on-dark.svg" />
+    <img src="docs/brand/sprintd.svg" height="44" alt="sprintd" />
   </picture>
 </p>
 
