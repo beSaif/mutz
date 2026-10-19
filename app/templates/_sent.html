@@ -1,0 +1,25 @@
+{# After sending: what went out, to whom and when, and the one action. At the top of the lead page until the CEO
+   accepts; after that the page shows only the emails. Needs lead, sent (lifecycle.sent_view) and names. #}
+{% set acc = sent.accepted_at %}
+<div class="snt{{ ' acc' if acc }}" id="status">
+<ol class="snt-st" aria-label="{{ _('Where this lead stands') }}">
+<li class="done"><b>{{ _('Pitch sent') }}</b><span>{{ sent.at|date }}</span></li>
+<li class="{{ 'done' if acc else 'on' }}"{% if not acc %} aria-current="step"{% endif %}><b>{{ _('CEO accepts') }}</b><span>{{ acc|date if acc else _('waiting for the reply') }}</span></li>
+<li class="{{ 'on' if acc }}"{% if acc %} aria-current="step"{% endif %}><b>{{ _('Email the researchers') }}</b><span>{{ _('drafted for you') if acc else _('after the CEO accepts') }}</span></li>
+</ol>
+{% if acc %}
+<p class="snt-ok"><span aria-hidden="true">✓</span> {{ _('CEO accepted the intro') }}<span class="lb">{{ acc|date(True) }}</span></p>
+{% elif sent.stage == 'lost' %}
+<h2>{{ _('Lead closed as lost') }}</h2>
+{% else %}
+<h2>{{ _("Waiting for the CEO's reply") }}</h2>
+{% endif %}
+<dl class="sd snt-dl">
+<dt>{{ _('What was sent') }}</dt><dd>{{ _('Pitch v{n}, clean PDF', n=sent.n) }}<span class="lb"> · {{ _('{n} cards', n=sent.cards) if sent.cards != 1 else _('{n} card', n=sent.cards) }}</span> · <a href="/leads/{{ lead.id }}/export/v{{ sent.n }}/clean.pdf">{{ _('Download') }}</a></dd>
+<dt>{{ _('To') }}</dt><dd>{{ _('The CEO of {company}', company=sent.company) }}{% if sent.place %}<span class="lb"> · {{ sent.place }}</span>{% endif %}</dd>
+<dt>{{ _('When') }}</dt><dd>{{ sent.at|date(True) }}{% if names.get(sent.by) %}<span class="lb"> · {{ _('by {name}', name=names[sent.by]) }}</span>{% endif %}</dd>
+</dl>
+{% if not acc and sent.stage != 'lost' %}
+<form method="post" action="/leads/{{ lead.id }}/accepted"><button class="b p">{{ _('CEO accepted the intro') }}</button></form>
+{% endif %}
+</div>

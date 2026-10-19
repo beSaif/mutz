@@ -1,0 +1,7 @@
+{% if review %}
+  {% for n in it.refs %}{% set s = sources[n - 1] %}
+  <p class="evline">[{{ n }}] {% if s.quote %}“{{ s.quote }}” {% endif %}{{ s.host }} ·
+    <a href="{{ s.deep_link if s.quote else s.url }}">{{ t("Open at quote") if s.quote else t("Open page") }}</a></p>
+  {% endfor %}
+  {% if it.notes %}<div class="internal notes"><b>{{ t("Officer note:") }}</b> {{ it.notes }}</div>{% endif %}
+{% endif %}

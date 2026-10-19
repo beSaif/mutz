@@ -1,0 +1,58 @@
+// throwaway dry run of the whole flow, screenshots + timings (moved out of the repo afterwards)
+import { chromium, type Page } from 'playwright'
+const BASE = 'http://localhost:8100'
+const OUT = process.argv[2]
+let p: Page
+let T = Date.now()
+const lap = () => { const s = (Date.now() - T) / 1000; T = Date.now(); return s.toFixed(1) }
+const shot = async (n: string) => { await p.screenshot({ path: `${OUT}/${n}.png` }); console.log('shot', n, p.url(), lap()) }
+const main = async () => {
+  await fetch(`${BASE}/insights/seed`, { method: 'POST', redirect: 'manual' })
+  const b = await chromium.launch()
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 810 } })
+  await ctx.addInitScript(`try { localStorage.setItem('mutz-intro', '1') } catch (e) {}`)
+  p = await ctx.newPage(); p.on('dialog', (d) => d.accept())
+  await p.goto(BASE + '/'); await shot('a01-home')
+  await p.getByRole('button', { name: 'Load the sport wearable demo' }).first().click()
+  await p.waitForSelector('text=Step 2 of 2', { timeout: 300_000 }); await shot('a02-needs')
+  await p.getByRole('button', { name: 'Find matches' }).click()
+  await p.waitForFunction(`!document.body.innerText.includes('Searching…')`, undefined, { timeout: 600_000 })
+  await p.waitForLoadState('networkidle'); await shot('a03-matches')
+  const acceptFor = (name: string) => p.locator(`xpath=//*[normalize-space()='${name}']/following::button[normalize-space()='Accept'][1]`)
+  const tab = async (l: string) => { await p.locator('a', { hasText: l }).first().click(); await p.waitForLoadState('networkidle') }
+  await tab('Clinical study'); await acceptFor('Diabetes Center Berne').click(); await p.waitForTimeout(800)
+  await tab('R&D partner'); console.log((await p.locator('main').innerText()).slice(0, 1500))
+  await shot('a04-rnd')
+  await acceptFor('Rafael Morand').click().catch((e) => console.log('no RM', e.message)); await p.waitForTimeout(800)
+  await tab('Funding'); await p.getByRole('button', { name: 'Accept' }).first().click(); await p.waitForTimeout(800)
+  await p.getByRole('link', { name: 'Open evidence map' }).first().click(); await p.waitForURL('**/map**'); await p.waitForTimeout(1500)
+  await shot('a05-map')
+  await p.getByText('Diabetes Center Berne').first().click(); await p.waitForTimeout(1200); await shot('a06-map-detail')
+  console.log((await p.locator('#detail').innerText()).slice(0, 1500))
+  await p.goto(p.url().replace(/\/map.*/, '/pitch')); await p.waitForTimeout(1500); await shot('a07-pwait')
+  await p.waitForSelector('#pwait.hidden', { state: 'attached', timeout: 300_000 }); await shot('a08-brief')
+  await p.locator('[data-next]').first().click(); await p.waitForTimeout(1200); await shot('a09-card')
+  console.log('cards left', await p.locator('#pdock').innerText())
+  await p.locator('[data-all]').click().catch(() => {}); await p.waitForTimeout(1000)
+  await p.locator('[data-write]').click(); await p.waitForTimeout(2000); await shot('a10-writing')
+  await p.waitForSelector('#pwait.hidden', { state: 'attached', timeout: 400_000 }); await p.waitForTimeout(1000); await shot('a11-written')
+  await p.locator('#mutzbtn').click(); await p.waitForTimeout(600)
+  await p.locator('#mutzask').fill('change the whole pitch to german'); await p.keyboard.press('Enter')
+  await p.waitForTimeout(3000); await shot('a12-rewriting')
+  await p.waitForFunction(`document.documentElement.lang === 'de' || document.body.innerText.includes('Bern für')`, undefined, { timeout: 300_000 }).catch((e) => console.log('de wait', e.message))
+  await p.waitForLoadState('networkidle'); await p.waitForTimeout(1500); await shot('a13-german')
+  const lid = new URL(p.url()).pathname.split('/')[2]
+  await p.goto(`${BASE}/leads/${lid}/export`); await shot('a14-export')
+  await p.getByRole('button', { name: 'Export', exact: true }).click(); await p.waitForURL('**/after**'); await p.waitForTimeout(800); await shot('a15-sent')
+  await p.getByRole('button', { name: 'CEO accepted the intro' }).click(); await p.waitForURL('**/after#emails'); await p.waitForTimeout(1500); await shot('a16-accepted')
+  await p.waitForSelector('.ml-wait', { state: 'hidden', timeout: 120_000 }).catch(() => {}); await p.waitForTimeout(800); await shot('a17-emails')
+  await p.goto(`${BASE}/insights/capability`); await p.waitForTimeout(3000); await shot('a18-cap')
+  await p.goto(`${BASE}/insights`); await p.waitForTimeout(1500); await shot('a19-gaps')
+  await p.goto(`${BASE}/pipeline`); await p.waitForTimeout(1500); await shot('a20-pipeline')
+  await p.locator('#mutzbtn').click(); await p.waitForTimeout(600)
+  await p.locator('#mutzask').fill('Add sitem-insel.ch as a new source'); await p.keyboard.press('Enter')
+  await p.waitForFunction(`!document.querySelector('#mutzmsgs [role=status]')`, undefined, { timeout: 120_000 }); await p.waitForTimeout(800); await shot('a21-source')
+  console.log(await p.locator('#mutzmsgs').innerText())
+  await b.close()
+}
+main().catch((e) => { console.error(e); p?.screenshot({ path: `${OUT}/zz-error.png` }).finally(() => process.exit(1)) })

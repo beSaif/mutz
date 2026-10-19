@@ -1,16 +1,16 @@
 {% extends "base.html" %}{% set active_page = "insights" %}{% set active_sub = "capability" %}
-{% block title %}Capability map{% endblock %}
+{% block title %}{{ _('Capability map') }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
-{% block actions %}<a class="b s" href="?recompute=1">Recompute</a><span class="sp">Computed {{ at|date(True) }}{% if stub %} · stub search{% endif %}</span>{% endblock %}
+{% block actions %}<a class="b s" href="?recompute=1">{{ _('Recompute') }}</a><span class="sp">{{ _('Computed {date}', date=at|date(True)) }}{% if stub %} · {{ _('stub search') }}{% endif %}</span>{% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:999 1 720px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:20px">
-<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px 20px"><h1 style="margin:0;font-size:28px;line-height:1.15">Capability map</h1>
-<span class="cl-key lb"><span><b class="cw strong">Aa</b> Strong</span><span><b class="cw thin">Aa</b> Limited</span><span><b class="cw none">Aa</b> Absent</span><span>Size = units and pages</span></span></div>
-{% if computing %}<div role="status" style="display:flex;gap:16px;align-items:center;border:1px solid #111;padding:14px">{{ ui.mutz("search", 54, 46) }}<span style="font-size:14px">Bear with me… checking {{ 13 }} fields.</span></div><script>setTimeout(function(){ location.href = '/insights/capability'; }, 5000);</script>{% endif %}
+<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px 20px"><h1 style="margin:0;font-size:28px;line-height:1.15">{{ _('Capability map') }}</h1>
+<span class="cl-key lb"><span><b class="cw strong">Aa</b> {{ _('Strong') }}</span><span><b class="cw thin">Aa</b> {{ _('Limited') }}</span><span><b class="cw none">Aa</b> {{ _('Absent') }}</span><span>{{ _('Size = units and pages') }}</span></span></div>
+{% if computing %}<div role="status" style="display:flex;gap:16px;align-items:center;border:1px solid #111;padding:14px">{{ ui.mutz("search", 54, 46) }}<span style="font-size:14px">{{ _('Bear with me… checking {n} fields.', n=13) }}</span></div><script>setTimeout(function(){ location.href = '/insights/capability'; }, 5000);</script>{% endif %}
 {% if cloud %}
 <div class="cloud" id="cloud">
-{% for r in cloud %}<button type="button" class="cw {{ r.cov }}" style="font-size:{{ r.size }}px" data-i="{{ loop.index0 }}" aria-pressed="false" title="{{ r.name }}: {{ {'strong':'strong','thin':'limited','none':'absent'}[r.cov] }} · {{ r.units }} units · {{ r.pages }} pages · {{ r.demand }} leads asking">{{ r.name }}</button>{% endfor %}
+{% for r in cloud %}<button type="button" class="cw {{ r.cov }}" style="font-size:{{ r.size }}px" data-i="{{ loop.index0 }}" aria-pressed="false" title="{{ _(r.name) }}: {{ {'strong':_('strong'),'thin':_('limited'),'none':_('absent')}[r.cov] }} · {{ _('{units} units · {pages} pages · {leads} leads asking', units=r.units, pages=r.pages, leads=r.demand) }}">{{ _(r.name) }}</button>{% endfor %}
 </div>
 <div id="cwd" class="cwd hidden" aria-live="polite"></div>
 <script type="application/json" id="clouddata">{{ cloud|tojson }}</script>
@@ -23,7 +23,7 @@
 (function(){
   var el = document.getElementById('cloud'); if (!el) return;
   var D = JSON.parse(document.getElementById('clouddata').textContent), box = document.getElementById('cwd');
-  var COV = {strong: 'Strong', thin: 'Limited', none: 'Absent'};
+  var COV = {strong: _t('Strong'), thin: _t('Limited'), none: _t('Absent')};
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   $$('#cloud .cw').forEach(function(b){ b.addEventListener('click', function(){
     var on = b.getAttribute('aria-pressed') !== 'true';
@@ -32,11 +32,11 @@
     if (!on) { box.classList.add('hidden'); return; }
     b.setAttribute('aria-pressed', 'true');
     var r = D[b.dataset.i];
-    box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><h2>' + esc(r.name) + '</h2><span class="chip">' + esc(r.use) + '</span></div>' +
+    box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><h2>' + esc(_t(r.name)) + '</h2><span class="chip">' + esc(_t(r.use)) + '</span></div>' +
       '<dl class="sd" style="margin:8px 0 0">' +
-      '<dt>Bern supply</dt><dd>' + COV[r.cov] + '</dd>' +
-      '<dt>Units</dt><dd>' + r.units + (r.unit_names.length ? '<span class="lb" style="display:block">' + esc(r.unit_names.join(', ')) + '</span>' : '') + '</dd>' +
-      '<dt>Pages</dt><dd>' + r.pages + '</dd><dt>Active studies</dt><dd>' + r.studies + '</dd><dt>SNSF grants</dt><dd>' + r.grants + '</dd><dt>Leads asking</dt><dd>' + r.demand + '</dd></dl>';
+      '<dt>' + esc(_t('Bern supply')) + '</dt><dd>' + esc(COV[r.cov]) + '</dd>' +
+      '<dt>' + esc(_t('Units')) + '</dt><dd>' + r.units + (r.unit_names.length ? '<span class="lb" style="display:block">' + esc(r.unit_names.join(', ')) + '</span>' : '') + '</dd>' +
+      '<dt>' + esc(_t('Pages')) + '</dt><dd>' + r.pages + '</dd><dt>' + esc(_t('Active studies')) + '</dt><dd>' + r.studies + '</dd><dt>' + esc(_t('SNSF grants')) + '</dt><dd>' + r.grants + '</dd><dt>' + esc(_t('Leads asking')) + '</dt><dd>' + r.demand + '</dd></dl>';
     box.classList.remove('hidden');
   }); });
 })();

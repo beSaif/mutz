@@ -1,10 +1,11 @@
 {% import "_ui.html" as ui %}<!doctype html>
-<html lang="en">
+<html lang="{{ lang() }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Bärner Mutz{% endblock %} · Bern</title>
 <link rel="stylesheet" href="{{ asset('app.css') }}">
+<script>window.MZ_LANG={{ lang()|tojson }};window.MZ_T={{ i18n_js()|tojson }};window._t=function(s,o){var r=MZ_T[s]||s;if(o)for(var k in o)r=r.split("{"+k+"}").join(o[k]);return r}</script>
 <script>try{if(/[?&]intro=1/.test(location.search)||!localStorage.getItem("mutz-intro"))document.documentElement.classList.add("intro")}catch(e){}</script>
 </head>
 {% set focus = self.casebar()|trim %}
@@ -36,36 +37,39 @@
 </div>
 {% endmacro %}
 <div class="shell">
-<nav class="rail" aria-label="Workspace">
+<nav class="rail" aria-label="{{ _('Workspace') }}">
 <a class="rl-mz" href="/" title="Bärner Mutz">{{ ui.mutz("idle", 30, 28) }}</a>
 <hr>
-<a class="rl-ws" href="/" title="Bern Economic Development Agency">BE</a>
-<a class="rl-t on" href="/" title="Leads and insights" aria-current="true">{{ ico('grid', 20) }}</a>
-{% if focus %}<button type="button" class="rl-t" id="sbtoggle" title="Show the menu" aria-label="Show the menu" aria-expanded="false" onclick="var o=document.body.classList.toggle('sbo');this.setAttribute('aria-expanded',o);this.title=this.ariaLabel=o?'Hide the menu':'Show the menu'">{{ ico('panel', 20) }}</button>{% endif %}
+<a class="rl-ws" href="/" title="{{ _('Bern Economic Development Agency') }}">BE</a>
+{% if focus %}<button type="button" class="rl-t" id="sbtoggle" title="{{ _('Show the menu') }}" aria-label="{{ _('Show the menu') }}" aria-expanded="false" onclick="var o=document.body.classList.toggle('sbo');this.setAttribute('aria-expanded',o);this.title=this.ariaLabel=o?_t('Hide the menu'):_t('Show the menu')">{{ ico('panel', 20) }}</button>{% endif %}
 <div class="rl-ft">
-<a class="rl-t" href="/" title="Search leads" onclick="var s=document.querySelector('.ab .srch input');if(s){s.focus();return false}">{{ ico('search', 20) }}</a>
-<a class="rl-t" href="/states" title="States and help">{{ ico('buoy', 20) }}</a>
+<a class="rl-t" href="/" title="{{ _('Search leads') }}" onclick="var s=document.querySelector('.ab .srch input');if(s){s.focus();return false}">{{ ico('search', 20) }}</a>
+<details class="fp who lng"><summary class="rl-t rl-lg" title="{{ _('Language') }}" aria-label="{{ _('Language') }}: {{ dict(LANGS)[lang()] }}">{{ lang()|upper }}</summary><div class="fpb">
+<b style="font-size:13px">{{ _('Language') }}</b>
+<nav class="whol">{% for c, n in LANGS %}<a href="/lang/{{ c }}" lang="{{ c }}" hreflang="{{ c }}" class="lo{{ ' on' if c == lang() }}"{% if c == lang() %} aria-current="true"{% endif %}><span class="av">{{ c|upper }}</span><span style="flex:1">{{ n }}</span>{% if c == lang() %}<span aria-hidden="true">✓</span>{% endif %}</a>{% endfor %}</nav>
+</div></details>
 {% if me %}{{ ui.who(me, officers) }}{% endif %}
 </div>
 </nav>
-<aside class="sb" aria-label="Main">
-<a class="brand" href="/">{% if logo %}<img src="/logo.png" alt="Bern Economic Development Agency">{% endif %}<b lang="de">Bärner Mutz</b></a>
-<form method="post" action="/leads/new"><button class="si cmp" type="submit">{{ ico('plus') }}<span>New lead</span></button></form>
-<nav class="sbn" aria-label="Main">
-{% call grp('leads', 'Leads', '/', [('all','All leads','/',nc.all,'inbox'),('drafts','Drafts','/?f=drafts',nc.drafts,'pen'),('closed','Sent and closed','/?f=closed',nc.closed,'send')]) %}{% if lead %}<a class="si on cur" href="/leads/{{ lead.id }}" aria-current="page" lang="de">{{ ico('file', 16) }}<span>{{ lead.title }}</span></a>{% endif %}{% endcall %}
-{{ grp('insights', 'Insights', '/insights', [('gaps','Gap report','/insights',none,'chart'),('capability','Capability map','/insights/capability',none,'grid'),('pipeline','Pipeline','/pipeline',none,'gauge')]) }}
-{{ grp('archives', 'Sources', '/archives', [('sources','All sources','/archives',nc.archives,'db'),('add','Add a source','/archives/add',none,'folder')]) }}
-{{ grp('eval', 'Evaluation', '/eval', [('quality','Search quality','/eval',none,'target'),('checks','Checks and cost','/eval/checks',none,'shield')]) }}
+<aside class="sb" aria-label="{{ _('Main') }}">
+<a class="brand" href="/">{% if logo %}<img src="/logo.png" alt="{{ _('Bern Economic Development Agency') }}">{% endif %}<b lang="de">Bärner Mutz</b></a>
+<form method="post" action="/leads/new"><button class="si cmp" type="submit">{{ ico('plus') }}<span>{{ _('New lead') }}</span></button></form>
+<nav class="sbn" aria-label="{{ _('Main') }}">
+{% call grp('leads', _('Leads'), '/', [('all',_('All leads'),'/',nc.all,'inbox'),('drafts',_('Drafts'),'/?f=drafts',nc.drafts,'pen'),('closed',_('Sent and closed'),'/?f=closed',nc.closed,'send')]) %}{% if lead %}<a class="si on cur" href="/leads/{{ lead.id }}" aria-current="page" lang="de">{{ ico('file', 16) }}<span>{{ lead.title }}</span></a>{% endif %}{% endcall %}
+{{ grp('insights', _('Insights'), '/insights', [('gaps',_('Gap report'),'/insights',none,'chart'),('capability',_('Capability map'),'/insights/capability',none,'grid'),('pipeline',_('Pipeline'),'/pipeline',none,'gauge')]) }}
+{{ grp('archives', _('Sources'), '/archives', [('sources',_('All sources'),'/archives',nc.archives,'db'),('add',_('Add a source'),'/archives/add',none,'folder')]) }}
+{{ grp('eval', _('Evaluation'), '/eval', [('quality',_('Search quality'),'/eval',none,'target'),('checks',_('Checks and cost'),'/eval/checks',none,'shield')]) }}
 </nav>
 <div class="sbf">
-<a class="sov" href="/eval/checks#sovereignty" title="Briefs are read by Apertus 70B on CSCS in Switzerland. Confidential figures and contact data are struck on this machine first."><span class="ring" aria-hidden="true"></span>Apertus on CSCS, Switzerland</a>
-<span class="sbm">Team <b>control-free</b></span>
-{% if stubbed %}<span class="stub" title="These contracts are served by app/stubs.py over the crawled pages until the real module answers">stub: {{ stubbed|join(", ") }}</span>{% endif %}
-<span class="sbm"><a href="/?intro=1">Replay intro</a></span>
+<a class="sov" href="/eval/checks#sovereignty" title="{{ _('Briefs are read by Apertus 70B on CSCS in Switzerland. Confidential figures and contact data are struck on this machine first.') }}"><span class="ring" aria-hidden="true"></span>{{ _('Apertus on CSCS, Switzerland') }}</a>
+<span class="sbm">{{ _('Team') }} <b>control-free</b></span>
+{% if stubbed %}<span class="stub" title="{{ _('These contracts are served by app/stubs.py over the crawled pages until the real module answers') }}">stub: {{ stubbed|join(", ") }}</span>{% endif %}
+<span class="sbm"><a href="/?intro=1">{{ _('Replay intro') }}</a></span>
+<nav class="lsw" aria-label="{{ _('Language') }}">{% for c, n in LANGS %}<a href="/lang/{{ c }}" lang="{{ c }}" hreflang="{{ c }}" title="{{ n }}"{% if c == lang() %} class="on" aria-current="true"{% endif %}>{{ c|upper }}</a>{% endfor %}</nav>
 </div>
 </aside>
 <div class="wrap">
-{% if self.actions()|trim %}<div class="ab" role="toolbar" aria-label="Actions">{% block actions %}{% endblock %}</div>{% endif %}
+{% if self.actions()|trim %}<div class="ab" role="toolbar" aria-label="{{ _('Actions') }}">{% block actions %}{% endblock %}</div>{% endif %}
 {% block casebar %}{% endblock %}
 <div class="view {% block viewclass %}{% endblock %}">
 {% block content %}{% endblock %}
@@ -74,20 +78,22 @@
 </div>
 {% set m = mutz or {} %}
 <div id="mutz" class="{% if m.corner == 'left' %}left{% endif %}" data-screen="{{ m.screen or '' }}" data-lead="{{ m.lead or '' }}" data-need="{{ m.need or '' }}" data-pot="{{ m.pot or '' }}">
-{% if m.bubble %}<p class="bubble" id="mutzbubble">{{ m.bubble }}{% if 'Grüessech' in m.bubble %}<span class="lb" style="display:block">Hello! (Bernese German)</span>{% endif %}<button type="button" aria-label="Dismiss" onclick="this.parentNode.remove()">×</button></p>{% endif %}
-<button type="button" class="peek" aria-label="Ask Bärner Mutz (M)" aria-haspopup="dialog" aria-expanded="false" id="mutzbtn">{{ ui.mutz("idle", 72, 68) }}</button>
+{% if m.bubble %}<p class="bubble" id="mutzbubble">{{ m.bubble }}{% if 'Grüessech' in m.bubble %}<span class="lb" style="display:block">{{ _('Hello! (Bernese German)') }}</span>{% endif %}<button type="button" aria-label="{{ _('Dismiss') }}" onclick="this.parentNode.remove()">×</button></p>{% endif %}
+<button type="button" class="peek" aria-label="{{ _('Ask Bärner Mutz (M)') }}" aria-haspopup="dialog" aria-expanded="false" id="mutzbtn">{{ ui.mutz("idle", 72, 68) }}</button>
 </div>
 <div id="mutzcard" role="dialog" aria-modal="false" aria-label="Bärner Mutz" class="hidden{% if m.corner == 'left' %} left{% endif %}">
 <div class="hd" id="mutzhd">
 <svg viewBox="0 0 10 16" width="10" height="16" aria-hidden="true"><circle cx="2" cy="3" r="1.4" fill="#111"/><circle cx="8" cy="3" r="1.4" fill="#111"/><circle cx="2" cy="8" r="1.4" fill="#111"/><circle cx="8" cy="8" r="1.4" fill="#111"/><circle cx="2" cy="13" r="1.4" fill="#111"/><circle cx="8" cy="13" r="1.4" fill="#111"/></svg>
-<div style="flex:1;min-width:0"><b style="display:block;font-size:15px" lang="de">Bärner Mutz</b><span class="lb" id="mutzknows">Knows: {% if lead %}{{ lead.title }} · {% endif %}{{ m.screen or 'Leads' }}</span></div>
-{% if m.pot %}<span title="Coverage for this screen" style="display:inline-flex;align-items:center;gap:4px" class="lb">{{ ui.pot(m.pot, 16, 18) }}{{ ui.potlabel(m.pot) }}</span>{% endif %}
-<button type="button" class="ic" aria-label="Close Bärner Mutz, Esc" id="mutzclose"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="#111" stroke-width="1.8"/></svg></button>
+<div style="flex:1;min-width:0"><b style="display:block;font-size:15px" lang="de">Bärner Mutz</b><span class="lb" id="mutzknows">{% if lead %}{{ _('Knows: {lead} · {screen}', lead=lead.title, screen=_(m.screen or 'Leads')) }}{% else %}{{ _('Knows: {screen}', screen=_(m.screen or 'Leads')) }}{% endif %}</span></div>
+{% if m.pot %}<span title="{{ _('Coverage for this screen') }}" style="display:inline-flex;align-items:center;gap:4px" class="lb">{{ ui.pot(m.pot, 16, 18) }}{{ ui.potlabel(m.pot) }}</span>{% endif %}
+<button type="button" class="ic" aria-label="{{ _('Close Bärner Mutz, Esc') }}" id="mutzclose"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="#111" stroke-width="1.8"/></svg></button>
 </div>
 <div class="msgs" id="mutzmsgs" aria-live="polite"></div>
 <form id="mutzform" style="display:flex;gap:8px;padding:10px 12px;border-top:1px solid #111;align-items:flex-end">
-<div style="flex:1;display:flex;flex-direction:column;gap:2px"><label for="mutzask" class="lb">Ask in German, French or English</label><input id="mutzask" class="in" autocomplete="off" placeholder="{% if m.screen == 'Matches' %}Why is the first match ranked first?{% else %}Who in Bern works on glucose sensors?{% endif %}" style="font-size:14px;padding:9px 10px"></div>
-<button class="b" type="submit">Ask</button>
+<input type="file" id="mutzfilein" accept=".pdf,.txt,.md,application/pdf,text/plain" hidden>
+<button type="button" class="ic mzclip" id="mutzclip" aria-label="{{ _('Attach a company PDF or text: Bärner Mutz drafts the pitch') }}" title="{{ _('Attach a company PDF or text: Bärner Mutz drafts the pitch') }}"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10.5 4.5 5.2 9.8a1.6 1.6 0 0 0 2.3 2.3l5.6-5.6a3 3 0 0 0-4.3-4.3L3.2 7.8a4.3 4.3 0 0 0 6.1 6.1l4.4-4.4" fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+<div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span id="mutzfile" class="mzfile hidden"><span id="mutzfilename"></span><button type="button" class="ic" id="mutzfilex" aria-label="{{ _('Remove the file') }}">×</button></span><label for="mutzask" class="lb">{{ _('Ask in German, French, Italian or English') }}</label><input id="mutzask" class="in" autocomplete="off" placeholder="{% if m.screen == 'Matches' %}{{ _('Why is the first match ranked first?') }}{% else %}{{ _('Who in Bern works on glucose sensors?') }}{% endif %}" style="font-size:14px;padding:9px 10px"></div>
+<button class="b" type="submit">{{ _('Ask') }}</button>
 </form>
 </div>
 {% include "_splash.html" %}

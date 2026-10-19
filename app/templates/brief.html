@@ -1,16 +1,16 @@
 {% extends "base.html" %}{% set active_page = "leads" %}
-{% block title %}Brief · {{ lead.title }}{% endblock %}
+{% block title %}{{ _('Brief') }} · {{ lead.title }}{% endblock %}
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
 {% block content %}
 {% macro passages() %}
 {% if lead.passages and mode in ('pdf', 'text', 'website') %}
 <details {% if mode == 'pdf' and view == 'source' %}open{% endif %}>
-<summary class="lb" style="cursor:pointer">What was used, ignored and struck · {{ lead.passages|selectattr('status','equalto','used')|list|length }} of {{ lead.passages|length }} passages used</summary>
-<div style="display:flex;gap:16px;flex-wrap:wrap;margin:8px 0" class="lb"><span><b style="color:#111">Black rule</b> used</span><span>Grey: ignored</span><span style="text-decoration:line-through">Struck by you</span></div>
+<summary class="lb" style="cursor:pointer">{{ _('What was used, ignored and struck · {used} of {total} passages used', used=lead.passages|selectattr('status','equalto','used')|list|length, total=lead.passages|length) }}</summary>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin:8px 0" class="lb"><span><b style="color:#111">{{ _('Black rule') }}</b> {{ _('used') }}</span><span>{{ _('Grey: ignored') }}</span><span style="text-decoration:line-through">{{ _('Struck by you') }}</span></div>
 <div style="background:#F2F2F2;padding:16px"><div style="background:#fff;padding:18px 20px;display:flex;flex-direction:column">
 {% for p in lead.passages %}
-<div class="ps {{ {'used':'u','ignored':'i','struck':'x'}.get(p.status,'i') }}" {% if 'instruction' in (p.reason or '') %}style="font-style:italic"{% endif %}><span>{{ p.text }}</span><span class="t">{{ p.status|capitalize }}{% if p.reason and not p.reason.lower().startswith(p.status) %} · {{ p.reason }}{% elif p.reason %}{{ p.reason[p.status|length:] }}{% endif %}{% if p.status == 'struck' %} · <a href="#" data-strike="{{ loop.index0 }}">Undo</a>{% elif p.status == 'used' %} · <a href="#" data-strike="{{ loop.index0 }}">Do not use this</a>{% endif %}</span></div>
+<div class="ps {{ {'used':'u','ignored':'i','struck':'x'}.get(p.status,'i') }}" {% if 'instruction' in (p.reason or '') %}style="font-style:italic"{% endif %}><span>{{ p.text }}</span><span class="t">{{ _(p.status|capitalize) }}{{ p.reason|preason(p.status) }}{% if p.status == 'struck' %} · <a href="#" data-strike="{{ loop.index0 }}">{{ _('Undo') }}</a>{% elif p.status == 'used' %} · <a href="#" data-strike="{{ loop.index0 }}">{{ _('Do not use this') }}</a>{% endif %}</span></div>
 {% endfor %}
 </div></div>
 </details>
@@ -22,41 +22,41 @@
 <div class="pane" style="padding:32px 32px 88px">
 <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
 <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
-<div><span class="lb">Step 1 of 2 · Source</span><h1 style="margin:0;font-size:24px">The lead</h1></div>
-{% if needs %}<a class="b s" href="/leads/{{ lead.id }}/brief">Back to {{ needs|length }} need{{ 's' if needs|length != 1 }}</a>
-{% else %}<form method="post" action="/leads/demo" style="display:flex;align-items:baseline;gap:6px"><span class="lb">No brief to hand?</span><button class="lnk" type="submit">Load the sport wearable demo</button></form>{% endif %}
+<div><span class="lb">{{ _('Step 1 of 2 · Source') }}</span><h1 style="margin:0;font-size:24px">{{ _('The lead') }}</h1></div>
+{% if needs %}<a class="b s" href="/leads/{{ lead.id }}/brief">{{ _('Back to {n} needs', n=needs|length) if needs|length != 1 else _('Back to {n} need', n=needs|length) }}</a>
+{% else %}<form method="post" action="/leads/demo" style="display:flex;align-items:baseline;gap:6px"><span class="lb">{{ _('No brief to hand?') }}</span><button class="lnk" type="submit">{{ _('Load the sport wearable demo') }}</button></form>{% endif %}
 </div>
-<nav aria-label="Input type" class="tb">{% for m, l in [('text','Text'),('pdf','PDF'),('website','Website'),('keywords','Keywords')] %}<a href="?mode={{ m }}{{ '&source=1' if needs }}" class="{{ 'on' if mode == m }}">{{ l }}</a>{% endfor %}</nav>
-{% if err %}<div class="err" role="alert"><b>The Apertus gateway did not answer.</b> Your brief is saved. Try again in a minute, or use Keywords, which needs no model.</div>{% endif %}
+<nav aria-label="{{ _('Input type') }}" class="tb">{% for m, l in [('text','Text'),('pdf','PDF'),('website','Website'),('keywords','Keywords')] %}<a href="?mode={{ m }}{{ '&source=1' if needs }}" class="{{ 'on' if mode == m }}">{{ _(l) }}</a>{% endfor %}</nav>
+{% if err %}<div class="err" role="alert"><b>{{ _('The Apertus gateway did not answer.') }}</b> {{ _('Your brief is saved. Try again in a minute, or use Keywords, which needs no model.') }}</div>{% endif %}
 <form id="briefform" method="post" action="/leads/{{ lead.id }}/brief" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:14px">
 <input type="hidden" name="mode" value="{{ mode }}">
-<label class="lb" for="title" style="margin-bottom:-10px">Lead name</label>
+<label class="lb" for="title" style="margin-bottom:-10px">{{ _('Lead name') }}</label>
 <input id="title" class="in" value="{{ lead.title }}" data-lead-title style="font-size:14px;padding:8px 10px">
 {% if mode == 'text' %}
-<label for="op" class="lb">Company description</label>
-<textarea id="op" name="text" rows="9" class="in" style="resize:vertical" placeholder="Paste a company description, for example from the S-GE or GGBa project description.">{{ lead.input_text or '' }}</textarea>
+<label for="op" class="lb">{{ _('Company description') }}</label>
+<textarea id="op" name="text" rows="9" class="in" style="resize:vertical" placeholder="{{ _('Paste a company description, for example from the S-GE or GGBa project description.') }}">{{ lead.input_text or '' }}</textarea>
 {% elif mode == 'pdf' %}
-<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">{% if lead.pdf_name %}<b style="font-size:14px">{{ lead.pdf_name }}</b>{% endif %}<span style="flex:1"></span><label class="b s" for="pdf">{{ 'Replace file' if lead.pdf_name else 'Choose PDF' }}</label><input type="file" id="pdf" name="pdf" accept="application/pdf" class="hidden" onchange="this.form.requestSubmit()"></div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">{% if lead.pdf_name %}{% if has_file %}<a href="/leads/{{ lead.id }}/file" target="_blank" rel="noopener" style="font-size:14px;font-weight:700">{{ lead.pdf_name }}</a>{% else %}<b style="font-size:14px">{{ lead.pdf_name }}</b>{% endif %}{% endif %}<span style="flex:1"></span><label class="b s" for="pdf">{{ _('Replace file') if lead.pdf_name else _('Choose PDF') }}</label><input type="file" id="pdf" name="pdf" accept="application/pdf" class="hidden" onchange="this.form.requestSubmit()"></div>
 <input type="hidden" name="text" value="{{ lead.input_text or '' }}">
 {% elif mode == 'website' %}
 <input type="hidden" name="text" value="{{ lead.input_text or '' }}">
 {% elif mode == 'keywords' %}
-<label for="kw" class="lb">One need per line</label>
-<textarea id="kw" name="keywords" rows="5" class="in" placeholder="glucose sensor, women in sport&#10;clinical trial support"></textarea>
+<label for="kw" class="lb">{{ _('One need per line') }}</label>
+<textarea id="kw" name="keywords" rows="5" class="in" placeholder="{{ _('glucose sensor, women in sport\nclinical trial support')|replace('\n', '&#10;'|safe) }}"></textarea>
 {% endif %}
 {{ passages() }}
 {% if mode == 'pdf' %}
-<label style="display:flex;gap:10px;align-items:flex-start;border:1px solid #111;padding:12px;font-size:14px"><input type="checkbox" name="keep_file" value="1" {% if lead.keep_file %}checked{% endif %} style="margin-top:4px"><span><b>Keep the file with the lead</b></span></label>
+<label style="display:flex;gap:10px;align-items:flex-start;border:1px solid #111;padding:12px;font-size:14px"><input type="checkbox" name="keep_file" value="1" {% if lead.keep_file %}checked{% endif %} style="margin-top:4px"><span><b>{{ _('Keep the file with the lead') }}</b></span></label>
 {% endif %}
 {% if mode != 'keywords' %}
-<label for="web" class="lb">Company website{{ ', optional' if mode != 'website' }}</label>
+<label for="web" class="lb">{{ _('Company website, optional') if mode != 'website' else _('Company website') }}</label>
 <input id="web" name="website" value="{{ lead.website or '' }}" placeholder="https://" class="in">
 {% endif %}
-<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="lb">Pitch language</span>
-{% for l in ['en','de','fr'] %}<label class="b s {{ 'k' if (lead.lang or 'en') == l }}" style="cursor:pointer"><input type="radio" name="lang" value="{{ l }}" class="hidden" {% if (lead.lang or 'en') == l %}checked{% endif %} onchange="document.querySelectorAll('[name=lang]').forEach(r=>r.parentNode.classList.toggle('k',r.checked))">{{ l|upper }}</label>{% endfor %}</div>
-<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="b p" type="submit" id="readbtn">{{ 'Read the brief again' if needs else 'Find needs' }}</button>{% if mode != 'keywords' %}<span class="lb">Apertus 70B · CSCS</span>{% endif %}</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="lb">{{ _('Pitch language') }}</span>
+{% for l in ['en','de','fr','it'] %}<label class="b s {{ 'k' if (lead.lang or 'en') == l }}" style="cursor:pointer"><input type="radio" name="lang" value="{{ l }}" class="hidden" {% if (lead.lang or 'en') == l %}checked{% endif %} onchange="document.querySelectorAll('[name=lang]').forEach(r=>r.parentNode.classList.toggle('k',r.checked))">{{ l|upper }}</label>{% endfor %}</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="b p" type="submit" id="readbtn">{{ _('Read the brief again') if needs else _('Find needs') }}</button>{% if mode != 'keywords' %}<span class="lb">Apertus 70B · CSCS</span>{% endif %}</div>
 </form>
-<div id="reading" class="hidden" role="status" aria-live="polite" style="display:flex;gap:20px;align-items:flex-start;border-top:1px solid #111;padding-top:16px"><span>{{ ui.mutz("search", 64, 54) }}</span><div><h2 style="margin:0 0 6px;font-size:21px">Bear with me…</h2><p style="margin:0;font-size:14px">Reading the brief. The needs open in step 2.</p></div></div>
+<div id="reading" class="hidden" role="status" aria-live="polite" style="display:flex;gap:20px;align-items:flex-start;border-top:1px solid #111;padding-top:16px"><span>{{ ui.mutz("search", 64, 54) }}</span><div><h2 style="margin:0 0 6px;font-size:21px">{{ _('Bear with me…') }}</h2><p style="margin:0;font-size:14px">{{ _('Reading the brief. The needs open in step 2.') }}</p></div></div>
 </div>
 </div>
 </section>
@@ -65,24 +65,24 @@
 <div class="pane" style="padding:32px 32px 88px">
 <div style="max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
 <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px">
-<div><span class="lb">Step 2 of 2 · Needs</span><h1 style="margin:0;font-size:24px">{{ needs|length }} need{{ 's' if needs|length != 1 }}</h1></div>
-<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="lb">Read from {% if mode == 'pdf' and lead.pdf_name %}{{ lead.pdf_name }}{% elif mode == 'website' %}{{ lead.website or 'the website' }}{% elif mode == 'keywords' %}keywords{% else %}the pasted text{% endif %} · {{ (lead.lang or 'en')|upper }}</span><a class="b s" href="/leads/{{ lead.id }}/brief?source=1&mode={{ mode }}">Change source</a></div>
+<div><span class="lb">{{ _('Step 2 of 2 · Needs') }}</span><h1 style="margin:0;font-size:24px">{{ _('{n} needs', n=needs|length) if needs|length != 1 else _('{n} need', n=needs|length) }}</h1></div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="lb">{% if lead.pdf_name and has_file %}{{ _('Read from') }} <a href="/leads/{{ lead.id }}/file" target="_blank" rel="noopener">{{ lead.pdf_name }}</a>{% elif mode == 'pdf' and lead.pdf_name %}{{ _('Read from {src}', src=lead.pdf_name) }}{% elif mode == 'website' %}{{ _('Read from {src}', src=lead.website) if lead.website else _('Read from the website') }}{% elif mode == 'keywords' %}{{ _('Read from keywords') }}{% else %}{{ _('Read from the pasted text') }}{% endif %} · {{ (lead.lang or 'en')|upper }}</span><a class="b s" href="/leads/{{ lead.id }}/brief?source=1&mode={{ mode }}">{{ _('Change source') }}</a></div>
 </div>
 {% if lead.profile and (lead.profile.name or lead.profile.product or lead.profile.sector) %}
 <dl class="pr" style="background:#FAFAFA;padding:12px 14px">
-{% for k, label in [('name','Name'),('sector','Sector'),('stage','Stage'),('product','Product')] %}<dt>{{ label }}</dt>{% if lead.profile.get(k) %}<dd>{{ lead.profile[k] }}</dd>{% else %}<dd class="lb">Not stated</dd>{% endif %}{% endfor %}
+{% for k, label in [('name','Name'),('sector','Sector'),('stage','Stage'),('product','Product')] %}<dt>{{ _(label) }}</dt>{% if lead.profile.get(k) %}<dd>{{ lead.profile[k] }}</dd>{% else %}<dd class="lb">{{ _('Not stated') }}</dd>{% endif %}{% endfor %}
 </dl>
 {% endif %}
 <div style="border-top:1px solid #111" id="needs">
 {% for n in needs %}
 <div class="nd" data-need="{{ n.id }}">
-<div style="display:flex;gap:10px;align-items:center"><span class="chip">{{ n.label or (n.type|nlabel) }}</span><b style="flex:1" contenteditable="true" spellcheck="false" data-need-text title="Click to edit">{{ n.text }}</b><button class="b s" aria-label="Delete need" data-del>Delete</button></div>
+<div style="display:flex;gap:10px;align-items:center"><span class="chip">{{ _(n.label) or (n.type|nlabel) }}</span><b style="flex:1" contenteditable="true" spellcheck="false" data-need-text title="{{ _('Click to edit') }}">{{ n.text }}</b><button class="b s" aria-label="{{ _('Delete need') }}" data-del>{{ _('Delete') }}</button></div>
 <details class="nm">
-<summary class="lb">{% set on = n.terms|selectattr('on')|list|length %}{{ on }} search term{{ 's' if on != 1 }}{% if n.from_sentence %} · source sentence{% endif %}</summary>
+<summary class="lb">{% set on = n.terms|selectattr('on')|list|length %}{{ _('{n} search terms', n=on) if on != 1 else _('{n} search term', n=on) }}{% if n.from_sentence %} · {{ _('source sentence') }}{% endif %}</summary>
 <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-<div style="display:flex;gap:6px;flex-wrap:wrap">{% for t in n.terms %}<label class="chip"><input type="checkbox" data-term="{{ t.t }}" {% if t.on %}checked{% endif %}> {{ t.t }}</label>{% endfor %}<input class="chip" data-addterm placeholder="+ term" style="width:90px;font:12px var(--font)"></div>
-{% if n.from_sentence %}<span class="lb">From {{ {'pdf':'the PDF','website':'the website'}.get(n.source, 'the text') }} · “{{ n.from_sentence|truncate(110) }}”</span>{% endif %}
-{% if n.type in ('supplier','funding','transfer','other') %}<span class="lb">{{ 'Not in our sources yet' if n.type == 'supplier' else 'From the agency\'s list' }}</span>{% endif %}
+<div style="display:flex;gap:6px;flex-wrap:wrap">{% for t in n.terms %}<label class="chip"><input type="checkbox" data-term="{{ t.t }}" {% if t.on %}checked{% endif %}> {{ t.t }}</label>{% endfor %}<input class="chip" data-addterm placeholder="{{ _('+ term') }}" style="width:90px;font:12px var(--font)"></div>
+{% if n.from_sentence %}<span class="lb">{{ _({'pdf':'From the PDF','website':'From the website'}.get(n.source, 'From the text')) }} · “{{ n.from_sentence|truncate(110) }}”</span>{% endif %}
+{% if n.type in ('supplier','funding','transfer','other') %}<span class="lb">{{ _('Not in our sources yet') if n.type == 'supplier' else _('From the agency\'s list') }}</span>{% endif %}
 {# hidden for now: <label class="lb"><input type="checkbox" data-share {% if n.shareable %}checked{% endif %}> Shareable with researchers</label> #}
 </div>
 </details>
@@ -94,11 +94,11 @@
 </div>
 <div class="dock r" style="padding:12px 32px">
 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-<details><summary class="b dash" style="list-style:none">Add a need</summary>
-<form method="post" action="/leads/{{ lead.id }}/needs/add" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input name="text" class="in" placeholder="What does the company need?" required style="font-size:14px;padding:8px;width:260px"><select name="type" class="in" style="font-size:14px;padding:8px">{% for t in ['research','infrastructure','supplier','funding','transfer','other'] %}<option value="{{ t }}">{{ t|nlabel }}</option>{% endfor %}</select><button class="b s">Add</button></form>
+<details><summary class="b dash" style="list-style:none">{{ _('Add a need') }}</summary>
+<form method="post" action="/leads/{{ lead.id }}/needs/add" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input name="text" class="in" placeholder="{{ _('What does the company need?') }}" required style="font-size:14px;padding:8px;width:260px"><select name="type" class="in" style="font-size:14px;padding:8px">{% for t in ['research','infrastructure','supplier','funding','transfer','other'] %}<option value="{{ t }}">{{ t|nlabel }}</option>{% endfor %}</select><button class="b s">{{ _('Add') }}</button></form>
 </details>
 <span style="flex:1"></span>
-<form method="post" action="/leads/{{ lead.id }}/search"><button class="b p" type="submit">Find matches</button></form>
+<form method="post" action="/leads/{{ lead.id }}/search"><button class="b p" type="submit">{{ _('Find matches') }}</button></form>
 </div>
 </div>
 </section>

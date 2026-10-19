@@ -1,30 +1,18 @@
 {% extends "base.html" %}{% set active_page = "insights" %}{% set active_sub = "pipeline" %}
-{% block title %}Pipeline{% endblock %}
-{% block actions %}<a class="b s" href="/">Show as list</a><span class="sp">{{ kpi.leads }} lead{{ 's' if kpi.leads != 1 }} this year</span>{% endblock %}
+{% block title %}{{ _('Pipeline') }}{% endblock %}
+{% block actions %}<span class="sp">{{ _('{n} lead this year', n=kpi.leads) if kpi.leads == 1 else _('{n} leads this year', n=kpi.leads) }}</span>{% endblock %}
 {% block content %}
 <main style="max-width:1280px;padding:32px;display:flex;flex-direction:column;gap:22px">
-<h1 style="margin:0;font-size:28px;line-height:1.15">Pipeline</h1>
-<section aria-label="Did better pitches bring more visits?" style="display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-start">
-<div style="flex:1 1 260px;min-width:0"><h2 style="margin:0 0 4px;font-size:18px">Did better pitches bring more visits?</h2>
-</div>
-<div style="flex:2 1 520px;min-width:0;overflow-x:auto"><table class="t" style="min-width:460px">
-<thead><tr><th></th><th>With the navigator</th><th>Before, agency baseline</th></tr></thead>
-<tbody>
-<tr><td>Days, lead to pitch</td><td>{% if kpi.median_days is not none %}<b>{{ kpi.median_days }}</b> <span class="lb">median</span>{% else %}<span class="lb">No pitch sent yet</span>{% endif %}</td><td class="lb">Ask the agency</td></tr>
-<tr><td>Visit rate</td><td>{{ ui.meter(kpi.visits, kpi.pitched, "Visit rate", "pitched leads visited", quiet=True) }}</td><td class="lb">Ask the agency</td></tr>
-<tr><td>Win rate</td><td>{{ ui.meter(kpi.won, kpi.visits, "Win rate", "visits won", quiet=True) }}</td><td class="lb">Ask the agency</td></tr>
-</tbody></table>
-</div>
-</section>
+<h1 style="margin:0;font-size:28px;line-height:1.15">{{ _('Pipeline') }}</h1>
 <div style="overflow-x:auto">
 <div style="display:grid;grid-template-columns:repeat(6,minmax(170px,1fr));gap:16px;min-width:1060px">
 {% for s in stages %}
-<section style="min-width:0;display:flex;flex-direction:column;gap:8px" aria-label="{{ s }}">
-<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #111;padding-bottom:6px"><b style="font-size:15px">{{ {'new':'New','triaged':'Triaged','pitched':'Pitched','visit':'Visit','won':'Won','lost':'Lost'}[s] }}</b><span class="lb">{{ cols[s]|length }}</span></div>
+<section style="min-width:0;display:flex;flex-direction:column;gap:8px" aria-label="{{ _({'new':'New','triaged':'Triaged','pitched':'Pitched','visit':'CEO accepted','won':'Won','lost':'Lost'}[s]) }}">
+<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #111;padding-bottom:6px"><b style="font-size:15px">{{ _({'new':'New','triaged':'Triaged','pitched':'Pitched','visit':'CEO accepted','won':'Won','lost':'Lost'}[s]) }}</b><span class="lb">{{ cols[s]|length }}</span></div>
 {% for l in cols[s] %}
-<a href="/leads/{{ l.id }}" style="border:1px solid #111;padding:10px;font-size:13px;line-height:1.4;text-decoration:none;display:block;background:#fff;{{ 'color:#5E5E5E' if s == 'lost' }}"><b style="display:block;font-size:14px;color:#111">{{ l.title }}</b>{{ l.origin }} · {% if l.versions %}v{{ l.versions|length }} sent {{ l.versions[-1].sent_at|date }}{% else %}{{ l.created_at|date }}{% endif %}
-<span class="lb" style="display:block">{% if s == 'new' %}{{ 'Not opened' if not l.opened else (l.n_needs ~ ' needs') }}{% elif s == 'triaged' %}{{ l.n_strong }} of {{ l.n_needs }} needs strong{% if l.n_needs %}<span class="bar"><i style="width:{{ (100 * l.n_strong / l.n_needs)|int }}%"></i></span>{% endif %}{% elif s == 'lost' %}{{ l.lost_reason or 'Reason missing' }}{% elif s == 'visit' %}{% set ag = l.n_out|selectattr('status','equalto','agreed')|list|length %}{{ ag }} of {{ l.n_out|length }} researchers agreed{% if l.n_out %}<span class="bar"><i style="width:{{ (100 * ag / l.n_out|length)|int }}%"></i></span>{% endif %}{% else %}{{ l.n_needs }} needs{% endif %}</span></a>
-{% else %}<span class="lb">None</span>{% endfor %}
+<a href="/leads/{{ l.id }}" style="border:1px solid #111;padding:10px;font-size:13px;line-height:1.4;text-decoration:none;display:block;background:#fff;{{ 'color:#5E5E5E' if s == 'lost' }}"><b style="display:block;font-size:14px;color:#111">{{ l.title }}</b>{{ _(l.origin) }} · {% if l.versions %}{{ _('v{n} sent {date}', n=l.versions|length, date=l.versions[-1].sent_at|date) }}{% else %}{{ l.created_at|date }}{% endif %}
+<span class="lb" style="display:block">{% if s == 'new' %}{{ _('Not opened') if not l.opened else _('{n} needs', n=l.n_needs) }}{% elif s == 'triaged' %}{{ _('{n} of {total} needs strong', n=l.n_strong, total=l.n_needs) }}{% if l.n_needs %}<span class="bar"><i style="width:{{ (100 * l.n_strong / l.n_needs)|int }}%"></i></span>{% endif %}{% elif s == 'lost' %}{{ _(l.lost_reason or 'Reason missing') }}{% elif s == 'visit' %}{% set ag = l.n_out|selectattr('status','equalto','agreed')|list|length %}{{ _('{n} of {total} researchers agreed', n=ag, total=l.n_out|length) }}{% if l.n_out %}<span class="bar"><i style="width:{{ (100 * ag / l.n_out|length)|int }}%"></i></span>{% endif %}{% else %}{{ _('{n} needs', n=l.n_needs) }}{% endif %}</span></a>
+{% else %}<span class="lb">{{ _('None') }}</span>{% endfor %}
 </section>
 {% endfor %}
 </div></div>

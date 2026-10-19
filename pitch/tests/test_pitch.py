@@ -276,6 +276,35 @@ def test_long_german_unit_name_renders(tmp_path, valid):
     assert Path(out).stat().st_size > 1000
 
 
+
+def test_plans_table_lists_each_plan_with_its_matches(valid):
+    valid["needs"] = [{"id": "n1", "label": "Clinical study", "text": "A study with athletes", "priority": "high"},
+                      {"id": "n2", "label": "Supplier", "text": "A patch maker"}]
+    valid["cards"][3]["need_id"] = "n1"
+    html = build.render_html(valid, "clean")
+    assert "Your plans, and what Bern has for each" in html
+    assert "A study with athletes" in html and "Still open." in html and "A patch maker" in html
+    ctx = build._context(valid, "clean")
+    assert ctx["n_answered"] == 1 and [o["name"] for o in ctx["plans"][0]["offers"]] == [valid["cards"][3]["name"]]
+
+
+def test_why_card_that_repeats_a_match_is_left_out(valid):
+    valid["cards"][0]["text"] = valid["cards"][3]["text"] + " [2]"
+    ctx = build._context(valid, "clean")
+    why = next(s for s in ctx["sections"] if s["key"] == "why")
+    assert len(why["cards"]) == 1
+
+
+def test_clean_pdf_merges_cards_that_say_the_same(valid):
+    twin = copy.deepcopy(valid["cards"][3])
+    twin["sources"][0]["quote"] = "Another sentence on the same page."
+    valid["cards"].append(twin)
+    sec = next(s for s in build._context(valid, "clean")["sections"] if s["key"] == "matches")
+    assert len(sec["cards"]) == 2
+    sec = next(s for s in build._context(valid, "review")["sections"] if s["key"] == "matches")
+    assert len(sec["cards"]) == 3                      # the officer still sees both
+
+
 # ---------------------------------------------------------------- CLI
 
 def test_cli(tmp_path):
@@ -291,3 +320,68 @@ def test_cli(tmp_path):
     assert bad.returncode == 1
     assert "has no source" in bad.stderr
     assert not (tmp_path / "bad.pdf").exists()
+
+
+# ---------------------------------------------------------------- document language
+
+LOCALES = ROOT / "pitch" / "locales"
+
+
+@pytest.mark.parametrize("lang, sources, nxt, evidence, how", [
+    ("de", "Quellen", "Nächster Schritt", "Belege", "Wie"),
+    ("fr", "Sources", "Prochaine étape", "Preuves", "Comment"),
+    ("it", "Fonti", "Prossimo passo", "Prove", "Come"),
+])
+def test_fixed_words_follow_the_pitch_language(valid, lang, sources, nxt, evidence, how):
+    valid["lang"] = lang
+    clean = build.render_html(valid, "clean")
+    assert f'<html lang="{lang}">' in clean
+    assert f"<h2>{sources}</h2>" in clean and nxt in clean and f'<p class="kicker">{how}</p>' in clean
+    assert "Your contact" not in clean and "Next step" not in clean and "Every statement in this document" not in clean
+    assert build.render_html(valid, "review").count(f"<h2>{evidence}</h2>") == 1
+
+
+def test_english_stays_english(valid):
+    html = build.render_html(valid, "clean")
+    assert '<html lang="en">' in html and "<h2>Sources</h2>" in html and "Next step" in html
+    assert "Your contact" in html and "@bottom-left { content:" not in html   # the stylesheet's English stands
+
+
+def test_contact_line_escapes_the_officer(valid):
+    valid["lang"] = "it"
+    valid["officer"] = {"name": "A <b>B</b>", "email": "a@b.ch"}
+    html = build.render_html(valid, "clean")
+    assert "Scriva a <b>A &lt;b&gt;B&lt;/b&gt;</b>" in html and 'href="mailto:a@b.ch"' in html
+
+
+def test_dates_in_the_pitch_language():
+    from pitch.locales import fmt_date
+    assert fmt_date("2026-10-19", "en") == "19 October 2026"
+    assert fmt_date("2026-10-19", "de") == "19. Oktober 2026"
+    assert fmt_date("2026-10-01", "fr") == "1er octobre 2026"
+    assert fmt_date("2026-03-07", "it") == "7 marzo 2026"
+    assert fmt_date("2026-03-07", "xx") == "7 March 2026"
+
+
+def test_catalogs_match():
+    import re
+    cats = {l: json.loads((LOCALES / f"{l}.json").read_text("utf-8")) for l in ("de", "fr", "it")}
+    assert set(cats["de"]) == set(cats["fr"]) == set(cats["it"])
+    ph = re.compile(r"\{\w+\}")
+    tags = re.compile(r"</?\w+")
+    for lang, cat in cats.items():
+        for en, tr in cat.items():
+            assert tr.strip(), (lang, en)
+            assert sorted(set(ph.findall(en))) == sorted(set(ph.findall(tr))), (lang, en)
+            assert sorted(tags.findall(en)) == sorted(tags.findall(tr)), (lang, en)
+    assert not any("ß" in v for v in cats["de"].values())
+    for lang in cats:   # the stored file is the canonical format
+        raw = (LOCALES / f"{lang}.json").read_text("utf-8")
+        assert raw == json.dumps(cats[lang], ensure_ascii=False, indent=1, sort_keys=True) + "\n"
+
+
+def test_italian_pdf_builds(tmp_path, valid):
+    valid["lang"] = "it"
+    out = build_pdf(valid, "clean", tmp_path / "it.pdf")
+    txt = text_of(out)
+    assert "Fonti" in txt and "Promozione economica del Cantone di Berna" in txt

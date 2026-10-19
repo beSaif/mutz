@@ -20,6 +20,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote as _urlquote, urlparse
 
+from app.i18n import _
+
 DATA = Path(os.environ.get("MUTZ_DATA", "data"))
 
 SOURCE_NAMES = {
@@ -404,27 +406,28 @@ def why_not(entity_or_name, query_text):
     for rank, (sc, pid, lst) in enumerate(ranked[:200], 1):
         page = c.pages[pid]
         if entity_or_name == f"page:{pid}" or (name and name in fold(page["title"])):
-            stages = [{"stage": "keyword (BM25)", "score": round(sc, 3), "rank": rank, "note": f"{len(lst)} matching chunks"},
-                      {"stage": "evidence bar", "score": bar, "rank": None, "note": "pages under the bar are not shown"}]
+            stages = [{"stage": "keyword (BM25)", "score": round(sc, 3), "rank": rank, "note": _("{n} matching chunks", n=len(lst))},
+                      {"stage": "evidence bar", "score": bar, "rank": None, "note": _("pages under the bar are not shown")}]
             if lowest:
                 stages.append({"stage": "lowest shown", "score": round(lowest[0], 3), "rank": len(shown),
                                "note": c.pages[lowest[1]]["title"]})
             if rank <= len(shown):
-                reason = f"Ranked {rank} for this need, inside the shown list."
+                reason = _("Ranked {rank} for this need, inside the shown list.", rank=rank)
             elif sc < bar:
-                reason = f"Ranked {rank}. Score {sc:.1f} is below the evidence bar {bar:.1f}: {len(lst)} chunk(s) mention the need's terms."
+                reason = _("Ranked {rank}. Score {score} is below the evidence bar {bar}: {n} chunk(s) mention the need's terms.",
+                           rank=rank, score=f"{sc:.1f}", bar=f"{bar:.1f}", n=len(lst))
             else:
-                reason = f"Ranked {rank}, below the cut of {len(shown)} shown matches."
+                reason = _("Ranked {rank}, below the cut of {n} shown matches.", rank=rank, n=len(shown))
             return {"entity_id": f"page:{pid}", "name": page["title"], "in_index": True, "rank": rank,
                     "stages": stages, "reason": reason, "searched_sources": sorted(c.by_source),
                     "evidence": [{"url": page["url"], "quote": _best_quote(c.chunks[i]["text"], qset)} for _, i in lst[:2]]}
     for pid, page in c.pages.items():
         if name and name in fold(page["title"] + " " + page["text"][:4000]):
             return {"entity_id": f"page:{pid}", "name": page["title"], "in_index": True, "rank": None, "stages": [],
-                    "reason": "In the archive, but none of the pages that name them mention this need's terms or synonyms.",
+                    "reason": _("In the archive, but none of the pages that name them mention this need's terms or synonyms."),
                     "searched_sources": sorted(c.by_source), "evidence": [{"url": page["url"], "quote": ""}]}
     return {"entity_id": None, "name": entity_or_name, "in_index": False, "rank": None, "stages": [],
-            "reason": "No page about this person in the indexed archives. Their profile may be on a site we do not crawl.",
+            "reason": _("No page about this person in the indexed archives. Their profile may be on a site we do not crawl."),
             "searched_sources": sorted(c.by_source), "evidence": []}
 
 
@@ -632,20 +635,20 @@ class ExportError(Exception):
 def validate(pitch):
     problems = []
     for i, card in enumerate(pitch.get("cards", []), 1):
-        label = card.get("name") or f"card {i}"
+        label = card.get("name") or _("card {i}", i=i)
         if not card.get("sources"):
-            problems.append(f"{label}: no source")
+            problems.append(_("{label}: no source", label=label))
         txt = card.get("text", "")
         m = BANNED.search(txt)
         if m:
-            problems.append(f"{label}: banned word '{m.group(0)}'")
+            problems.append(_("{label}: banned word '{word}'", label=label, word=m.group(0)))
         m = PROMISE.search(txt)
         if m:
-            problems.append(f"{label}: promises a meeting ('{m.group(0)}')")
+            problems.append(_("{label}: promises a meeting ('{words}')", label=label, words=m.group(0)))
     for fld in ("title", "intro"):
         m = BANNED.search(pitch.get(fld) or "")
         if m:
-            problems.append(f"{fld}: banned word '{m.group(0)}'")
+            problems.append(_("{label}: banned word '{word}'", label=fld, word=m.group(0)))
     return problems
 
 
@@ -664,10 +667,47 @@ def build_pdf(pitch, mode="review", out_path="pitch.pdf"):
             srcs.append(s)
             nums.append(len(srcs))
         cards.append({**card, "nums": nums})
+    from pitch.locales import fmt_date, tr
+    lang = pitch.get("lang") or "en"  # the document's fixed words follow the pitch language, not the interface
+    env.globals.update(t=lambda s, **kw: tr(lang, s, **kw), fmt_date=lambda v: fmt_date(v, lang))
     logo = Path("assets/private/Logo_SF_BE_EN.png")
     html = env.get_template("pdf.html").render(p=pitch, cards=cards, sources=srcs, mode=mode,
                                                logo=logo.resolve().as_uri() if logo.exists() else None,
-                                               today=datetime.now(timezone.utc).strftime("%d %B %Y"))
+                                               today=fmt_date(datetime.now(timezone.utc), lang))
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     HTML(string=html, base_url=str(Path.cwd())).write_pdf(out_path)
     return out_path
+
+
+# ---------------------------------------------------------------- researcher_email() (lifecycle.draft_email without the gateway)
+
+EMAIL_TEXT = {
+    "en": {"subject": "Introduction: {company} and {to}",
+           "body": "Dear colleagues at {to},\n\nI work for the Bern Economic Development Agency. {company}{place} works on {product}. "
+                   "The company is looking for:\n{needs}\n\nOur pitch to the company named your group: {fact}\n\n"
+                   "The CEO has read the pitch and accepted an introduction to your group. Would you be open to a 45 minute "
+                   "meeting with the company on [Date]? If so, I will propose a time.\n\nKind regards\n{officer}\n"
+                   "Bern Economic Development Agency"},
+    "de": {"subject": "Vorstellung: {company} und {to}",
+           "body": "Guten Tag\n\nIch arbeite bei der Wirtschaftsförderung des Kantons Bern. {company}{place} arbeitet an {product}. "
+                   "Das Unternehmen sucht:\n{needs}\n\nIn unserem Pitch an das Unternehmen haben wir Ihre Gruppe genannt: {fact}\n\n"
+                   "Der CEO hat den Pitch gelesen und möchte Ihre Gruppe kennenlernen. Hätten Sie am [Date] Zeit für ein "
+                   "Gespräch von 45 Minuten mit dem Unternehmen? Dann schlage ich Ihnen eine Uhrzeit vor.\n\n"
+                   "Freundliche Grüsse\n{officer}\nWirtschaftsförderung Kanton Bern"},
+    "it": {"subject": "Presentazione: {company} e {to}",
+           "body": "Gentili colleghi di {to},\n\nlavoro per la promozione economica del Canton Berna. {company}{place} lavora a {product}. "
+                   "L’azienda cerca:\n{needs}\n\nNel nostro pitch all’azienda abbiamo citato il vostro gruppo: {fact}\n\n"
+                   "Il CEO ha letto il pitch e desidera conoscere il vostro gruppo. Sareste disponibili per un incontro di 45 minuti "
+                   "con l’azienda il [Date]? In tal caso propongo un orario.\n\nCordiali saluti\n{officer}\n"
+                   "Promozione economica del Canton Berna"},
+}
+
+
+def researcher_email(f):
+    """A plain template from the same facts the gateway gets: company, its needs, one approved pitch fact, the officer."""
+    t = EMAIL_TEXT.get(f.get("lang"), EMAIL_TEXT["en"])
+    product = (f.get("product") or "").strip().rstrip(".")
+    kw = {"company": f["company"], "to": f["to"], "place": f" ({f['place']})" if f.get("place") else "",
+          "product": product or "its product", "needs": "\n".join(f"- {n}" for n in f.get("needs") or []) or "-",
+          "fact": (f.get("facts") or [""])[0], "officer": f.get("officer") or "[Officer name]"}
+    return {"subject": t["subject"].format(**kw), "body": t["body"].format(**kw)}

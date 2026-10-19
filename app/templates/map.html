@@ -1,42 +1,42 @@
 {% extends "base.html" %}{% set active_page = "leads" %}
-{% block title %}Evidence map · {{ lead.title }}{% endblock %}
+{% block title %}{{ _('Evidence map') }} · {{ lead.title }}{% endblock %}
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
 {% block content %}
 <main class="stack">
 <div style="flex:none;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;padding:14px 32px;border-bottom:1px solid #D9D9D9">
-<h1 style="margin:0;font-size:21px">Evidence map</h1>
-<span class="kk"><i style="border-top:2px solid #111"></i>Quoted on page</span>
-<span class="kk"><i style="border-top:2px dashed #111"></i>Inferred</span>
-<span class="kk"><i style="border-top:2px dotted #9A9A9A"></i>No source</span>
+<h1 style="margin:0;font-size:21px">{{ _('Evidence map') }}</h1>
+<span class="kk"><i style="border-top:2px solid #111"></i>{{ _('Quoted on page') }}</span>
+<span class="kk"><i style="border-top:2px dashed #111"></i>{{ _('Inferred') }}</span>
+<span class="kk"><i style="border-top:2px dotted #9A9A9A"></i>{{ _('No source') }}</span>
 <span style="flex:1"></span>
-<label class="lb"><input type="checkbox" {% if not all %}checked{% endif %} onchange="location.search=this.checked?'':'?all=1'"> Accepted matches only</label>
+<label class="lb"><input type="checkbox" {% if not all %}checked{% endif %} onchange="location.search=this.checked?'':'?all=1'"> {{ _('Accepted matches only') }}</label>
 </div>
 {% if not m.needs %}
 <section style="flex:1;padding:24px 32px">
-<div class="pn" style="max-width:760px"><span class="k">Nothing to map yet</span>
-<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("idle", 80, 75) }}<div style="flex:1 1 220px"><h2 style="margin:0;font-size:21px">No accepted matches yet</h2></div></div>
-<div style="display:flex;gap:8px"><a class="b p" href="/leads/{{ lead.id }}/matches">Back to matches</a>{% if not all %}<a class="b" href="?all=1">Show all suggested matches</a>{% endif %}</div></div>
+<div class="pn" style="max-width:760px"><span class="k">{{ _('Nothing to map yet') }}</span>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("idle", 80, 75) }}<div style="flex:1 1 220px"><h2 style="margin:0;font-size:21px">{{ _('No accepted matches yet') }}</h2></div></div>
+<div style="display:flex;gap:8px"><a class="b p" href="/leads/{{ lead.id }}/matches">{{ _('Back to matches') }}</a>{% if not all %}<a class="b" href="?all=1">{{ _('Show all suggested matches') }}</a>{% endif %}</div></div>
 </section>
 {% else %}
 <div class="mapbody">
-<section class="tree-pane scrollx" aria-label="Evidence tree">
-<div class="tcols lb" aria-hidden="true"><span>Need</span><span>Match</span><span>Fact</span><span>Source</span></div>
+<section class="tree-pane scrollx" aria-label="{{ _('Evidence tree') }}">
+<div class="tcols lb" aria-hidden="true"><span>{{ _('Need') }}</span><span>{{ _('Match') }}</span><span>{{ _('Fact') }}</span><span>{{ _('Source') }}</span></div>
 <div class="tree" id="map">
 {% for n in m.needs %}
 <div class="br open" data-b="{{ n.id }}">
-<button type="button" class="tn nd" data-k="need" data-id="{{ n.nid }}" aria-expanded="true" aria-controls="detail" data-label="{{ n.label }}: {{ n.text }}"><small>Need {{ n.i }} · {{ ui.potlabel(n.cov) }} · {{ n.matches|length }} match{{ 'es' if n.matches|length != 1 }}</small><span class="lab">{{ n.label }}</span><span class="cv" aria-hidden="true">▸</span></button>
+<button type="button" class="tn nd" data-k="need" data-id="{{ n.nid }}" aria-expanded="true" aria-controls="detail" data-label="{{ n.label }}: {{ n.text }}"><small>{{ _('Need {n}', n=n.i) }} · {{ ui.potlabel(n.cov) }} · {{ _('{n} match', n=n.matches|length) if n.matches|length == 1 else _('{n} matches', n=n.matches|length) }}</small><span class="lab">{{ _(n.label) }}</span><span class="cv" aria-hidden="true">▸</span></button>
 <div class="kids">
 {% for mt in n.matches %}
 <div class="br">
-<button type="button" class="tn mt{{ ' sg' if not mt.accepted }}" data-k="match" data-id="{{ mt.id }}" aria-expanded="false" aria-controls="detail" data-entity="{{ mt.entity }}" data-label="{{ mt.name }}"><small>{{ mt.type }}{{ '' if mt.accepted else ' · suggested' }} · {{ mt.facts|length }} fact{{ 's' if mt.facts|length != 1 }}</small><span class="lab" lang="de">{{ mt.name }}</span><span class="cv" aria-hidden="true">▸</span>{% if mt.badge %}<span class="badge" aria-label="In {{ mt.badge }} needs" title="In {{ mt.badge }} needs">{{ mt.badge }}</span>{% endif %}</button>
+<button type="button" class="tn mt{{ ' sg' if not mt.accepted }}" data-k="match" data-id="{{ mt.id }}" aria-expanded="false" aria-controls="detail" data-entity="{{ mt.entity }}" data-label="{{ mt.name }}"><small>{{ _(mt.type) }}{{ '' if mt.accepted else ' · ' ~ _('suggested') }} · {{ _('{n} fact', n=mt.facts|length) if mt.facts|length == 1 else _('{n} facts', n=mt.facts|length) }}</small><span class="lab" lang="de">{{ mt.name }}</span><span class="cv" aria-hidden="true">▸</span>{% if mt.badge %}<span class="badge" aria-label="{{ _('In {n} needs', n=mt.badge) }}" title="{{ _('In {n} needs', n=mt.badge) }}">{{ mt.badge }}</span>{% endif %}</button>
 <div class="kids">
 {% for f in mt.facts %}
 <div class="br open {{ f['style'] }}">
-<button type="button" class="tn ft{{ ' miss' if f['style'] == 'missing' }}" data-k="fact" data-id="{{ f.id }}" aria-controls="detail" data-entity="{{ mt.entity }}" data-label="{{ f.label }}"><small>{{ f.kind }} · {{ f.how }}</small><span class="lab">{{ f.label }}</span></button>
+<button type="button" class="tn ft{{ ' miss' if f['style'] == 'missing' }}" data-k="fact" data-id="{{ f.id }}" aria-controls="detail" data-entity="{{ mt.entity }}" data-label="{{ f.label }}"><small>{{ _(f.kind) }} · {{ _(f.how) }}</small><span class="lab">{{ _(f.label) if f['style'] == 'missing' else f.label }}</span></button>
 <div class="kids"><div class="br {{ f['style'] if f.url else 'missing' }}">
-{% if f.url %}<button type="button" class="tn ns" data-k="source" data-id="{{ f.sid }}" aria-controls="detail" data-label="{{ f.src }}"><small>Source · {{ 'inferred from' if f.how == 'Inferred' else 'quoted on' }}</small><span class="lab">{{ f.src }}</span></button>
-{% else %}<div class="tn ns miss"><small>Source</small><span class="lab">None. Check before use</span></div>{% endif %}
+{% if f.url %}<button type="button" class="tn ns" data-k="source" data-id="{{ f.sid }}" aria-controls="detail" data-label="{{ f.src }}"><small>{{ _('Source') }} · {{ _('inferred from') if f.how == 'Inferred' else _('quoted on') }}</small><span class="lab">{{ f.src }}</span></button>
+{% else %}<div class="tn ns miss"><small>{{ _('Source') }}</small><span class="lab">{{ _('None. Check before use') }}</span></div>{% endif %}
 </div></div>
 </div>
 {% endfor %}
@@ -48,10 +48,10 @@
 {% endfor %}
 </div>
 </section>
-<aside id="detail" class="drawer hidden" aria-label="Details" aria-live="polite"></aside>
+<aside id="detail" class="drawer hidden" aria-label="{{ _('Details') }}" aria-live="polite"></aside>
 </div>
 <div class="dock r" style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:12px 32px;font-size:14px">
-<span style="flex:1"></span><a class="b p" href="/leads/{{ lead.id }}/pitch">Go to pitch</a>
+<span style="flex:1"></span><a class="b p" href="/leads/{{ lead.id }}/pitch">{{ _('Go to pitch') }}</a>
 </div>
 <script type="application/json" id="mapdata">{{ m.detail|tojson }}</script>
 {% endif %}

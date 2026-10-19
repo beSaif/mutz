@@ -18,37 +18,37 @@
 {# A ratio as a thin bar, the numbers as a small label (DESIGN.md: rows, not big numbers). #}
 {% macro meter(n, total, label, note="", quiet=False) -%}
 {%- set pct = (100 * n / total)|round|int if total else 0 -%}
-<div class="meter" title="{{ label }}: {{ n }} of {{ total }}{{ ' (' ~ pct ~ ' %)' if total }}">
-<span class="meter-l">{% if not quiet %}<span>{{ label }}</span>{% endif %}<span class="lb">{{ n }} of {{ total }}{% if note %} {{ note }}{% endif %}{% if quiet and total %} · {{ pct }} %{% endif %}</span></span>
-<span class="bar" role="meter" aria-label="{{ label }}" aria-valuemin="0" aria-valuemax="{{ total }}" aria-valuenow="{{ n }}" aria-valuetext="{{ n }} of {{ total }}"><i style="width:{{ pct }}%"></i></span>
+<div class="meter" title="{{ label }}: {{ _('{n} of {total}', n=n, total=total) }}{{ ' (' ~ pct ~ ' %)' if total }}">
+<span class="meter-l">{% if not quiet %}<span>{{ label }}</span>{% endif %}<span class="lb">{{ _('{n} of {total}', n=n, total=total) }}{% if note %} {{ note }}{% endif %}{% if quiet and total %} · {{ pct }} %{% endif %}</span></span>
+<span class="bar" role="meter" aria-label="{{ label }}" aria-valuemin="0" aria-valuemax="{{ total }}" aria-valuenow="{{ n }}" aria-valuetext="{{ _('{n} of {total}', n=n, total=total) }}"><i style="width:{{ pct }}%"></i></span>
 </div>
 {%- endmacro %}
 
-{% macro potlabel(cov) -%}{{ {"strong": "Strong", "thin": "Limited", "none": "No match"}.get(cov, "Not checked") }}{%- endmacro %}
+{% macro potlabel(cov) -%}{{ _({"strong": "Strong", "thin": "Limited", "none": "No match"}.get(cov, "Not checked")) }}{%- endmacro %}
 
 {% macro av(name) %}<span class="av" aria-hidden="true">{{ (name or "?")[:1]|upper }}</span>{% endmacro %}
 
 {# who is working in this browser: a cookie, no password. Opens from the avatar in the rail #}
 {% macro who(me, officers) -%}
 <details class="fp who">
-<summary class="rl-av" title="Working as {{ me.name }}. Switch officer" aria-label="Working as {{ me.name }}, switch officer">{{ me.name[:1]|upper }}</summary>
+<summary class="rl-av" title="{{ _('Working as {name}. Switch officer', name=me.name) }}" aria-label="{{ _('Working as {name}, switch officer', name=me.name) }}">{{ me.name[:1]|upper }}</summary>
 <div class="fpb">
-<b style="font-size:13px">Working as</b>
+<b style="font-size:13px">{{ _('Working as') }}</b>
 <form method="post" action="/officer" class="whol">
 {% for o in officers %}<button name="id" value="{{ o.id }}"{% if o.id == me.id %} class="on" aria-current="true"{% endif %}>{{ av(o.name) }}<span style="flex:1"><b>{{ o.name }}</b>{% if o.focus %}<span class="lb" style="display:block">{{ o.focus }}</span>{% endif %}</span>{% if o.id == me.id %}<span aria-hidden="true">✓</span>{% endif %}</button>{% endfor %}
 </form>
-<form method="post" action="/officer" style="display:flex;gap:6px;margin-top:8px"><input name="name" class="in" placeholder="Add an officer" aria-label="Name of a new officer" maxlength="40" required style="flex:1;min-width:0;font-size:14px;padding:7px 10px"><button class="b s">Add</button></form>
-<p class="lb" style="margin:8px 0 0">No password. It sets who owns new leads, who accepted a match and whose name goes on the pitch.</p>
+<form method="post" action="/officer" style="display:flex;gap:6px;margin-top:8px"><input name="name" class="in" placeholder="{{ _('Add an officer') }}" aria-label="{{ _('Name of a new officer') }}" maxlength="40" required style="flex:1;min-width:0;font-size:14px;padding:7px 10px"><button class="b s">{{ _('Add') }}</button></form>
+<p class="lb" style="margin:8px 0 0">{{ _('No password. It sets who owns new leads, who accepted a match and whose name goes on the pitch.') }}</p>
 </div></details>
 {%- endmacro %}
 
 {% macro casebar(lead, case, chip=None) -%}
 <div class="casebar">
-<a href="/" style="font-size:14px">Leads</a><span class="lb">/</span><b lang="de" style="overflow-wrap:anywhere">{{ lead.title }}</b>
-{% if chip %}<span class="chip">{{ chip }}</span>{% elif case.step == 'pitch' and case.saved %}<span class="chip" id="saved">Draft saved {{ case.saved|date(True) }}</span>{% endif %}
-{% if case.me and lead.owner != case.me %}<form method="post" action="/leads/{{ lead.id }}/owner" style="margin:0"><button class="b s" title="Make this your lead. The pitch contact changes to you">Assign to me</button></form>{% endif %}
-<nav aria-label="Case steps" class="st" style="margin-left:auto">
-{% set steps = [("brief","1 Brief"),("matches","2 Matches"),("map","3 Evidence map"),("pitch","4 Pitch"),("export","5 Export"),("after","6 After sending")] %}
+<a href="/" style="font-size:14px">{{ _('Leads') }}</a><span class="lb">/</span><b lang="de" style="overflow-wrap:anywhere">{{ lead.title }}</b>
+{% if chip %}<span class="chip">{{ chip }}</span>{% elif case.step == 'pitch' and case.saved %}<span class="chip" id="saved">{{ _('Draft saved {date}', date=case.saved|date(True)) }}</span>{% endif %}
+{% if case.me and lead.owner != case.me %}<form method="post" action="/leads/{{ lead.id }}/owner" style="margin:0"><button class="b s" title="{{ _('Make this your lead. The pitch contact changes to you') }}">{{ _('Assign to me') }}</button></form>{% endif %}
+<nav aria-label="{{ _('Case steps') }}" class="st" style="margin-left:auto">
+{% set steps = [("brief","1 " ~ _("Brief")),("matches","2 " ~ _("Matches")),("map","3 " ~ _("Evidence map")),("pitch","4 " ~ _("Pitch")),("export","5 " ~ _("Export")),("after","6 " ~ _("After sending"))] %}
 {% for s, label in steps %}<a href="/leads/{{ lead.id }}/{{ s }}" class="{% if case.step == s %}on{% elif case.done.get(s) %}done{% endif %}"{% if case.step == s %} aria-current="step"{% endif %}>{{ label }}</a>{% endfor %}
 </nav>
 </div>

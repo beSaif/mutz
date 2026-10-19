@@ -63,11 +63,11 @@ summary.rl-av:hover,.who[open]>summary.rl-av{border-color:var(--black);color:var
 .who .fpb{left:calc(100% + 10px);right:auto;top:auto;bottom:0}
 .own{display:flex;align-items:center;gap:6px}
 .whol{display:flex;flex-direction:column;gap:2px;margin:8px 0 0}
-.whol button{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:1px solid transparent;background:#fff;font:14px var(--font);color:var(--black);text-align:left;cursor:pointer}
-.whol button:hover{background:var(--panel2)}
-.whol button.on{border-color:var(--black)}
-.whol button .av{width:28px;height:28px;font-size:13px}
-.whol button:not(.on) .av{background:#fff;color:var(--black);border:1px solid var(--black)}
+.whol button,.whol a{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:1px solid transparent;background:#fff;font:14px var(--font);color:var(--black);text-align:left;cursor:pointer}
+.whol button:hover,.whol a:hover{background:var(--panel2)}
+.whol button.on,.whol a.on{border-color:var(--black)}
+.whol button .av,.whol a .av{width:28px;height:28px;font-size:13px}
+.whol button:not(.on) .av,.whol a:not(.on) .av{background:#fff;color:var(--black);border:1px solid var(--black)}
 .sb{flex:0 0 calc(var(--sbw) - var(--rlw));min-height:0;overflow-y:auto;background:linear-gradient(#fff 60%,#FAFAFB);color:var(--black);border:1px solid var(--line);border-right-color:var(--line);border-radius:14px 0 0 14px;display:flex;flex-direction:column;gap:10px;padding:18px 12px 12px}
 .wrap{background:var(--paper);border:1px solid var(--line);border-left:0;border-radius:0 14px 14px 0;overflow:hidden}
 .sb a{color:var(--ink2)}
@@ -80,7 +80,7 @@ body.sbo .rl-t#sbtoggle{background:#fff;color:var(--black);border-color:var(--li
 .lnk{font:inherit;font-size:14px;color:var(--black);border:0;padding:0 0 1px;cursor:pointer}
 .lnk:hover{color:var(--red-h)}
 .brand{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:0 10px 4px;text-decoration:none}
-.brand img{height:24px;width:auto;filter:brightness(0)}
+.brand img{height:24px;width:auto}
 .brand b{font-size:17px;color:var(--black)}
 .ico{flex:none}
 .sbn{display:flex;flex-direction:column;gap:22px;margin-top:8px}
@@ -108,6 +108,15 @@ body.sbo .rl-t#sbtoggle{background:#fff;color:var(--black);border-color:var(--li
 .sbm{text-align:center;padding:2px 0}
 .sbm b{color:var(--black);font-weight:700}
 .sbm a{color:var(--grey)!important}
+.rl-lg{list-style:none;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:.02em}
+.lng[open]>summary.rl-lg{background:#fff;color:var(--black);border-color:var(--line)}
+.lng .fpb{width:200px}
+.whol a{text-decoration:none;box-sizing:border-box}
+.lsw{display:none;align-self:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.lsw a{padding:4px 10px;font-size:12px;font-weight:600;color:var(--grey)!important;text-decoration:none}
+.lsw a+a{border-left:1px solid var(--line)}
+.lsw a:hover{color:var(--black)!important;background:#F4F5F7}
+.lsw a.on{background:var(--black);color:#fff!important}
 .sbf .stub{border:1px dashed var(--grey);padding:0 6px;border-radius:6px;align-self:center}
 /* action bar: page actions on top of the view, as in a mail client */
 .ab{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:60px;padding:8px 32px;border-bottom:1px solid var(--rule);background:#fff}
@@ -314,6 +323,56 @@ pre{font:12.5px/1.55 ui-monospace,Menlo,monospace;background:var(--panel2);paddi
 #mutzcard.left{right:auto;left:calc(var(--sbw) + 24px)}
 #mutzcard .hd{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--black);cursor:move;user-select:none}
 #mutzcard .msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:14px}
+#mutzcard .mzclip{width:34px;height:38px;flex:none}
+#mutzcard .mzfile{font-size:12px;border:1px solid var(--black);padding:2px 2px 2px 6px;display:inline-flex;gap:4px;align-items:center;align-self:flex-start;max-width:100%}
+#mutzcard .mzfile span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mutzcard .mzfile .ic{width:20px;height:20px;font-size:14px}
+#mutzcard.drop{outline:3px dashed var(--black);outline-offset:-8px}
+/* a file sent in the chat: a card that opens it */
+.mzdoc{display:flex;gap:10px;align-items:center;border:1px solid var(--black);background:#fff;padding:8px 10px;max-width:85%;text-decoration:none;color:var(--black)}
+a.mzdoc:hover{background:var(--panel2);color:var(--black)}
+.mzdoc.sending{opacity:.6}
+.mzdoc-i{flex:none;width:30px;height:36px;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;clip-path:polygon(0 0,70% 0,100% 22%,100% 100%,0 100%)}
+.mzdoc-t{display:flex;flex-direction:column;min-width:0}
+.mzdoc-t b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* drafting a pitch from the chat: one card, the case bar's colours (grey to come, red now, black done) */
+.qp-b{border:1px solid var(--black);padding:12px;display:flex;flex-direction:column;gap:10px;background:#fff}
+.qp-hd{display:flex;gap:10px;align-items:center}
+.qp-top{position:sticky;top:-13px;z-index:1;background:#fff;margin:-12px -12px 0;padding:12px 12px 8px;display:flex;flex-direction:column;gap:10px}
+.qp-hd>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.qp-bear svg{width:44px;height:38px;display:block;animation:ml-bob 1.2s ease-in-out infinite alternate}
+.qp-clock{font-size:13px;font-variant-numeric:tabular-nums;color:var(--grey)}
+.qp-bar{position:relative;overflow:hidden;margin:0}
+.qp-bar i{position:relative;width:3%;transition:width .8s ease;overflow:hidden}
+.qp-bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:pwait 1.6s ease-in-out infinite}
+.qp-st{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.qp-st>li{display:flex;gap:10px;font-size:13px;color:var(--grey)}
+.qp-st>li>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.qp-st>li b{font-weight:400}
+.qp-st>li.on,.qp-st>li.done{color:var(--black)}
+.qp-st>li.on>div>b{font-weight:700}
+.qp-d{flex:none;width:12px;height:12px;margin-top:3px;border:2px solid var(--rule);border-radius:50%}
+.qp-st>li.on .qp-d{border-color:var(--red);background:var(--red);box-shadow:0 0 0 3px var(--tint)}
+.qp-st>li.done .qp-d{border-color:var(--black);background:var(--black) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 6.2l2 2 4-4.4' fill='none' stroke='%23fff' stroke-width='1.8'/%3E%3C/svg%3E") center/10px no-repeat}
+.qp-n{list-style:none;margin:6px 0 0;padding:0;border-top:1px solid var(--rule)}
+.qp-n li{display:grid;grid-template-columns:16px minmax(0,1fr) minmax(0,40%);gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--rule);animation:snt-in .3s ease-out}
+.qp-n li.wait{color:var(--grey)}
+.qp-n-t{display:flex;flex-direction:column;min-width:0}
+.qp-n-t b{font-weight:700;font-size:12px}
+.qp-n-t .lb,.qp-n-r{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qp-n-r{text-align:right;font-size:12px}
+.qp-n-i{display:flex;align-items:center;justify-content:center}
+.qp-o{width:8px;height:8px;border:1.5px solid var(--rule);border-radius:50%}
+.qp-spin{width:12px;height:12px;border:2px solid var(--tint);border-top-color:var(--red);border-radius:50%;animation:qp-spin .8s linear infinite}
+@keyframes qp-spin{to{transform:rotate(360deg)}}
+.qp-n-t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qp-ok{width:12px;height:12px;border-radius:50%;background:var(--black) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 6.2l2 2 4-4.4' fill='none' stroke='%23fff' stroke-width='1.8'/%3E%3C/svg%3E") center/10px no-repeat}
+/* the same run as a bubble by the bear while the chat is closed */
+#mutz .qp-peek{display:flex;flex-direction:column;gap:2px;text-align:left;cursor:pointer;font:inherit;font-size:13px;min-width:200px;color:var(--black)}
+#mutz .qp-peek .bar{margin-top:4px;position:relative;overflow:hidden}
+#mutz .qp-peek .bar i{transition:width .8s ease}
+#mutz.chat .qp-peek{display:none}
+@media (prefers-reduced-motion:reduce){.qp-bear svg,.qp-bar i::after,.qp-spin,.qp-n li{animation:none}.qp-bar i,#mutz .qp-peek .bar i{transition:none}}
 .m{display:flex;flex-direction:column;gap:6px;font-size:14px}
 .m .w{font-size:11px;color:var(--grey)}
 .m.me{align-items:flex-end}
@@ -343,7 +402,9 @@ pre{font:12.5px/1.55 ui-monospace,Menlo,monospace;background:var(--panel2);paddi
   .sg.on{flex-direction:row;align-items:center}
   .si,.sg>.si{margin:0;padding:6px 10px}
   .si.cur{display:none}
-  .sbf{display:none}
+  .sbf{padding:0 16px;margin:0}
+  .sbf>:not(.lsw){display:none}
+  .lsw{display:flex}  /* the rail, and its language button, is hidden on a phone */
   #mutz.left,#mutzcard.left{left:24px}
   .view,.view.panes{overflow:visible;display:block}
   .view.panes>main{flex-wrap:wrap}
@@ -384,6 +445,7 @@ pre{font:12.5px/1.55 ui-monospace,Menlo,monospace;background:var(--panel2);paddi
 .pg-sec.off>*:not(.pg-off){opacity:.5}
 .pg h2{font-size:18px;margin:0 0 8px}
 .pg-lede{color:var(--grey);margin:0 0 22px}
+body.mzl #pages .chg{background:#FFF4C2;box-shadow:0 0 0 6px #FFF4C2}
 .pages.busy{opacity:.45;pointer-events:none;transition:opacity .2s}
 .pg-off{font-size:12px;display:flex;gap:10px;align-items:center;margin:0 0 12px}
 .pg-empty{color:var(--grey);border:1px dashed var(--rule);padding:14px}
@@ -486,3 +548,48 @@ pre{font:12.5px/1.55 ui-monospace,Menlo,monospace;background:var(--panel2);paddi
 #intro svg{width:100%;height:100%;max-width:600px;max-height:600px;overflow:visible}
 #intro svg g{transform-box:view-box}
 #i-eyes,#i-happy,#i-lid{transform-box:fill-box;transform-origin:center}
+
+/* ---- pitch wait panel: over the canvas while the facts are drafted or the pitch is written */
+.pwait{position:absolute;top:64px;left:50%;transform:translateX(-50%);z-index:5;width:min(520px,calc(100% - 32px));background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);gap:0}
+.pwait .bar{position:relative;overflow:hidden;margin-top:14px}
+.pwait .bar i{position:absolute;left:0;top:0;width:30%;animation:pwait 1.4s ease-in-out infinite}
+@keyframes pwait{from{transform:translateX(-100%)}to{transform:translateX(340%)}}
+
+/* ---- after sending: status card, the CEO's yes, emails to the researchers, sent versions ---- */
+/* the status card: three steps in the case bar's look (grey to come, red now, black done), then what, to whom, when */
+.snt{border:1px solid var(--black);background:#fff;padding:20px 22px;display:flex;flex-direction:column;gap:16px}
+.snt h2{font-size:21px}
+.snt-st{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.snt-st li{border-top:3px solid var(--rule);padding-top:8px;font-size:13px;line-height:1.35;color:var(--grey);min-width:0}
+.snt-st li b{display:block;font-weight:400}
+.snt-st li span{font-size:12px}
+.snt-st li.done{border-top-color:var(--black);color:var(--black)}
+.snt-st li.on{border-top-color:var(--red);color:var(--black)}
+.snt-st li.on b{font-weight:700}
+.snt-ok{margin:0;background:var(--black);color:#fff;padding:12px 14px;font-size:16px;font-weight:700;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;animation:snt-in .35s ease-out}
+.snt-ok .lb{color:#D0D0D0;font-weight:400;margin-left:auto}
+@keyframes snt-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.snt-dl{grid-template-columns:110px minmax(0,1fr);margin:0}
+.snt form{margin:0}
+/* emails to the researchers: one per research group, a tab per group when there are several */
+.ml{display:flex;flex-direction:column;gap:12px}
+.ml-e{display:flex;flex-direction:column;gap:6px}
+.ml-e[hidden]{display:none}
+.ml-e input.in{font-size:14px;padding:8px 10px}
+.ml-e textarea.in{font-size:14px;line-height:1.55;resize:vertical}
+.ml-act{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.ml-act .lb{flex:1 1 180px}
+.ml-wait{display:flex;gap:14px;align-items:center;padding:18px;background:var(--panel2);font-size:14px}
+.ml-wait svg{flex:none;animation:ml-bob 1.2s ease-in-out infinite alternate}
+@keyframes ml-bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+/* new information, then the sent versions as a plain list; the agency's own copies fold away */
+.rc{border-top:1px solid var(--rule);padding-top:20px}
+.vl ul{list-style:none;margin:8px 0 0;padding:0;border-top:1px solid var(--black)}
+.vl li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.vl-more{margin-top:10px;font-size:13px}
+.vl-more summary{cursor:pointer;color:var(--grey);width:fit-content}
+.vl-more ul{border-top-color:var(--rule)}
+.vl-more li{grid-template-columns:40px auto auto 1fr;font-size:13px}
+.tl .it.acc::before{background:var(--black)}
+.ml-to{margin:0 0 6px;font-size:15px}
+.ml-to>.lb:first-child{display:inline-block;min-width:28px}

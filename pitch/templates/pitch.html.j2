@@ -2,16 +2,23 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="utf-8">
-<title>{{ title }}{% if review %} (review copy){% endif %}</title>
+<title>{{ title }}{% if review %} {{ t("(review copy)") }}{% endif %}</title>
 <meta name="author" content="{{ agency }}">
 <link rel="stylesheet" href="pitch.css">
 {% if review %}
 <style>
 @page { @top-left {
-  content: "Review copy for the agency. Not for sending.";
+  content: {{ css("Review copy for the agency. Not for sending.") }};
   font: bold 8pt "Helvetica Neue", Helvetica, Arial, sans-serif; color: #E30613;
   vertical-align: bottom; padding-bottom: 6mm;
 } }
+</style>
+{% endif %}
+{% if lang != "en" %}
+<style>
+@page { @bottom-left { content: {{ css("Bern Economic Development Agency") }}; } }
+@page :first { @bottom-left { content: {{ css("Prototype, not an official Canton of Bern tool") }}; } }
+h1 { bookmark-label: {{ css("Cover") }}; }
 </style>
 {% endif %}
 </head>
@@ -19,89 +26,164 @@
 
 {# ------------------------------------------------------------- Cover #}
 <section class="cover">
-  {% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="{{ agency }}">
-  {% else %}<span class="logo-text">{{ agency }}</span>{% endif %}
-  {% if review %}<div class="banner">Review copy. Every claim shows its quote and source. Send the clean PDF to the company.</div>{% endif %}
-  <h1>{{ title }}</h1>
-  <p class="for">For {{ company.name }}{% if company.country %}, {{ company.country }}{% endif %}</p>
-  <table class="meta">
-    <tr><td class="label">Date</td><td>{{ date }}</td></tr>
-    <tr><td class="label">Contact</td><td>{{ officer.name }}<br>{{ agency }}{% if officer.email %}<br><a href="mailto:{{ officer.email }}">{{ officer.email }}</a>{% endif %}</td></tr>
-    {% if review and case_id %}<tr><td class="label">Case</td><td>{{ case_id }}</td></tr>{% endif %}
-    {% if review and company.summary %}<tr><td class="label">Lead summary, internal</td><td><div class="internal">{{ company.summary }}</div></td></tr>{% endif %}
+  <table class="masthead"><tr>
+    <td>{% if logo_uri %}<img class="logo" src="{{ logo_uri }}" alt="{{ agency }}">
+        {% else %}<span class="logo-text">{{ agency }}</span>{% endif %}</td>
+    <td class="dateline">{{ t("Proposal") }}<br>{{ date }}</td>
+  </tr></table>
+  {% if review %}<div class="banner">{{ t("Review copy. Every claim shows its quote and source. Send the clean PDF to the company.") }}</div>{% endif %}
+
+  <div class="cover-body">
+    <p class="for">{{ t("For {name}", name=[company.name, company.city, company.country]|select|join(", ")) }}</p>
+    <h1>{{ title }}</h1>
+    {% if headline %}<p class="headline">{{ headline }}</p>{% endif %}
+    {% if company.product and not headline %}<p class="product">{{ company.product }}</p>{% endif %}
+    {% if intro %}<p class="intro">{{ intro }}</p>{% endif %}
+  </div>
+
+  <table class="facts"><tr>
+    {% if plans %}
+    <td><span class="big">{{ n_answered }}<span class="of"> / {{ plans|length }}</span></span>
+        {{ t("of your plans have a match in Bern") }}</td>
+    {% endif %}
+    <td><span class="big">{{ n_offers }}</span>
+        {{ t("partner in Bern: research groups, facilities and programmes") if n_offers == 1 else t("partners in Bern: research groups, facilities and programmes") }}</td>
+    <td><span class="big">{{ sources|length }}</span>
+        {{ t("public page behind every statement") if sources|length == 1 else t("public pages behind every statement") }}</td>
+  </tr></table>
+
+  <table class="contact"><tr>
+    <td class="label">{{ t("Your contact") }}</td>
+    <td><b>{{ officer.name }}</b><br>{{ agency }}{% if officer.email %}<br><a href="mailto:{{ officer.email }}">{{ officer.email }}</a>{% endif %}</td>
+  </tr>
+  {% if review and case_id %}<tr><td class="label">{{ t("Case") }}</td><td>{{ case_id }}</td></tr>{% endif %}
+  {% if review and company.summary %}<tr><td class="label">{{ t("Lead summary, internal") }}</td><td><div class="internal">{{ company.summary }}</div></td></tr>{% endif %}
   </table>
-  {% if intro %}<p class="intro">{{ intro }}</p>{% endif %}
 </section>
+
+{# ------------------------------------------------------------- Your plans at a glance #}
+{% macro plans_table(cont) %}
+<section class="sec{{ ' cont' if cont }}" id="sec-plans">
+  {% if not cont %}<p class="kicker">{{ t("Why") }}</p>{% endif %}
+  <h2>{{ t("Your plans, and what Bern has for each") }}</h2>
+  <p class="lede">{{ t("What you told us you are looking for, in your words, and where in Bern you can find it. The pages that follow describe each group, facility and programme.") }}</p>
+  <table class="plans">
+    <thead><tr><th class="c-plan">{{ t("Your plan") }}</th><th>{{ t("In Bern") }}</th></tr></thead>
+    {% for p in plans if p.offers %}
+    <tr>
+      <td class="c-plan">
+        {% if p.label %}<b>{{ p.label }}</b>{% if p.priority == "high" %}<span class="prio"> · {{ t("high priority") }}</span>{% endif %}<br>{% endif %}
+        <span class="need">{{ p.text }}</span>
+      </td>
+      <td>{% for o in p.offers %}<a class="offer" href="#{{ o.claim }}">{{ o.name }}</a>{% endfor %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% set open = plans|rejectattr("offers")|list %}
+  {% if open %}
+  <p class="open-plans"><b>{{ t("Still open.") }}</b> {{ t("The agency is still looking into") }}
+    {% for p in open %}{{ "" if loop.first else (" " ~ t("and") ~ " " if loop.last else ", ") }}<b>{{ p.label or p.text }}</b>{% if p.label %} ({{ p.text }}){% endif %}{% endfor %}.
+    {{ t("These are not covered in this document yet.") }}</p>
+  {% endif %}
+</section>
+{% endmacro %}
 
 {# ------------------------------------------------------------- Why, what, how #}
 {% set prev = namespace(part="") %}
+{% if plans and "why" not in sections|map(attribute="key") %}{{ plans_table(false) }}{% set prev.part = "Why" %}{% endif %}
 {% for key in blocks %}
 {% if key == "visit" %}
-{% if visit_day %}
-<section class="sec" id="sec-visit">{% set prev.part = "How" %}
-  <p class="kicker">How</p>
+<section class="sec" id="sec-visit">
+  <p class="kicker">{{ t("How") }}</p>
   <h2>{{ visit_title }}</h2>
-  <p class="lede">{{ how or "A draft programme for one day in Bern. Nothing is arranged yet. If you decide to visit, the agency asks each group whether they are available." }}</p>
+  <p class="lede">{{ how or t("Nothing is arranged yet. If you decide to visit, the agency asks each group whether they are available.") }}</p>
+  <table class="steps"><tr>
+    <td><span class="n">1</span><b>{{ t("Pick what interests you") }}</b><br>{{ t("Reply with the groups, facilities and programmes you want to know more about.") }}</td>
+    <td><span class="n">2</span><b>{{ t("The agency makes contact") }}</b><br>{{ t("We ask each group whether they are available. Nobody has been asked yet.") }}</td>
+    <td><span class="n">3</span><b>{{ t("A day in Bern") }}</b><br>{{ t("We propose a programme for your visit, along the lines of the draft below.") if visit_day else t("We propose a programme for your visit.") }}</td>
+  </tr></table>
+  {% if visit_day %}
+  <h3 class="visit-h">{{ t("Draft programme") }} <span class="lede">· {{ t("not arranged, for discussion") }}</span></h3>
   <table class="visit">
     {% for v in visit_day %}
     <tr><td class="time">{{ v.time }}</td><td>{{ v.topic }}{% if v.with %}<br><span class="lede">{{ v.with }}</span>{% endif %}</td></tr>
     {% endfor %}
   </table>
+  {% endif %}
+  <table class="cta"><tr>
+    <td class="label">{{ t("Next step") }}</td>
+    <td>{% if officer.email %}{{ th('Write to <b>{name}</b> at <a href="mailto:{email}">{email}</a> with the entries in this document that interest you, or with plans we have not covered yet.', name=officer.name, email=officer.email) }}{% else %}{{ th("Write to <b>{name}</b> with the entries in this document that interest you, or with plans we have not covered yet.", name=officer.name) }}{% endif %}</td>
+  </tr></table>
 </section>
-{% endif %}
 {% else %}
 {% set sec = sections|selectattr("key", "equalto", key)|first %}
-<section class="sec{{ " cont" if prev.part == sec.part }}" id="sec-{{ sec.key }}">
-  {% if prev.part != sec.part %}<p class="kicker">{{ sec.part }}</p>{% endif %}{% set prev.part = sec.part %}
+<section class="sec{{ ' cont' if prev.part == sec.part }}" id="sec-{{ sec.key }}">
+  {% if prev.part != sec.part %}<p class="kicker">{{ t(sec.part) }}</p>{% endif %}{% set prev.part = sec.part %}
   <h2>{{ sec.title }}</h2>
   <p class="lede">
-    {%- if sec.key == "why" %}{{ sec.cards|length }} reason{{ "s" if sec.cards|length != 1 }}, each with a source.
-    {%- elif sec.key == "matches" %}Research groups and projects in Bern that fit your plans. Each entry links to the public page it is based on.
-    {%- else %}Facilities and support services you can use in Bern.{% endif -%}
+    {%- if sec.key == "why" %}{{ t("What makes Bern a fit for you, each point with its source.") }}
+    {%- elif sec.key == "matches" %}{{ t("Research groups and projects in Bern that work on what you need. Each entry links to the public page it is based on.") }}
+    {%- else %}{{ t("Facilities, programmes and services you can use in Bern.") }}{% endif -%}
   </p>
+  {% set grp = namespace(key=None) %}
   {% for it in sec.cards %}
-  <div class="card" id="{{ it.id }}">
-    <p class="kind">{% if sec.key == "why" %}{% if not written %}Point {{ loop.index }}{% endif %}{% elif it.kind %}{{ it.kind }}{% endif %}{% if review %} <span class="status {{ it.status }}">· {{ it.status_label }}</span>{% endif %}</p>
-    {% if sec.key != "why" %}
-    <h3>{{ it.heading }}</h3>
-    {% if it.sub %}<p class="sub">{{ it.sub }}</p>{% endif %}
-    {% if it.person %}<p class="sub">Led by {{ it.person }}</p>{% endif %}
-    {% endif %}
-    <p>{{ it.text }}{% for n in it.refs %}<sup class="ref"><a href="#{{ 'ev' if review else 'src' }}-{{ n }}">[{{ n }}]</a></sup>{% endfor %}</p>
-    {% if review %}
-      {% for n in it.refs %}{% set s = sources[n - 1] %}
-      <p class="evline">[{{ n }}] {% if s.quote %}“{{ s.quote }}” {% endif %}{{ s.host }} ·
-        <a href="{{ s.deep_link if s.quote else s.url }}">{{ "Open at quote" if s.quote else "Open page" }}</a></p>
-      {% endfor %}
-      {% if it.notes %}<div class="internal notes"><b>Officer note:</b> {{ it.notes }}</div>{% endif %}
-    {% endif %}
-  </div>
+  {% if sec.key != "why" and it.need and it.need_key != grp.key %}{% set grp.key = it.need_key %}
+  <p class="need-head"><span class="tag">{{ t("For your plan") }}</span> {% if it.need_label %}<b>{{ it.need_label }}</b> · {% endif %}{{ it.need }}</p>
+  {% elif sec.key != "why" and it.nearby and grp.key != "nearby" %}{% set grp.key = "nearby" %}
+  <p class="need-head"><span class="tag">{{ t("Around you in Bern") }}</span> {{ t("Places and programmes for companies in your field") }}</p>
+  {% endif %}
+  {% if sec.key == "why" %}
+  <table class="card reason" id="{{ it.id }}"><tr>
+    <td class="num">{{ loop.index }}</td>
+    <td class="body">
+      {% if review %}<p class="kind"><span class="status {{ it.status }}">{{ it.status_label }}</span></p>{% endif %}
+      {% if it.title or it.need_label %}<h3>{{ it.title or it.need_label }}</h3>{% endif %}
+      <p>{{ it.text }}{% for n in it.refs %}<sup class="ref"><a href="#{{ 'ev' if review else 'src' }}-{{ n }}">[{{ n }}]</a></sup>{% endfor %}</p>
+      {% include "_evidence.j2" %}
+    </td>
+  </tr></table>
+  {% else %}
+  <table class="card" id="{{ it.id }}"><tr>
+    <td class="side">
+      {% if it.kind %}<p class="kind">{{ it.kind }}</p>{% endif %}
+      {% if it.sub %}<p class="sub">{{ it.sub }}</p>{% endif %}
+      {% if it.person %}<p class="sub">{{ t("Led by {name}", name=it.person) }}</p>{% endif %}
+      {% if review %}<p class="kind"><span class="status {{ it.status }}">{{ it.status_label }}</span></p>{% endif %}
+    </td>
+    <td class="body">
+      <h3>{{ it.heading }}</h3>
+      <p>{{ it.text }}{% for n in it.refs %}<sup class="ref"><a href="#{{ 'ev' if review else 'src' }}-{{ n }}">[{{ n }}]</a></sup>{% endfor %}</p>
+      {% include "_evidence.j2" %}
+    </td>
+  </tr></table>
+  {% endif %}
   {% endfor %}
 </section>
+{% if sec.key == "why" and plans %}{{ plans_table(true) }}{% endif %}
 {% endif %}
 {% endfor %}
 
 {# ------------------------------------------------------------- Sources #}
 <section class="sec" id="sec-sources">
-  <h2>{{ "Evidence" if review else "Sources" }}</h2>
+  <h2>{{ t("Evidence") if review else t("Sources") }}</h2>
   <p class="lede">
-    {%- if review %}Each [n] with the exact quote from the public page. "Open at quote" opens the page scrolled to the sentence; if the page has changed, it opens at the top.
-    {%- else %}Every statement in this document is based on these public pages.{% endif -%}
+    {%- if review %}{{ th('Each [n] with the exact quote from the public page. "Open at quote" opens the page scrolled to the sentence; if the page has changed, it opens at the top.') }}
+    {%- else %}{{ t("Every statement in this document is based on these public pages.") }}{% endif -%}
   </p>
-  <p class="lede">Drafted with Apertus on Swiss infrastructure (CSCS); confidential figures and contact data were struck before any text left the agency.</p>
+  <p class="lede">{{ t("Drafted with Apertus on Swiss infrastructure (CSCS); confidential figures and contact data were struck before any text left the agency.") }}</p>
   {% if review %}
     {% for s in sources %}
     <div class="ev" id="ev-{{ s.n }}">
-      <p class="quote"><b>[{{ s.n }}]</b> {% if s.quote %}“{{ s.quote }}”{% else %}No quote stored. Check the page by hand.{% endif %}</p>
-      <p class="src">{% if s.title %}{{ s.title }} · {% endif %}{{ s.host }}{% if s.fetched %} · fetched {{ s.fetched }}{% endif %} · {{ {"verified": "Verified quote", "edited": "Card edited by you", "needs_check": "Needs a check"}[s.status] }}</p>
+      <p class="quote"><b>[{{ s.n }}]</b> {% if s.quote %}“{{ s.quote }}”{% else %}{{ t("No quote stored. Check the page by hand.") }}{% endif %}</p>
+      <p class="src">{% if s.title %}{{ s.title }} · {% endif %}{{ s.host }}{% if s.fetched %} · {{ t("fetched {date}", date=s.fetched) }}{% endif %} · {{ t({"verified": "Verified quote", "edited": "Card edited by you", "needs_check": "Needs a check"}[s.status]) }}</p>
       <p class="url">{{ s.url }}</p>
-      <p class="links">{% if s.quote %}<a class="go" href="{{ s.deep_link }}">Open at quote</a>{% endif %}<a class="go" href="{{ s.url }}">Open page</a><a class="go" href="#{{ s.claim }}">Back to claim</a></p>
+      <p class="links">{% if s.quote %}<a class="go" href="{{ s.deep_link }}">{{ t("Open at quote") }}</a>{% endif %}<a class="go" href="{{ s.url }}">{{ t("Open page") }}</a><a class="go" href="#{{ s.claim }}">{{ t("Back to claim") }}</a></p>
     </div>
     {% endfor %}
   {% else %}
     <ol class="sources">
       {% for s in sources %}
-      <li id="src-{{ s.n }}"><span class="n">[{{ s.n }}]</span>{% if s.title %}{{ s.title }}, {% endif %}<a class="url" href="{{ s.url }}">{{ s.url }}</a></li>
+      <li id="src-{{ s.n }}"><span class="n">[{{ s.n }}]</span><span class="host">{{ s.title or s.host }}</span><br><a class="url" href="{{ s.url }}">{{ s.url }}</a></li>
       {% endfor %}
     </ol>
   {% endif %}

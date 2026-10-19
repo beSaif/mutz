@@ -1,29 +1,29 @@
 {% extends "base.html" %}{% set active_page = "insights" %}{% set active_sub = "gaps" %}
-{% block title %}Gap report{% endblock %}
+{% block title %}{{ _('Gap report') }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
 {% block actions %}
-<form method="get" action="/insights"><label for="yr" class="lb">Year</label><select id="yr" name="year" class="in" style="font-size:14px;padding:7px 9px" onchange="this.form.submit()">{% for y in years %}<option {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
-<a class="b s" href="/insights/gaps.csv?year={{ year }}">Download CSV</a>
-{% if not demo_rows %}<form method="post" action="/insights/seed"><button class="b s">{{ 'Add' if rows else 'Load' }} example leads</button></form>{% endif %}
-<span class="sp">{{ n_leads }} lead{{ 's' if n_leads != 1 }} in {{ year }}</span>
+<form method="get" action="/insights"><label for="yr" class="lb">{{ _('Year') }}</label><select id="yr" name="year" class="in" style="font-size:14px;padding:7px 9px" onchange="this.form.submit()">{% for y in years %}<option {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></form>
+<a class="b s" href="/insights/gaps.csv?year={{ year }}">{{ _('Download CSV') }}</a>
+{% if not demo_rows %}<form method="post" action="/insights/seed"><button class="b s">{{ _('Add example leads') if rows else _('Load example leads') }}</button></form>{% endif %}
+<span class="sp">{{ _('{n} lead in {year}', n=n_leads, year=year) if n_leads == 1 else _('{n} leads in {year}', n=n_leads, year=year) }}</span>
 {% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:999 1 680px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:20px">
-<div><h1 style="margin:0;font-size:28px;line-height:1.15">Gap report</h1>
-<p class="lb" style="margin:4px 0 0">What leads asked for that Bern could not answer, most unanswered first.{% if demo_leads %} {{ demo_leads }} of the {{ n_leads }} leads are seeded examples.{% endif %}</p></div>
+<div><h1 style="margin:0;font-size:28px;line-height:1.15">{{ _('Gap report') }}</h1>
+<p class="lb" style="margin:4px 0 0">{{ _('What leads asked for that Bern could not answer, most unanswered first.') }}{% if demo_leads %} {{ _('{n} of the {total} leads are seeded examples.', n=demo_leads, total=n_leads) }}{% endif %}</p></div>
 {% if rows %}
 <div style="overflow-x:auto"><table class="t" style="min-width:760px">
-<thead><tr><th>Field asked for</th><th>Leads</th><th>Leads with no match</th><th>Share of all leads</th><th>Bern coverage</th><th>Searched</th><th>Outcome of those leads</th></tr></thead>
+<thead><tr><th>{{ _('Field asked for') }}</th><th>{{ _('Leads') }}</th><th>{{ _('Leads with no match') }}</th><th>{{ _('Share of all leads') }}</th><th>{{ _('Bern coverage') }}</th><th>{{ _('Searched') }}</th><th>{{ _('Outcome of those leads') }}</th></tr></thead>
 <tbody>
 {% for r in rows %}
-<tr><td><b>{{ r.name }}</b></td><td>{{ r.leads }}</td><td>{{ r.empty }}</td><td>{{ r.share }}%</td><td><span style="display:inline-flex;gap:6px;align-items:center">{{ ui.pot(r.cov, 18, 20) }}{{ ui.potlabel(r.cov) }}</span>{% if r.maybe_archive_gap and r.cov != 'strong' %}<div class="lb" style="margin-top:4px;color:var(--red-h)">Maybe a source gap</div>{% endif %}</td><td>{{ r.archives }} sources{% if r.maybe_archive_gap and r.cov != 'strong' %}<div><a class="b s" href="/archives/add" style="margin-top:6px">Add a source to check</a></div>{% endif %}</td><td>{{ r.outcome }}</td></tr>
+<tr><td><b>{{ _(r.name) }}</b></td><td>{{ r.leads }}</td><td>{{ r.empty }}</td><td>{{ r.share }}%</td><td><span style="display:inline-flex;gap:6px;align-items:center">{{ ui.pot(r.cov, 18, 20) }}{{ ui.potlabel(r.cov) }}</span>{% if r.maybe_archive_gap and r.cov != 'strong' %}<div class="lb" style="margin-top:4px;color:var(--red-h)">{{ _('Maybe a source gap') }}</div>{% endif %}</td><td>{{ _('{n} sources', n=r.archives) }}{% if r.maybe_archive_gap and r.cov != 'strong' %}<div><a class="b s" href="/archives/add" style="margin-top:6px">{{ _('Add a source to check') }}</a></div>{% endif %}</td><td>{% for o in (r.outcome or '').split(', ') if o %}{% set st = o.rsplit(' ', 1) %}{% if st|length == 2 and st[1].isdigit() %}{{ _(st[0]) }} {{ st[1] }}{% else %}{{ _(o) }}{% endif %}{{ ', ' if not loop.last }}{% endfor %}</td></tr>
 {% endfor %}
-<tr style="color:#5E5E5E"><td colspan="7">Other (fewer than {{ k_min }} leads) · {{ other }} leads</td></tr>
+<tr style="color:#5E5E5E"><td colspan="7">{{ _('Other (fewer than {k} leads) · {n} leads', k=k_min, n=other) }}</td></tr>
 </tbody></table></div>
 {% else %}
-<section class="pn" style="max-width:640px"><span class="k">Not enough leads yet</span>
-<p style="margin:0">{{ n_leads }} lead{{ 's' if n_leads != 1 }} so far. A field shows from {{ k_min }} leads.</p></section>
+<section class="pn" style="max-width:640px"><span class="k">{{ _('Not enough leads yet') }}</span>
+<p style="margin:0">{{ _('{n} lead so far.', n=n_leads) if n_leads == 1 else _('{n} leads so far.', n=n_leads) }} {{ _('A field shows from {k} leads.', k=k_min) }}</p></section>
 {% endif %}
 </section>
 </main>

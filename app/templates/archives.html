@@ -1,46 +1,46 @@
 {% extends "base.html" %}{% set active_page = "archives" %}{% set active_sub = view %}
-{% block title %}{{ 'Add a source' if view == 'add' else 'Sources' }}{% endblock %}
+{% block title %}{{ _('Add a source') if view == 'add' else _('Sources') }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
 {% block actions %}
-{% if view == 'add' %}<a class="b s" href="/archives">Back to sources</a>{% else %}<a class="b s" href="/archives/add">Add a source</a>{% endif %}
-<span class="sp">{{ arch.n }} sources · {{ arch.total|num }} pages{% if arch.last %} · last crawl {{ arch.last|date(True) }}{% endif %}</span>
+{% if view == 'add' %}<a class="b s" href="/archives">{{ _('Back to sources') }}</a>{% else %}<a class="b s" href="/archives/add">{{ _('Add a source') }}</a>{% endif %}
+<span class="sp">{{ _('{n} sources · {pages} pages', n=arch.n, pages=arch.total|num) }}{% if arch.last %} · {{ _('last crawl {date}', date=arch.last|date(True)) }}{% endif %}</span>
 {% endblock %}
 {% block content %}
 <main class="two">
 {% if view == 'add' %}
 <section style="flex:1 1 600px;min-width:0;max-width:720px;padding:32px;display:flex;flex-direction:column;gap:12px">
-<h1 style="margin:0;font-size:28px;line-height:1.15">Add a source</h1>
-<p style="margin:0;font-size:14px">Give the address of a public website, for example a hospital or institute. We check that it is public and allows crawling, then show the one line that adds it to the search.</p>
+<h1 style="margin:0;font-size:28px;line-height:1.15">{{ _('Add a source') }}</h1>
+<p style="margin:0;font-size:14px">{{ _('Give the address of a public website, for example a hospital or institute. We check that it is public and allows crawling, then show the one line that adds it to the search.') }}</p>
 <form method="get" action="/archives/add" style="display:flex;flex-direction:column;gap:12px">
-<label for="url" class="lb">Public website</label>
-<input id="url" name="url" value="{{ url or '' }}" placeholder="For example https://sitem-insel.ch/" class="in">
-<button class="b" style="align-self:flex-start">Check this site</button>
+<label for="url" class="lb">{{ _('Public website') }}</label>
+<input id="url" name="url" value="{{ url or '' }}" placeholder="{{ _('For example {url}', url='https://sitem-insel.ch/') }}" class="in">
+<button class="b" style="align-self:flex-start">{{ _('Check this site') }}</button>
 </form>
 {% if proposal %}
 {% if proposal.ok %}
-<div><div class="ok"><b aria-hidden="true">✓</b>Public, no login</div><div class="ok"><b aria-hidden="true">✓</b>robots.txt checked</div><div class="ok"><b aria-hidden="true">✓</b>1 request per second</div></div>
+<div><div class="ok"><b aria-hidden="true">✓</b>{{ _('Public, no login') }}</div><div class="ok"><b aria-hidden="true">✓</b>{{ _('robots.txt checked') }}</div><div class="ok"><b aria-hidden="true">✓</b>{{ _('1 request per second') }}</div></div>
 <pre>{{ proposal.entry }}</pre>
 <pre>python crawl.py --config config/sources.json</pre>
 {% else %}
-<div class="err" role="alert">{{ proposal.reason }}</div>
+<div class="err" role="alert">{{ _(proposal.reason) }}</div>
 {% endif %}
 {% endif %}
 </section>
 {% else %}
 <section style="flex:1 1 600px;min-width:0;padding:32px">
-<h1 style="margin:0 0 16px;font-size:28px;line-height:1.15">Sources</h1>
+<h1 style="margin:0 0 16px;font-size:28px;line-height:1.15">{{ _('Sources') }}</h1>
 <div style="overflow-x:auto">
 <table class="t" style="min-width:680px">
-<thead><tr><th>Source</th><th>Pages</th><th>People found</th><th>Languages</th><th>Last crawl</th><th>Skipped</th></tr></thead>
+<thead><tr><th>{{ _('Source') }}</th><th>{{ _('Pages') }}</th><th>{{ _('People found') }}</th><th>{{ _('Languages') }}</th><th>{{ _('Last crawl') }}</th><th>{{ _('Skipped') }}</th></tr></thead>
 <tbody>
 {% for g in arch.groups %}
-<tr><td><b>{{ g.name }}</b><div class="lb">{{ g.sub }}</div></td><td>{{ g.pages|num }}</td><td>{{ people.get(g.id, '–') if people else 'not extracted yet' }}</td><td>{{ g.langs }}</td><td>{{ g.last|date(True) }}</td><td>{{ g.skipped }}{% if g.skipped %} <span class="lb">pages missing or behind a login</span>{% endif %}</td></tr>
+<tr><td><b>{{ g.name }}</b><div class="lb">{% if g.sub.endswith('life science subdomains') and g.sub[:1].isdigit() %}{{ _('{n} life science subdomains', n=g.sub.split(' ')[0]) }}{% elif g.sub == 'life science subdomains' %}{{ _('life science subdomains') }}{% else %}{{ g.sub }}{% endif %}</div></td><td>{{ g.pages|num }}</td><td>{{ people.get(g.id, '–') if people else _('not extracted yet') }}</td><td>{{ g.langs }}</td><td>{{ g.last|date(True) }}</td><td>{{ g.skipped }}{% if g.skipped %} <span class="lb">{{ _('pages missing or behind a login') }}</span>{% endif %}</td></tr>
 {% else %}
-<tr><td colspan="6">No pages crawled yet</td></tr>
+<tr><td colspan="6">{{ _('No pages crawled yet') }}</td></tr>
 {% endfor %}
-<tr><td><b>SNSF grants</b><div class="lb">opendata.swiss · filtered to Bern</div></td><td>{{ '1 file' if snsf is not none else '–' }}</td><td>{{ (snsf ~ ' grants') if snsf is not none else 'not loaded' }}</td><td>EN</td><td></td><td></td></tr>
+<tr><td><b>{{ _('SNSF grants') }}</b><div class="lb">{{ _('opendata.swiss · filtered to Bern') }}</div></td><td>{{ _('1 file') if snsf is not none else '–' }}</td><td>{{ _('{n} grants', n=snsf) if snsf is not none else _('not loaded') }}</td><td>EN</td><td></td><td></td></tr>
 {% if proposal and proposal.ok %}
-<tr style="background:#F2F2F2"><td><b>{{ proposal.id }}</b><div class="lb">{{ proposal.host }} · proposed</div></td><td>not crawled</td><td></td><td></td><td>Not yet</td><td>robots.txt checked at crawl</td></tr>
+<tr style="background:#F2F2F2"><td><b>{{ proposal.id }}</b><div class="lb">{{ proposal.host }} · {{ _('proposed') }}</div></td><td>{{ _('not crawled') }}</td><td></td><td></td><td>{{ _('Not yet') }}</td><td>{{ _('robots.txt checked at crawl') }}</td></tr>
 {% endif %}
 </tbody>
 </table>

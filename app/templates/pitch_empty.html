@@ -3,8 +3,8 @@
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
 {% block content %}
 <main style="padding:32px;max-width:760px">
-<section class="pn"><span class="k">No accepted matches yet</span>
-<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("idle", 80, 75) }}<div style="flex:1 1 220px"><h2 style="margin:0 0 6px;font-size:21px">Accept at least one match and the pitch builds itself from it.</h2><p class="lb" style="margin:0">Every card starts from a verified quote. You can edit, reorder and delete everything afterwards.</p></div></div>
-<div style="display:flex;gap:8px"><a class="b p" href="/leads/{{ lead.id }}/matches">Back to matches</a></div></section>
+<section class="pn"><span class="k">{{ _('No accepted matches yet') }}</span>
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("idle", 80, 75) }}<div style="flex:1 1 220px"><h2 style="margin:0 0 6px;font-size:21px">{{ _('Accept at least one match and the pitch builds itself from it.') }}</h2><p class="lb" style="margin:0">{{ _('Every card starts from a verified quote. You can edit, reorder and delete everything afterwards.') }}</p></div></div>
+<div style="display:flex;gap:8px"><a class="b p" href="/leads/{{ lead.id }}/matches">{{ _('Back to matches') }}</a></div></section>
 </main>
 {% endblock %}

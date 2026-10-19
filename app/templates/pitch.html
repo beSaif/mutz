@@ -4,27 +4,37 @@
 {% block viewclass %}panes{% endblock %}
 {% block content %}
 <main id="pitchapp">
-<aside aria-label="Outline" class="olbar">
+<aside aria-label="{{ _('Outline') }}" class="olbar">
 <div id="outline"></div>
 <div id="toast" role="status"></div>
 </aside>
-<section class="pcol" style="flex:1 1 600px;min-width:0;background:#E6E6E6" aria-label="Document">
+<section class="pcol" style="flex:1 1 600px;min-width:0;background:#E6E6E6;position:relative" aria-label="{{ _('Document') }}">
 <div class="pe-bar">
-<span class="lb" id="pgno">Page 1</span>
+<span class="lb" id="pgno">{{ _('Page {n}', n=1) }}</span>
 <span style="flex:1"></span>
-<span class="pe-z" role="group" aria-label="Zoom"><button type="button" class="b s" data-z="-" aria-label="Zoom out">−</button><span id="zl" class="lb" style="min-width:42px;text-align:center">100%</span><button type="button" class="b s" data-z="+" aria-label="Zoom in">+</button><button type="button" class="b s" data-z="fit">Fit</button></span>
+<span class="pe-z" role="group" aria-label="{{ _('Zoom') }}"><button type="button" class="b s" data-z="-" aria-label="{{ _('Zoom out') }}">−</button><span id="zl" class="lb" style="min-width:42px;text-align:center">100%</span><button type="button" class="b s" data-z="+" aria-label="{{ _('Zoom in') }}">+</button><button type="button" class="b s" data-z="fit">{{ _('Fit') }}</button></span>
 </div>
 <div class="pane" id="canvas"><div class="pages" id="pages"></div></div>
+{# shown while the facts are drafted and while the pitch is written; pitch.js fills in the line for each step #}
+<div class="pn pwait{{ '' if pending else ' hidden' }}" id="pwait">
+<div style="display:flex;gap:18px;align-items:flex-start">
+<span data-pose="wait">{{ ui.mutz("search", 64, 54) }}</span><span data-pose="sad" class="hidden">{{ ui.mutz("sad", 58, 54) }}</span>
+<div style="flex:1;min-width:0" role="status" aria-live="polite">
+<h2 id="pw-h" style="margin:0 0 6px;font-size:18px">{{ _('Reading the matches and pulling out the facts…') if pending and pending[0] == 'read' else _('Looking for suggestions for the needs with no match yet…') if pending else '' }}</h2>
+<p id="pw-n" class="lb" style="margin:0">{{ _('This takes up to a minute. The cards arrive unchecked, for you to compare with their sources.') if pending else '' }}</p>
+<span class="bar" id="pw-bar"><i></i></span>
+<button type="button" class="b s hidden" id="pw-retry" style="margin-top:12px">{{ _('Try again') }}</button>
+</div></div></div>
 </section>
-<aside class="pcol" aria-label="Inspector" style="flex:0 0 330px;border-left:1px solid #D9D9D9">
+<aside class="pcol" aria-label="{{ _('Inspector') }}" style="flex:0 0 330px;border-left:1px solid #D9D9D9">
 <div class="pane" id="inspector" style="padding:20px 24px 88px"></div>
 <div class="dock r" id="pdock" style="padding:12px 24px;display:flex;flex-direction:column;gap:6px">
-<a class="b p" href="/leads/{{ lead.id }}/export" style="justify-content:center">Continue to export</a>
+<a class="b p" href="/leads/{{ lead.id }}/export" style="justify-content:center">{{ _('Continue to export') }}</a>
 </div>
 </aside>
 </main>
 {% endblock %}
 {% block scripts %}
 <script src="{{ asset('pitch.js') }}"></script>
-<script>initPitch({{ lead.id|tojson }}, {{ draft|tojson }}, {{ section|tojson }}, {{ {"logo": logo, "company": (lead.profile or {}).get("name") or lead.title, "date": today}|tojson }});</script>
+<script>initPitch({{ lead.id|tojson }}, {{ draft|tojson }}, {{ section|tojson }}, {{ {"logo": logo, "company": (lead.profile or {}).get("name") or lead.title, "date": today, "doc": doc, "pending": pending}|tojson }});</script>
 {% endblock %}

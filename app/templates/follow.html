@@ -1,39 +1,39 @@
 {% extends "base.html" %}{% set active_page = "leads" %}
-{% block title %}Contact the researchers · {{ lead.title }}{% endblock %}
+{% block title %}{{ _('Contact the researchers') }} · {{ lead.title }}{% endblock %}
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:999 1 640px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:20px">
-<div><h1 style="margin:0;font-size:24px">Contact the researchers</h1></div>
-{% if not rows %}<p>No accepted matches yet. <a href="/leads/{{ lead.id }}/matches">Accept matches first.</a></p>{% else %}
+<div><h1 style="margin:0;font-size:24px">{{ _('Contact the researchers') }}</h1></div>
+{% if not rows %}<p>{{ _('No accepted matches yet.') }} <a href="/leads/{{ lead.id }}/matches">{{ _('Accept matches first.') }}</a></p>{% else %}
 <div style="overflow-x:auto"><table class="t" style="min-width:560px">
-<thead><tr><th>Researcher or group</th><th>Language</th><th>Why them</th><th>Status</th></tr></thead>
+<thead><tr><th>{{ _('Researcher or group') }}</th><th>{{ _('Language') }}</th><th>{{ _('Why them') }}</th><th>{{ _('Status') }}</th></tr></thead>
 <tbody>
 {% for r in rows %}
-<tr {% if cur and r.id == cur.id %}style="background:#F2F2F2"{% endif %}><td><a href="?sel={{ r.id }}"><b lang="de">{{ r.name }}</b></a><div class="lb">{{ r.unit }}</div></td><td>{{ r.lang|upper }}</td><td>{% if r.why %}“{{ r.why|truncate(90) }}” {% if r.url %}<a href="{{ r.url }}" target="_blank" rel="noopener">source</a>{% endif %}{% endif %}</td>
-<td><select class="in" data-status="{{ r.id }}" style="font-size:13px;padding:4px">{% for s in ['drafted','sent','agreed','declined','no reply'] %}<option {% if r.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></td></tr>
+<tr {% if cur and r.id == cur.id %}style="background:#F2F2F2"{% endif %}><td><a href="?sel={{ r.id }}"><b lang="de">{{ r.name }}</b></a><div class="lb">{{ r.unit }}</div></td><td>{{ r.lang|upper }}</td><td>{% if r.why %}“{{ r.why|truncate(90) }}” {% if r.url %}<a href="{{ r.url }}" target="_blank" rel="noopener">{{ _('source') }}</a>{% endif %}{% endif %}</td>
+<td><select class="in" data-status="{{ r.id }}" style="font-size:13px;padding:4px">{% for s in ['drafted','sent','agreed','declined','no reply'] %}<option value="{{ s }}" {% if r.status == s %}selected{% endif %}>{{ _(s) }}</option>{% endfor %}</select></td></tr>
 {% endfor %}
 </tbody></table></div>
 {% if cur %}
 <div style="border:1px solid #111;padding:16px;display:flex;flex-direction:column;gap:10px">
-<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:baseline"><b>Intro draft for {{ cur.name }}</b><span class="lb">{{ {'de':'German','fr':'French'}.get(cur.lang,'English') }} · written from shareable needs only</span>
-<span style="flex:1"></span>{% for l in ['de','fr','en'] %}<button class="b s {{ 'k' if cur.lang == l }}" data-lang="{{ l }}">{{ l|upper }}</button>{% endfor %}</div>
-<label for="draft" class="lb">Edit before sending</label>
-<textarea id="draft" lang="{{ cur.lang }}" rows="10" class="in" style="font-size:14px;line-height:1.55;resize:vertical" placeholder="Write the draft, or let Bärner Mutz draft it from the shareable needs.">{{ cur.draft }}</textarea>
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:baseline"><b>{{ _('Intro draft for {name}', name=cur.name) }}</b><span class="lb">{{ _({'de':'German','fr':'French','it':'Italian'}.get(cur.lang,'English')) }} · {{ _('written from shareable needs only') }}</span>
+<span style="flex:1"></span>{% for l in ['de','fr','it','en'] %}<button class="b s {{ 'k' if cur.lang == l }}" data-lang="{{ l }}">{{ l|upper }}</button>{% endfor %}</div>
+<label for="draft" class="lb">{{ _('Edit before sending') }}</label>
+<textarea id="draft" lang="{{ cur.lang }}" rows="10" class="in" style="font-size:14px;line-height:1.55;resize:vertical" placeholder="{{ _('Write the draft, or let Bärner Mutz draft it from the shareable needs.') }}">{{ cur.draft }}</textarea>
 <p class="lb hidden" id="omsg" style="margin:0"></p>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b s {{ 'p' if not cur.draft }}" data-gen>{{ 'Draft it' if not cur.draft else 'Draft again' }}</button><button class="b s" data-copy>Copy</button><a class="b s" id="mailto" href="mailto:?subject={{ 'Anfrage: Gespräch mit einem Unternehmen' if cur.lang == 'de' else ('Demande: rencontre avec une entreprise' if cur.lang == 'fr' else 'Request: meeting with a company') }}">Open in mail</a><button class="b s" data-short>Rewrite shorter</button><button class="b s" data-sent>Mark as sent</button></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b s {{ 'p' if not cur.draft }}" data-gen>{{ _('Draft it') if not cur.draft else _('Draft again') }}</button><button class="b s" data-copy>{{ _('Copy') }}</button><a class="b s" id="mailto" href="mailto:?subject={{ 'Anfrage: Gespräch mit einem Unternehmen' if cur.lang == 'de' else ('Demande: rencontre avec une entreprise' if cur.lang == 'fr' else ('Richiesta: incontro con un’azienda' if cur.lang == 'it' else 'Request: meeting with a company')) }}">{{ _('Open in mail') }}</a><button class="b s" data-short>{{ _('Rewrite shorter') }}</button><button class="b s" data-sent>{{ _('Mark as sent') }}</button></div>
 </div>
 {% endif %}{% endif %}
 </section>
 <div aria-hidden="true" class="vr"></div>
 <aside style="flex:1 1 340px;padding:32px;display:flex;flex-direction:column;gap:14px">
-<h2 style="margin:0;font-size:21px">Visit day</h2>
+<h2 style="margin:0;font-size:21px">{{ _('Visit day') }}</h2>
 <div style="border-top:1px solid #111">
-{% for v in visit %}<div class="sl" style="display:grid;grid-template-columns:60px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid #D9D9D9"><b style="width:auto;color:#111;font-weight:700">{{ v.time }}</b><span {% if not v.on %}style="color:#5E5E5E"{% endif %}>{{ v.what }}<span class="lb" style="display:block">{{ v.note }}</span></span></div>{% endfor %}
+{% for v in visit %}<div class="sl" style="display:grid;grid-template-columns:60px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid #D9D9D9"><b style="width:auto;color:#111;font-weight:700">{{ v.time }}</b><span {% if not v.on %}style="color:#5E5E5E"{% endif %}>{{ _(v.what) }}<span class="lb" style="display:block">{{ _(v.note) }}</span></span></div>{% endfor %}
 </div>
-<a class="b" href="/leads/{{ lead.id }}/visit.ics" style="align-self:flex-start">Export calendar file (.ics)</a>
-<div style="background:#F2F2F2;padding:14px;font-size:14px">Who agrees or declines can feed a weak “responsive to industry” signal into future matches. It never hides anyone.</div>
+<a class="b" href="/leads/{{ lead.id }}/visit.ics" style="align-self:flex-start">{{ _('Export calendar file (.ics)') }}</a>
+<div style="background:#F2F2F2;padding:14px;font-size:14px">{{ _('Who agrees or declines can feed a weak “responsive to industry” signal into future matches. It never hides anyone.') }}</div>
 </aside>
 </main>
 {% endblock %}
@@ -47,11 +47,11 @@
   function m(t){ msg.textContent = t; msg.classList.remove('hidden'); }
   function mail(){ var a = document.getElementById('mailto'); a.href = a.href.split('&body=')[0] + '&body=' + encodeURIComponent(ta.value); }
   ta.addEventListener('change', function(){ mutzPost('/api/outreach/' + cur, {draft: ta.value}); mail(); }); mail();
-  function gen(extra){ m('Drafting from the shareable needs…'); mutzPost('/api/outreach/' + cur, extra).then(function(r){ if (!r.ok) { m(r.error); return; } ta.value = r.draft; mail(); msg.classList.add('hidden'); }); }
+  function gen(extra){ m(_t('Drafting from the shareable needs…')); mutzPost('/api/outreach/' + cur, extra).then(function(r){ if (!r.ok) { m(r.error); return; } ta.value = r.draft; mail(); msg.classList.add('hidden'); }); }
   document.querySelector('[data-gen]').addEventListener('click', function(){ gen({generate: true}); });
   document.querySelector('[data-short]').addEventListener('click', function(){ gen({rewrite: true}); });
   $$('[data-lang]').forEach(function(b){ b.addEventListener('click', function(){ gen({generate: true, lang: b.dataset.lang}); $$('[data-lang]').forEach(function(x){ x.classList.toggle('k', x===b); }); }); });
-  document.querySelector('[data-copy]').addEventListener('click', function(){ navigator.clipboard && navigator.clipboard.writeText(ta.value); m('Copied.'); });
+  document.querySelector('[data-copy]').addEventListener('click', function(){ navigator.clipboard && navigator.clipboard.writeText(ta.value); m(_t('Copied.')); });
   document.querySelector('[data-sent]').addEventListener('click', function(){ mutzPost('/api/outreach/' + cur, {status: 'sent', draft: ta.value}).then(function(){ location.reload(); }); });
 })();
 </script>

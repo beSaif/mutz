@@ -6,7 +6,7 @@
   {"id": "l05", "clip": "mutz", "text": "If I want to know why it's first, I can ask Mutz, the bear in the corner. It answers from the ranking log of this exact search."},
   {"id": "l06", "clip": "nomatch", "text": "And when Bern doesn't have something, it says so. Nothing on cleanroom capacity has evidence behind it, so it's no match, not a weak guess."},
   {"id": "l07", "clip": "accept", "text": "I accept the ones I'd actually put in front of their CEO. The AI in Health and Nutrition group for the algorithms, a pilot study at the Diabetes Center, and Innosuisse for the funding."},
-  {"id": "l08", "clip": "map", "text": "The evidence map draws each match back to where it came from... the need, the fact, and the page it was read on."},
+  {"id": "l08", "clip": "map", "text": "The evidence map draws each match back to where it came from... the need, the quote, and the page it was read on. And under that, what it's connected to in Bern... who leads it, the people around it, and their projects."},
   {"id": "l09", "clip": "pitch", "text": "Then the pitch. Apertus drafts each card only from that card's own quotes, and I check every one against its source. Nothing goes out until they're all ticked."},
   {"id": "l10", "clip": "export", "text": "Then I export it, and the lead moves on to sent."},
   {"id": "l11", "clip": "pdf", "text": "And this is what Kestrelyn gets. The people in Bern who fit, and a source for every line."},

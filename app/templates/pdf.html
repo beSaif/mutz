@@ -2,7 +2,7 @@
 <html lang="{{ p.lang or 'en' }}"><head><meta charset="utf-8">
 <style>
 @page{size:A4;margin:22mm 18mm 20mm 18mm;@bottom-right{content:counter(page) " / " counter(pages);font:8pt Helvetica,Arial,sans-serif;color:#5E5E5E}}
-@page :first{@bottom-left{content:"Prototype, not an official Canton of Bern tool";font:8pt Helvetica,Arial,sans-serif;color:#5E5E5E}}
+@page :first{@bottom-left{content:"{{ t('Prototype, not an official Canton of Bern tool') }}";font:8pt Helvetica,Arial,sans-serif;color:#5E5E5E}}
 body{font:10pt/1.45 "Helvetica Neue",Helvetica,Arial,sans-serif;color:#111;margin:0}
 .pg{position:relative;page-break-after:always;min-height:240mm}
 .pg:last-child{page-break-after:auto}
@@ -21,27 +21,27 @@ sup a,a.n{text-decoration:none;color:#111}
 img.logo{width:62mm;margin-bottom:14mm}
 </style></head><body>
 <section class="pg">
-<div>{% if logo %}<img class="logo" src="{{ logo }}" alt="Bern Economic Development Agency">{% else %}<p><b>Bern Economic Development Agency</b></p>{% endif %}
+<div>{% if logo %}<img class="logo" src="{{ logo }}" alt="{{ t('Bern Economic Development Agency') }}">{% else %}<p><b>{{ t('Bern Economic Development Agency') }}</b></p>{% endif %}
 <h1>{{ p.title }}</h1><p class="l">{{ today }}</p></div>
-<div style="padding-top:16mm"><p>{{ p.intro }}</p><p class="l">Prepared for {{ p.company.name }}<br>Contact: {{ p.officer.name }}{% if p.officer.email %}, {{ p.officer.email }}{% endif %}</p></div>
+<div style="padding-top:16mm"><p>{{ p.intro }}</p><p class="l">{{ t('Prepared for {name}', name=p.company.name) }}<br>{{ t('Contact: {name}', name=p.officer.name) }}{% if p.officer.email %}, {{ p.officer.email }}{% endif %}</p></div>
 </section>
 {% set ns = namespace(n=0) %}
 {% for sec in (p.sections or []) if sec.id not in ('cover',) %}
 {% set scards = cards|selectattr('section','in',[sec.id, 'infrastructure' if sec.id == 'infra' else sec.id])|list %}
 {% if sec.id == 'sources' %}
-<section class="pg"><div><h2>Sources</h2><p class="l">{{ 'Each entry gives the exact quote, the page and the fetch date.' if mode == 'review' else 'Every claim in this document links to a public page.' }}</p><p class="l">Drafted with Apertus on Swiss infrastructure (CSCS); confidential figures and contact data were struck before any text left the agency.</p></div>
+<section class="pg"><div><h2>{{ t('Sources') }}</h2><p class="l">{{ t('Each entry gives the exact quote, the page and the fetch date.') if mode == 'review' else t('Every claim in this document links to a public page.') }}</p><p class="l">{{ t('Drafted with Apertus on Swiss infrastructure (CSCS); confidential figures and contact data were struck before any text left the agency.') }}</p></div>
 <div>{% set m = namespace(n=0) %}{% for c in cards %}{% for s in c.sources %}{% set m.n = m.n + 1 %}
-<div class="ev" id="ev-{{ m.n }}"><b>[{{ m.n }}]</b> {% if mode == 'review' and s.quote %}<i>“{{ s.quote }}”</i><br>{% endif %}<a href="{{ s.deep_link if mode == 'review' else s.url }}">{{ s.url }}</a>{% if mode == 'review' %}<br><span class="l">{{ c.name }}{% if s.fetched_at %} · fetched {{ s.fetched_at[:10] }}{% endif %} · {{ 'edited by you' if c.edited else ('added by you' if s.added_by_officer else 'verified quote') }}</span>{% endif %}</div>
+<div class="ev" id="ev-{{ m.n }}"><b>[{{ m.n }}]</b> {% if mode == 'review' and s.quote %}<i>“{{ s.quote }}”</i><br>{% endif %}<a href="{{ s.deep_link if mode == 'review' else s.url }}">{{ s.url }}</a>{% if mode == 'review' %}<br><span class="l">{{ c.name }}{% if s.fetched_at %} · {{ t('fetched {date}', date=fmt_date(s.fetched_at[:10])) }}{% endif %} · {{ t('edited by you') if c.edited else (t('added by you') if s.added_by_officer else t('verified quote')) }}</span>{% endif %}</div>
 {% endfor %}{% endfor %}</div></section>
 {% elif sec.id == 'visit' %}
-<section class="pg"><div><p class="kicker">How</p><h2>{{ sec.title }}</h2><p class="l">{{ p.how or "A draft schedule. Meetings depend on each group's availability." }}</p></div>
+<section class="pg"><div><p class="kicker">{{ t('How') }}</p><h2>{{ sec.title }}</h2><p class="l">{{ p.how or t("A draft schedule. Meetings depend on each group's availability.") }}</p></div>
 <div>{% for r in p.visit or [] %}<p><b>{{ r.time }}</b> {{ r.what }}</p>{% endfor %}</div></section>
 {% elif scards %}
-<section class="pg"><div><p class="kicker">{{ {'why': 'Why', 'matches': 'What', 'infra': 'What'}.get(sec.id, '') }}</p><h2>{{ sec.title }}</h2></div><div>
+<section class="pg"><div><p class="kicker">{{ t({'why': 'Why', 'matches': 'What', 'infra': 'What'}.get(sec.id, '')) }}</p><h2>{{ sec.title }}</h2></div><div>
 {% for c in scards %}
-{% set t = namespace(s=c.text) %}{% for k in range(c.sources|length) %}{% set t.s = t.s.replace('[' ~ (k + 1) ~ ']', '[[' ~ (c.nums[k]) ~ ']]') %}{% endfor %}
+{% set tx = namespace(s=c.text) %}{% for k in range(c.sources|length) %}{% set tx.s = tx.s.replace('[' ~ (k + 1) ~ ']', '[[' ~ (c.nums[k]) ~ ']]') %}{% endfor %}
 <div class="card">{% if sec.id != 'why' %}<h3>{{ c.name }}</h3>{% if c.unit and c.unit != c.name %}<p class="l">{{ c.unit }}</p>{% endif %}{% endif %}
-<p>{{ t.s|replace('[[','[')|replace(']]',']') }} {% if mode == 'review' %}{% for n in c.nums %}<a class="n" href="#ev-{{ n }}">→{{ n }}</a> {% endfor %}<span class="mk {{ 'e' if c.edited }}">{{ 'edited by you' if c.edited else 'verified quote' }}</span>{% endif %}</p></div>
+<p>{{ tx.s|replace('[[','[')|replace(']]',']') }} {% if mode == 'review' %}{% for n in c.nums %}<a class="n" href="#ev-{{ n }}">→{{ n }}</a> {% endfor %}<span class="mk {{ 'e' if c.edited }}">{{ t('edited by you') if c.edited else t('verified quote') }}</span>{% endif %}</p></div>
 {% endfor %}</div></section>
 {% endif %}
 {% endfor %}

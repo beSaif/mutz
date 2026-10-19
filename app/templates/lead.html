@@ -1,73 +1,145 @@
 {% extends "base.html" %}{% set active_page = "leads" %}
-{% block title %}After sending · {{ lead.title }}{% endblock %}
+{% block title %}{{ _('After sending') }} · {{ lead.title }}{% endblock %}
 {% block casebar %}{{ ui.casebar(lead, case) }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
 {% block content %}
-<main class="two">
-<section style="flex:1 1 380px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:18px">
-<h1 style="margin:0;font-size:24px">Timeline</h1>
-<div class="tl">
-{% for e in entries %}
-<div class="it {{ 'red' if loop.last and e.kind in ('email','call','note') }}"><span class="lb">{{ e.at|date }} · {{ {'one_pager':'one pager','website':'website','pitch':'pitch','email':'email','call':'call notes','note':'note'}.get(e.kind, e.kind) }}{% if e.who and names.get(e.who) %} · {{ names[e.who] }}{% endif %}{% if e.added_by and e.added_by != 'officer' %} · added through Bärner Mutz{% endif %}</span>
-<b style="display:block">{{ {'one_pager':'Company description','website':'Company website'}.get(e.kind) or (e.text if e.kind == 'pitch' else e.kind|capitalize) }}</b>
-{% if e.kind in ('email','call','note') %}<p style="margin:4px 0 0">{{ e.text|truncate(400) }}</p>{% elif e.kind == 'website' %}<p class="lb" style="margin:2px 0 0">{{ e.text }}</p>{% endif %}
-<span class="lb">{{ 'Confidential' if e.confidential else 'Public' }}{% if e.kind in ('email','call','note') %} · {{ 'shareable' if e.shareable else 'not shareable' }}{% endif %}</span></div>
-{% endfor %}
+{# one column: what was sent and the sent versions; once the CEO accepted (mail is set), only the emails #}
+<main class="two" style="justify-content:center">
+<section style="flex:999 1 560px;min-width:0;max-width:880px;padding:40px 32px;display:flex;flex-direction:column;gap:28px">
+{% if request.query_params.get('err') == 'gateway' %}<div class="err" role="alert"><b>{{ _('The Apertus gateway did not answer.') }}</b> {{ _('The timeline is saved. Try again in a minute.') }}</div>{% endif %}
+{% if mail %}{% elif sent %}{% include "_sent.html" %}{% else %}
+<div><h2 style="margin:0;font-size:21px">{{ _('No version sent yet.') }}</h2><p style="font-size:14px;margin:6px 0 0"><a href="/leads/{{ lead.id }}/export">{{ _('Review and export') }}</a></p></div>
+{% endif %}
+
+{% if mail %}
+<section id="emails" class="ml" aria-labelledby="ml-h">
+<div><h2 id="ml-h" style="font-size:21px">{{ _('Email to the researchers') if mail.emails|length < 2 else _('Emails to the researchers') }}</h2>
+<p class="lb" style="margin:4px 0 0">{{ _('One email per research group, written from the pitch the CEO read. Edit it here; your changes are saved.') }}</p></div>
+{% if not mail.emails %}<p style="margin:0;font-size:14px">{{ _('No accepted research group to write to.') }} <a href="/leads/{{ lead.id }}/matches">{{ _('Accept matches first.') }}</a></p>
+{% else %}
+{% if mail.emails|length > 1 %}<div class="tb" role="tablist" aria-label="{{ _('Research groups') }}">{% for e in mail.emails %}<button type="button" role="tab" data-mt="{{ e.key }}" aria-selected="{{ 'true' if loop.first else 'false' }}" class="{{ 'on' if loop.first }}">{{ e.to }}</button>{% endfor %}</div>{% endif %}
+{% for e in mail.emails %}
+<div class="ml-e" data-me="{{ e.key }}"{% if not loop.first %} hidden{% endif %}>
+{% if e.state == 'running' %}
+<div class="ml-wait" role="status">{{ ui.mutz('search', 48, 40) }}<span><b>{{ _('Drafting the email to the researchers…') }}</b><span class="lb" style="display:block">{{ _('Apertus 70B writes it from the approved pitch. This takes a few seconds.') }}</span></span></div>
+{% else %}
+<p class="ml-to"><span class="lb">{{ _('To') }}</span> <b>{{ e.to }}</b><span class="lb" style="display:block">{{ _('Accepted matches: {names}', names=e.names|join(' · ')) }}</span></p>
+<label class="lb" for="ms-{{ loop.index }}">{{ _('Subject') }}</label>
+<input class="in" id="ms-{{ loop.index }}" data-f="subject" value="{{ e.subject }}">
+<label class="lb" for="mb-{{ loop.index }}">{{ _('Message') }}</label>
+<textarea class="in" id="mb-{{ loop.index }}" data-f="body" rows="13">{{ e.body }}</textarea>
+<div class="ml-act"><a class="b p" data-mailto href="{{ mailto(e) }}">{{ _('Open in mail') }}</a><button type="button" class="b" data-copy>{{ _('Copy') }}</button><button type="button" class="b" data-redo>{{ _('Draft again') }}</button>
+<span class="lb" data-msg role="status">{% if e.edited %}{{ _('Your edits are saved.') }}{% elif e.source == 'template' %}{{ _('Written from a template: the Apertus gateway did not answer.') }}{% else %}{{ _('Drafted by Apertus 70B. Check it before sending.') }}{% endif %}</span></div>
+{% endif %}
 </div>
-<form method="post" action="/leads/{{ lead.id }}/entry" style="border:1px solid #111;padding:14px;display:flex;flex-direction:column;gap:8px">
-<b style="font-size:14px">Add information</b>
-<label for="kind" class="lb">Kind</label>
-<select id="kind" name="kind" class="in" style="font-size:14px;padding:8px"><option value="email">Email</option><option value="call">Call notes</option><option value="note">Note</option></select>
-<label for="info" class="lb">Paste or type</label>
-<textarea id="info" name="text" rows="3" placeholder="What changed?" class="in" style="font-size:14px;resize:vertical" required></textarea>
-<div style="display:flex;gap:16px;flex-wrap:wrap" class="lb"><label><input type="checkbox" name="confidential" value="1" checked> Confidential</label><label><input type="checkbox" name="shareable" value="1"> Shareable with researchers</label></div>
-<button class="b" style="align-self:flex-start">Add to timeline</button>
-</form>
-<form method="post" action="/leads/{{ lead.id }}/stage" style="border-top:1px solid #111;padding-top:14px;display:flex;flex-direction:column;gap:8px">
-<label for="stage" class="lb">Status</label>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><select id="stage" name="stage" class="in" style="font-size:14px;padding:8px">{% for s in stages %}<option value="{{ s }}" {% if lead.stage == s %}selected{% endif %}>{{ {'new':'New','triaged':'Triaged','pitched':'Pitched','visit':'Visit accepted','won':'Won','lost':'Lost'}[s] }}</option>{% endfor %}</select>
-<select name="lost_reason" class="in" style="font-size:14px;padding:8px" aria-label="Reason if lost"><option value="">Reason, if lost</option>{% for r in lost %}<option {% if lead.lost_reason == r %}selected{% endif %}>{{ r }}</option>{% endfor %}</select>
-<button class="b s">Set status</button></div>
-{% if request.query_params.get('err') == 'reason' %}<p class="lb" style="color:#B8000F;margin:0">A lost lead needs a reason, so the pipeline can learn from it.</p>{% endif %}
-</form>
+{% endfor %}
+{% if mail.other %}<p class="lb" style="margin:0">{{ _('Not in these emails: {names}. They are services, not research groups.', names=mail.other|join(', ')) }}</p>{% endif %}
+<p style="margin:0;font-size:14px"><a href="/leads/{{ lead.id }}/follow">{{ _('Track the replies and plan the visit day') }}</a></p>
+{% endif %}
 </section>
-<div aria-hidden="true" class="vr"></div>
-<section style="flex:999 1 560px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:22px">
-{% if request.query_params.get('err') == 'gateway' %}<div class="err" role="alert"><b>The Apertus gateway did not answer.</b> The timeline is saved. Try again in a minute.</div>{% endif %}
+{% endif %}
+
+{% if not mail %}
 {% if not diff %}
-<div><h2 style="margin:0;font-size:21px">Re-evaluate on new information</h2>
-<form method="post" action="/leads/{{ lead.id }}/reevaluate"><button class="b p">Compare with the needs</button></form></div>
 {% elif diff.stage == 'none' %}
-<div><h2 style="margin:0;font-size:21px">Nothing to re-evaluate</h2><p style="font-size:14px">{{ diff.note }}</p>
-<form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b s">OK</button></form></div>
+<div><h2 style="margin:0;font-size:21px">{{ _('Nothing to re-evaluate') }}</h2><p style="font-size:14px">{{ _(diff.note) }}</p>
+<form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b s">{{ _('OK') }}</button></form></div>
 {% else %}
 <div>
-<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:21px">1 · What the reply changes</h2><span class="lb">Apertus 70B on CSCS compared old needs with the new entry</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:21px">{{ _('1 · What the reply changes') }}</h2><span class="lb">{{ _('Apertus 70B on CSCS compared old needs with the new entry') }}</span></div>
 <div style="border-top:1px solid #111;margin-top:8px">
-{% for a in diff.added %}<div class="df" style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>Added</b><span>{{ a.text }}</span><span class="lb">from the {{ diff.entry_label }}</span></div>{% endfor %}
-{% for c in diff.changed %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>{{ 'Priority' if c.priority else 'Changed' }}</b><span>{{ c.label }}: {{ c.note }}{% if c.from_sentence %} “{{ c.from_sentence|truncate(80) }}”{% endif %}</span><span class="lb">from the {{ diff.entry_label }}</span></div>{% endfor %}
-{% for c in diff.removed %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>Removed</b><span>{{ c.label }}: {{ c.text }}</span><span class="lb">from the {{ diff.entry_label }}</span></div>{% endfor %}
-{% if diff.same %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px;color:#5E5E5E"><span>Same</span><span>{{ diff.same|join(' · ') }}</span><span class="lb">matches kept as they are</span></div>{% endif %}
-{% if not diff.added and not diff.changed and not diff.removed %}<p style="font-size:14px">The new entry does not change any need.</p>{% endif %}
+{% for a in diff.added %}<div class="df" style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>{{ _('Added') }}</b><span>{{ a.text }}</span><span class="lb">{{ _('from the {entry}', entry=diff.entry_label) }}</span></div>{% endfor %}
+{% for c in diff.changed %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>{{ _('Priority') if c.priority else _('Changed') }}</b><span>{{ c.label }}: {{ c.note }}{% if c.from_sentence %} “{{ c.from_sentence|truncate(80) }}”{% endif %}</span><span class="lb">{{ _('from the {entry}', entry=diff.entry_label) }}</span></div>{% endfor %}
+{% for c in diff.removed %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>{{ _('Removed') }}</b><span>{{ c.label }}: {{ c.text }}</span><span class="lb">{{ _('from the {entry}', entry=diff.entry_label) }}</span></div>{% endfor %}
+{% if diff.same %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px;color:#5E5E5E"><span>{{ _('Same') }}</span><span>{{ diff.same|join(' · ') }}</span><span class="lb">{{ _('matches kept as they are') }}</span></div>{% endif %}
+{% if not diff.added and not diff.changed and not diff.removed %}<p style="font-size:14px">{{ _('The new entry does not change any need.') }}</p>{% endif %}
 </div>
-{% if diff.stage == 'needs' %}<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><form method="post" action="/leads/{{ lead.id }}/diff/confirm"><button class="b s p">Confirm changes</button></form><a class="b s" href="/leads/{{ lead.id }}/brief">Edit</a><form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b s">Discard</button></form></div>{% endif %}
+{% if diff.stage == 'needs' %}<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><form method="post" action="/leads/{{ lead.id }}/diff/confirm"><button class="b s p">{{ _('Confirm changes') }}</button></form><a class="b s" href="/leads/{{ lead.id }}/brief">{{ _('Edit') }}</a><form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b s">{{ _('Discard') }}</button></form></div>{% endif %}
 </div>
 {% if diff.stage == 'matches' %}
-{% set nm = namespace(rows=[]) %}
-<div><h2 style="margin:0;font-size:21px">2 · Matches, rerun for changed needs only</h2>
+<div><h2 style="margin:0;font-size:21px">{{ _('2 · Matches, rerun for changed needs only') }}</h2>
 <div style="border-top:1px solid #111;margin-top:8px">
-{% for n in diff.new_needs %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>New</b><span>Need added: rerun on its own</span><a class="b s" href="/leads/{{ lead.id }}/matches?need={{ n }}">Review its matches</a></div>{% endfor %}
-<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px;color:#5E5E5E"><span>Kept</span><span>Accepted matches did not move</span><span class="lb">already accepted</span></div>
+{% for n in diff.new_needs %}<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px"><b>{{ _('New') }}</b><span>{{ _('Need added: rerun on its own') }}</span><a class="b s" href="/leads/{{ lead.id }}/matches?need={{ n }}">{{ _('Review its matches') }}</a></div>{% endfor %}
+<div style="display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #D9D9D9;font-size:14px;color:#5E5E5E"><span>{{ _('Kept') }}</span><span>{{ _('Accepted matches did not move') }}</span><span class="lb">{{ _('already accepted') }}</span></div>
 </div></div>
-<div><div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:21px">3 · Pitch v{{ (versions|length) + 1 }}</h2></div>
-<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b">Keep v{{ versions|length }}</button></form><form method="post" action="/leads/{{ lead.id }}/diff/build"><button class="b p">Build v{{ (versions|length) + 1 }} from accepted changes</button></form></div></div>
+<div><div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:21px">{{ _('3 · Pitch v{n}', n=(versions|length) + 1) }}</h2></div>
+<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><form method="post" action="/leads/{{ lead.id }}/diff/keep"><button class="b">{{ _('Keep v{n}', n=versions|length) }}</button></form><form method="post" action="/leads/{{ lead.id }}/diff/build"><button class="b p">{{ _('Build v{n} from accepted changes', n=(versions|length) + 1) }}</button></form></div></div>
 {% endif %}
 {% endif %}
-<div style="background:#F2F2F2;padding:14px;font-size:14px">
-<b style="display:block;margin-bottom:4px">Versions</b>
-{% if versions %}<div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:4px 12px">{% for v in versions %}<b>v{{ v.n }}</b><span>Sent {{ v.sent_at|date }}{% if v.built_from %} · built from {{ v.built_from|length }} timeline entr{{ 'ies' if v.built_from|length != 1 else 'y' }}{% endif %}</span><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/clean.pdf">Clean PDF</a><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/pitch.json">JSON</a>{% endfor %}</div>{% else %}<p style="margin:0">No version sent yet. <a href="/leads/{{ lead.id }}/review">Review and export</a></p>{% endif %}
-</div>
-<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid #111;padding-top:14px"><span style="flex:1"></span><form method="post" action="/leads/{{ lead.id }}/stage"><input type="hidden" name="stage" value="visit"><button class="b">Visit accepted: contact researchers</button></form></div>
+
+{% if versions %}
+<section class="vl" aria-labelledby="vl-h">
+<h2 id="vl-h">{{ _('Sent versions') }}</h2>
+<ul>{% for v in versions|reverse %}<li><b>v{{ v.n }}</b><span>{{ _('sent {date}', date=v.sent_at|date) }}</span><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/clean.pdf">{{ _('PDF') }}</a></li>{% endfor %}</ul>
+<details class="vl-more"><summary>{{ _('Agency copies') }}</summary>
+<p class="lb" style="margin:6px 0 0">{{ _('For the agency only: every [n] in the review PDF opens its quote.') }}</p>
+<ul>{% for v in versions|reverse %}<li><b>v{{ v.n }}</b><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/review.pdf">{{ _('Review PDF') }}</a><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/pitch.json">JSON</a></li>{% endfor %}</ul>
+</details>
+</section>
+{% endif %}
+{% endif %}
 </section>
 </main>
 {% endblock %}
+{% block scripts %}{% set dl = request.query_params.get('dl') %}{% if dl and dl.isdigit() %}
+<script>
+(function () {  // arriving from Export: download the clean PDF that just went out, once
+  var a = document.createElement("a");
+  a.href = "/leads/{{ lead.id }}/export/v{{ dl }}/clean.pdf"; a.download = "";
+  document.body.appendChild(a); a.click(); a.remove();
+  history.replaceState(null, "", location.pathname + location.hash);
+})();
+</script>
+{% endif %}{% if mail %}
+<script>
+(function () {
+  var lid = {{ lead.id|tojson }};
+  // drafting runs on the server: poll until every email is written, then show them
+  if ({{ (mail.running or false)|tojson }}) {
+    var poll = setInterval(function () {
+      fetch("/api/leads/" + lid + "/emails").then(function (r) { return r.json(); }).then(function (d) {
+        if (!d.running) { clearInterval(poll); location.reload(); }
+      }).catch(function () {});
+    }, 1500);
+  }
+  function pick(t) {
+    $$("[data-mt]").forEach(function (x) { x.classList.toggle("on", x === t); x.setAttribute("aria-selected", x === t); });
+    $$("[data-me]").forEach(function (p) { p.hidden = p.dataset.me !== t.dataset.mt; });
+  }
+  $$("[data-mt]").forEach(function (t) {
+    if (location.hash === "#emails-" + encodeURIComponent(t.dataset.mt)) pick(t);  // the group open before a reload
+    t.addEventListener("click", function () { pick(t); history.replaceState(null, "", "#emails-" + encodeURIComponent(t.dataset.mt)); });
+  });
+  if (location.hash.indexOf("#emails-") === 0) document.getElementById("emails").scrollIntoView();
+  $$("[data-me]").forEach(function (p) {
+    var key = p.dataset.me, sub = p.querySelector('[data-f="subject"]'), body = p.querySelector('[data-f="body"]');
+    if (!body) return;
+    var msg = p.querySelector("[data-msg]"), mail = p.querySelector("[data-mailto]"), timer = null;
+    function say(t) { msg.textContent = t; }
+    function href() { mail.href = "mailto:?subject=" + encodeURIComponent(sub.value) + "&body=" + encodeURIComponent(body.value); }
+    function fit() { if (p.hidden) return; body.style.height = "auto"; body.style.height = (body.scrollHeight + 2) + "px"; }  // the whole email, no inner scroll
+    fit(); body.addEventListener("input", fit);
+    $$("[data-mt]").forEach(function (t) { t.addEventListener("click", function () { setTimeout(fit); }); });
+    function save() {
+      mutzPost("/api/leads/" + lid + "/emails", {key: key, subject: sub.value, body: body.value})
+        .then(function (r) { say(r.ok ? _t("Your edits are saved.") : _t("That did not work. Try again.")); })
+        .catch(function () { say(_t("That did not work. Try again.")); });
+    }
+    [sub, body].forEach(function (el) {
+      el.addEventListener("input", function () { href(); say(_t("Saving…")); clearTimeout(timer); timer = setTimeout(save, 600); });
+    });
+    p.querySelector("[data-copy]").addEventListener("click", function () {
+      if (navigator.clipboard) navigator.clipboard.writeText(body.value).then(function () { say(_t("Copied.")); }, function () { body.select(); });
+      else body.select();
+    });
+    p.querySelector("[data-redo]").addEventListener("click", function () {
+      if (timer) { clearTimeout(timer); timer = null; }
+      p.querySelectorAll("button,input,textarea").forEach(function (el) { el.disabled = true; });
+      say(_t("Drafting the email to the researchers…"));
+      mutzPost("/api/leads/" + lid + "/emails", {key: key, redo: true}).then(function () { location.reload(); })
+        .catch(function () { say(_t("That did not work. Try again.")); });
+    });
+  });
+})();
+</script>
+{% endif %}{% endblock %}

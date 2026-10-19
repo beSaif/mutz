@@ -129,6 +129,39 @@ def test_old_pitch_draft_gets_why_what_how():
     assert d["how"] == pitchgen.HOW
 
 
+
+def test_agency_list_entries_go_with_facilities_and_funding():
+    from app import pitchgen
+    r = {"entity_id": "curated:innosuisse", "type": "unit", "name": "Innosuisse", "reasons": []}
+    n = {"id": "n", "type": "funding", "text": "Funding"}
+    assert pitchgen.section_for(r, n) == "infra" and pitchgen._card_type(r, n) == "funding"
+    unit = {"entity_id": "unit:x", "type": "unit", "name": "X"}
+    assert pitchgen.section_for(unit, {"type": "research"}) == "matches"
+    cards = [{"entity_id": "unit:a", "type": "person", "name": "P", "unit": "A"},
+             {"entity_id": "unit:a2", "type": "unit", "name": "A", "unit": "A"}, r | {"unit": ""}]
+    assert [v["what"] for v in pitchgen.visit_day(cards)][1:] == ["Group at A"]   # one stop per place, no programmes
+
+
+
+def test_open_plans_get_unchecked_suggestions_once(monkeypatch):
+    from app import pitchgen
+    monkeypatch.setattr(pitchgen, "_write", lambda cards, lead, lang: None)
+    hit = {"entity_id": "unit:g", "type": "unit", "name": "G", "unit": "G", "reasons": [{"url": "https://g.example/a", "quote": "q"}]}
+    needs = [{"id": "n1", "type": "research", "text": "R&D", "coverage": "strong", "route": {"kind": "search"}, "result": {"results": [hit]}},
+             {"id": "n2", "type": "funding", "text": "Money", "coverage": "strong",
+              "route": {"kind": "curated", "entries": [{"id": "curated:bridge"}, {"id": "curated:ctu-bern"}]}},
+             {"id": "n3", "type": "supplier", "text": "Maker", "coverage": "none", "route": {"kind": "not_covered"}}]
+    lead = {"id": "x", "title": "X", "profile": {"sector": "Healthtech"}}
+    d = {"sections": [dict(s) for s in pitchgen.SECTIONS], "cards": []}
+    assert pitchgen.suggest(d, lead, needs) >= 3
+    new = [c for c in d["cards"] if c["section"] != "why"]
+    assert all(not c["checked"] and c["origin"] == "suggested" for c in new)
+    assert {c["need_id"] for c in new} == {"n1", "n2", None}                 # nothing for the supplier plan
+    assert "curated:ctu-bern" not in {c["entity_id"] for c in new}           # only checked entries of the agency list
+    assert any(c.get("nearby") and c["entity_id"] == "curated:sitem-insel" for c in new)
+    assert pitchgen.suggest(d, lead, needs) == 0                             # once per draft
+
+
 def test_matches_sort_filter_and_map_render():
     lid = db.create_lead("Sort lead", origin="S-GE")
     client.post(f"/leads/{lid}/brief", data={"mode": "keywords", "keywords": "type 1 diabetes exercise study"}, follow_redirects=False)
@@ -170,7 +203,7 @@ def test_export_is_its_own_step():
     r = client.get(f"/leads/{lid}/review?err=unchecked", follow_redirects=False)   # old links still work
     assert r.status_code in (303, 307) and r.headers["location"].endswith(f"/leads/{lid}/export?err=unchecked")
     r = client.get(f"/leads/{lid}/export")
-    assert r.status_code == 200 and "Export and mark as sent" in r.text
+    assert r.status_code == 200 and ">Export</button>" in r.text
     assert 'aria-current="step">5 Export' in r.text and 'role="meter"' in r.text
     assert db.lead(lid)["step"] == "export"
     assert client.get(f"/leads/{lid}", follow_redirects=False).headers["location"].endswith("/export")
@@ -203,6 +236,7 @@ def test_write_the_pitch_turns_cards_into_paragraphs(monkeypatch):
     m = n["result"]["results"][0]
     client.post("/api/decide", json={"lead": lid, "need": n["id"], "entity": m["entity_id"], "decision": "accept"})
     client.get(f"/leads/{lid}/pitch")
+    client.post(f"/api/pitch/{lid}/build")   # the page opens first, then asks for its draft
     draft, _ = db.pitch_draft(lid)
     mine = next(c for c in draft["cards"] if c["section"] == "matches")
     mine.update(text="My own words. [1]", edited=True)
@@ -238,6 +272,51 @@ def test_write_the_pitch_turns_cards_into_paragraphs(monkeypatch):
     assert not r["ok"] and "Nothing changed" in r["error"]
 
 
+def test_officer_request_changes_only_what_passes_the_checks(monkeypatch):
+    lid = db.create_lead("Change lead", origin="S-GE")
+    client.post(f"/leads/{lid}/brief", data={"mode": "keywords", "keywords": "type 1 diabetes exercise study"}, follow_redirects=False)
+    from app import main
+    from common import llm
+    main._search_job(lid, None)
+    n = db.needs(lid)[0]
+    for m in n["result"]["results"][:3]:
+        client.post("/api/decide", json={"lead": lid, "need": n["id"], "entity": m["entity_id"], "decision": "accept"})
+    client.get(f"/leads/{lid}/pitch")
+    client.post(f"/api/pitch/{lid}/build")   # the page opens first, then asks for its draft
+    draft, _ = db.pitch_draft(lid)
+    cards = [c for c in main.pitchgen.visible_cards(draft) if c["section"] in ("why", "matches", "infra")]
+    assert len(cards) >= 3
+    for c in cards:
+        c["checked"] = True
+    cards[2]["locked"] = True
+    before = {c["card_id"]: c["text"] for c in cards}
+
+    def fake(model, messages, **kw):
+        return {"content": "", "tool_calls": [{"name": "change_pitch", "arguments": {
+            "intro": "The agency also helps with work permits for your team.",
+            "how": "We will meet you in Bern next week.",                                  # a promise: refused
+            "cards": [{"id": "card1", "text": "A short version of the card. [1]"},
+                      {"id": "card2", "text": "The group has 4000 patients. [1]"},          # a figure the sources lack: refused
+                      {"id": "card3", "text": "Locked text changed. [1]"}],                  # locked: left alone
+            "note": "I left the meeting out."}}]}
+    monkeypatch.setattr(llm, "chat", fake)
+    assert not client.post(f"/api/pitch/{lid}/change", json={"draft": draft, "instruction": " "}).json()["ok"]
+    r = client.post(f"/api/pitch/{lid}/change", json={"draft": draft, "instruction": "Add work permits, shorter cards"}).json()
+    assert r["ok"] and set(r["changed"]) == {"intro", "card:" + cards[0]["card_id"]}
+    d = r["draft"]
+    got = {c["card_id"]: c for c in d["cards"]}
+    assert d["intro"].startswith("The agency also helps") and d["how"] != "We will meet you in Bern next week."
+    assert got[cards[0]["card_id"]]["text"] == "A short version of the card. [1]" and not got[cards[0]["card_id"]]["checked"]
+    assert got[cards[1]["card_id"]]["text"] == before[cards[1]["card_id"]] and got[cards[1]["card_id"]]["checked"]
+    assert got[cards[2]["card_id"]]["text"] == before[cards[2]["card_id"]]
+    assert "left the meeting out" in r["note"] and "2 more changes" in r["note"]
+    assert db.pitch_draft(lid)[0]["intro"] == d["intro"]                                  # saved
+
+    monkeypatch.setattr(llm, "chat", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("gateway down")))
+    r = client.post(f"/api/pitch/{lid}/change", json={"draft": d, "instruction": "shorter"}).json()
+    assert not r["ok"] and "Nothing changed" in r["error"]
+
+
 def pitch_problems(p):
     from pitch import build
     return build.validate(p)
@@ -254,3 +333,46 @@ def test_reset_clears_leads_keeps_seeded_signals():
     assert db.leads() == [] and db.entries(lid) == []
     assert seeded and sum(1 for s in db.signals() if s["demo"] == 2) == seeded
     assert all(s["demo"] == 2 for s in db.signals())
+
+
+def test_new_italian_draft_has_italian_fixed_words():
+    from app import pitchgen
+    from pitch.locales import tr
+    d = pitchgen.new_draft({"id": "x", "title": "T", "lang": "it", "profile": {"name": "Acme"}}, [], [])
+    assert [s["title"] for s in d["sections"]] == ["Copertina", "Perché Berna per Lei", "Partner di ricerca",
+                                                   "Strutture, finanziamenti e servizi", "Come iniziare", "Fonti"]
+    assert d["how"] == tr("it", pitchgen.HOW) != pitchgen.HOW and d["title"] == "Berna per Acme" and d["lang"] == "it"
+    assert d["visit"][0]["what"].startswith("Accoglienza presso")
+    cards = [{"entity_id": "unit:a", "type": "person", "name": "P", "unit": "A"}]
+    assert pitchgen.visit_day(cards, "it")[1]["what"] == "Gruppo di ricerca, A"
+    old = {"sections": [], "cards": [], "lang": "it"}
+    assert pitchgen.upgrade(old)["how"] == d["how"]
+
+
+def test_italian_pitch_page_and_stub_pdf(monkeypatch, tmp_path):
+    from app import main, pitchgen
+    from pypdf import PdfReader
+    monkeypatch.setattr(pitchgen, "_llm_cards", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("no gateway in tests")))
+    lid = db.create_lead("Italian lead", origin="S-GE")
+    client.post(f"/leads/{lid}/brief", data={"mode": "keywords", "keywords": "type 1 diabetes exercise study", "lang": "it"},
+                follow_redirects=False)
+    assert db.lead(lid)["lang"] == "it"
+    assert 'value="it"' in client.get(f"/leads/{lid}/brief?source=1&mode=keywords").text   # the Brief offers IT
+    main._search_job(lid, None)
+    n = db.needs(lid)[0]
+    m = n["result"]["results"][0]
+    client.post("/api/decide", json={"lead": lid, "need": n["id"], "entity": m["entity_id"], "decision": "accept"})
+    r = client.get(f"/leads/{lid}/pitch")
+    assert r.status_code == 200 and '<html lang="en">' in r.text           # the interface stays English
+    assert '"Sources": "Fonti"' in r.text and '"Group at {unit}": "Gruppo di ricerca, {unit}"' in r.text   # the editor's doc catalog
+    client.post(f"/api/pitch/{lid}/build")   # the page opens first, then asks for its draft
+    draft, _ = db.pitch_draft(lid)
+    assert draft["lang"] == "it" and [s["title"] for s in draft["sections"]][1] == "Perché Berna per Lei"
+    p = pitchgen.to_contract(draft, db.lead(lid), db.needs(lid))
+    assert p["lang"] == "it" and p["how"].startswith("Nulla è ancora organizzato")
+    p["cards"] = [c for c in p["cards"] if not stubs.BANNED.search(c["text"])]   # the stub rejects "Innovation Park" names
+    from pitch.build import _patch_macos_dlopen
+    _patch_macos_dlopen()   # WeasyPrint finds Homebrew's Pango on macOS
+    out = stubs.build_pdf(p, "clean", str(tmp_path / "stub.pdf"))
+    txt = " ".join(" ".join((pg.extract_text() or "").split()) for pg in PdfReader(out).pages)
+    assert "Fonti" in txt and "Preparato per" in txt

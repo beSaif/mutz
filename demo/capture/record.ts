@@ -226,8 +226,15 @@ async function main() {
   await hold(1200)
   await click(page, page.getByText('Diabetes Center Berne').first())
   await hold(1500)
-  await point(page, page.getByText('Source · quoted on').first())
+  await point(page, page.locator('#detail .qt').first())
   await hold(2200)
+  // the knowledge graph around the match: who leads it, colleagues, projects
+  const graph = page.locator('#detail h3', { hasText: /Connected to|Works with/ })
+  if (await graph.count()) {
+    await reveal(graph, 'start', 1200)
+    await point(page, page.locator('#detail dl.sd').last())
+    await hold(2600)
+  }
   await wrap()
 
   // off camera: the map's hover handlers make the cursor crawl, so go to the pitch here and cut to it
@@ -264,8 +271,8 @@ async function main() {
   // 10. export ------------------------------------------------------------------------------------
   await shoot(page, 'export', 'Officer')
   await hold(1000)
-  await click(page, page.getByRole('button', { name: 'Export and mark as sent' }))
-  await page.waitForURL('**done=**')
+  await click(page, page.getByRole('button', { name: 'Export', exact: true }))
+  await page.waitForURL('**/after**') // the click also downloads the clean PDF, which the context accepts
   await hold(1600)
   await wrap(0.4)
 

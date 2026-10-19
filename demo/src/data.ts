@@ -12,11 +12,18 @@ import { C } from './theme'
 
 export const VIDEO = 'rec/screen.mp4'
 
+// --- opening splash (pnpm intro) --------------------------------------------------------------
+export const INTRO_VIDEO = 'rec/intro.mp4'
+export const LOGO = 'rec/logo.png'
+/** The splash runs 5.8 s, holds on the logo, then fades into the walkthrough, which starts at INTRO. */
+export const INTRO_LEN = 5.8
+export const INTRO = INTRO_LEN + 1.2
+export const INTRO_FADE = 0.5
+
 /** Where the footage sits in the frame; the strip below it carries the tag and subtitles. */
 export const SCREEN = { x: 96, y: 14, w: 1728, h: 972 }
 
-// --- end card ---------------------------------------------------------------------------------
-export const TITLE = 'mutz'
+// --- end card: the splash's logo (title and tag are in it), then these ---------------------------
 export const TAGLINE = 'From a company’s one pager to the right experts in Bern.'
 export const CREDIT = 'Hack Apertus Liebefeld ’26 · Bern Economic Development Agency'
 
@@ -63,10 +70,12 @@ NARRATION.forEach((l, i) => {
   if (prev && prev.at + prev.seconds > l.at) console.warn(`line ${l.id} starts ${(prev.at + prev.seconds - l.at).toFixed(2)} s before ${prev.id} ends`)
 })
 
-/** The footage holds its last frame until the end card, which follows the last line after a breath. */
+/** The footage holds its last frame until the end card, which follows the last line after a breath. Both are walkthrough time. */
 const lastEnd = NARRATION.reduce((a, l) => Math.max(a, l.at + l.seconds), VIDEO_END)
 export const CARD_AT = lastEnd + 1.5
-export const TOTAL = CARD_AT + 4.5
+export const CARD_LEN = 5.5
+/** Length of the whole video: the splash, then the walkthrough and its end card. */
+export const TOTAL = INTRO + CARD_AT + CARD_LEN
 
 // --- camera -----------------------------------------------------------------------------------
 /**

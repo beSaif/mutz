@@ -10,9 +10,14 @@ CLI:
     python -m pitch.build fixture.json --check        (validate only)
 
 Optional pitch and card fields understood on top of the contract:
-    pitch["lang"]                   "en" (default), "de", "fr": sets hyphenation
+    pitch["lang"]                   "en" (default), "de", "fr", "it": the document's language, for its fixed
+                                    words (pitch/locales), dates and hyphenation
     pitch["visit_day"]              [{"time", "topic", "with"}], a draft programme
     pitch["override_review_gate"]   true lets the clean PDF out with unchecked cards
+    pitch["headline"]               one line under the title on the cover
+    pitch["needs"]                  [{"id", "label", "text", "priority"}], the company's plans: the PDF opens
+                                    with each plan and what Bern has for it
+    company["city"|"product"|"sector"]   shown on the cover
     card["included"]                false hides the card from export and validation
     card["checked"]                 false blocks the clean PDF (review gate)
     card["status"]                  "verified" | "edited" | "needs_check" (else derived)
@@ -20,6 +25,9 @@ Optional pitch and card fields understood on top of the contract:
     card["section"]                 "why" | "matches" | "infrastructure" (else from type)
     card["person"]                  name of a group head; hidden unless show_person_name
     card["notes"]                   officer notes, Review PDF only
+    card["need_id"], card["need"], card["need_label"]   the plan the card answers; cards are grouped by it
+    card["title"]                   a why card's reason in a few words
+    card["nearby"]                  true: a place around Bern for the company's sector, not tied to one plan
     source["title"], source["fetched_at"]   shown in the evidence appendix
 """
 from __future__ import annotations
@@ -29,9 +37,12 @@ import json
 import os
 import re
 import sys
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 from urllib.parse import quote, urlsplit
+
+from pitch import locales
+from pitch.locales import tr
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = Path(__file__).resolve().parent / "templates"
@@ -186,9 +197,12 @@ def _name_tokens(name: str) -> list[str]:
 
 def _prose_fields(pitch) -> list[tuple[str, str, int | None]]:
     """(where, text, card index) for every piece of written copy that lands in the PDF."""
-    out = [("Title", pitch.get("title") or "", None), ("Intro", pitch.get("intro") or "", None)]
+    out = [("Title", pitch.get("title") or "", None), ("Headline", pitch.get("headline") or "", None),
+           ("Intro", pitch.get("intro") or "", None)]
     for i, c in _included(pitch):
         out.append((f"{_card_label(i, c)} text", c.get("text") or "", i))
+        if c.get("title"):
+            out.append((f"{_card_label(i, c)} title", c["title"], i))
     if pitch.get("how"):
         out.append(("How to start", pitch.get("how") or "", None))
     for j, v in enumerate(pitch.get("visit_day") or []):
@@ -273,9 +287,11 @@ def validate_detailed(pitch, mode: str | None = None) -> list[dict]:
         if (c.get("person") or "").strip():
             hidden.append((i, c["person"].strip()))
     hidden = [(i, n) for i, n in hidden if n not in shown_names]
-    checks = [("Title", pitch.get("title") or "", None), ("Intro", pitch.get("intro") or "", None)]
+    checks = [("Title", pitch.get("title") or "", None), ("Headline", pitch.get("headline") or "", None),
+              ("Intro", pitch.get("intro") or "", None)]
     for i, c in cards:
         checks.append((f"{_card_label(i, c)} text", c.get("text") or "", i))
+        checks.append((f"{_card_label(i, c)} title", c.get("title") or "", i))
         checks.append((f"{_card_label(i, c)} unit", c.get("unit") or "", i))
         if c.get("type") != "person":
             checks.append((f"{_card_label(i, c)} name", c.get("name") or "", i))
@@ -323,17 +339,8 @@ def validate(pitch, mode: str | None = None) -> list[str]:
 # Rendering
 # --------------------------------------------------------------------------
 
-def _fmt_date(value) -> str:
-    if not value:
-        return ""
-    if isinstance(value, (date, datetime)):
-        d = value
-    else:
-        try:
-            d = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-        except ValueError:
-            return str(value)
-    return f"{d.day} {d.strftime('%B %Y')}"
+def _fmt_date(value, lang="en") -> str:
+    return locales.fmt_date(value, lang)
 
 
 def _host(url: str) -> str:
@@ -345,6 +352,10 @@ def _strip_markers(text: str) -> str:
     return re.sub(r"\s*\[\d+\]", "", text or "").strip()
 
 
+def _norm_text(text) -> str:
+    return " ".join(re.sub(r"\[\[?\d+\]?\]", " ", text or "").lower().split())
+
+
 def _section_of(card: dict) -> str:
     sec = card.get("section")
     if sec in dict(SECTIONS):
@@ -353,6 +364,7 @@ def _section_of(card: dict) -> str:
 
 
 def _context(pitch: dict, mode: str) -> dict:
+    lang = locales.norm(pitch.get("lang"))
     sources: list[dict] = []
     index: dict[tuple, int] = {}
     sections = []
@@ -363,25 +375,32 @@ def _context(pitch: dict, mode: str) -> dict:
     titles = {k: sec["title"] for k, sec in given if sec.get("title")}
     order = [k for k, _ in given if k in BLOCKS]
     order += [k for k in BLOCKS if k not in order]
+    plans = [n for n in pitch.get("needs") or [] if isinstance(n, dict) and (n.get("text") or "").strip()]
+    plan_pos = {n.get("id"): k for k, n in enumerate(plans)}
+    # a why card that only repeats a match card's words adds nothing: the plans table makes that point
+    said = {_norm_text(c.get("text")) for _, c in _included(pitch) if _section_of(c) != "why"}
     for key, title in SECTIONS:
         items = []
-        for i, c in _included(pitch):
-            if _section_of(c) != key:
-                continue
+        chosen = [(i, c) for i, c in _included(pitch) if _section_of(c) == key]
+        if key == "why":
+            chosen = [(i, c) for i, c in chosen if _norm_text(c.get("text")) not in said]
+        if key != "why":  # grouped by the plan each card answers, in the company's order
+            chosen.sort(key=lambda ic: plan_pos.get(ic[1].get("need_id"), len(plans)))
+        for i, c in chosen:
             claim_no += 1
             claim_id = f"claim-{claim_no}"
             refs = []
             for s in c.get("sources") or []:
                 url = s["url"].strip()
                 q = " ".join((s.get("quote") or "").split())
-                k = (url, q)
+                k = (url, q) if mode == "review" else (url, "")  # the clean PDF lists each page once
                 if k not in index:
                     index[k] = len(sources) + 1
                     sources.append({
                         "n": index[k], "url": url, "quote": q, "host": _host(url),
                         "deep_link": s.get("deep_link") or deep_link(url, q),
                         "title": s.get("title") or "",
-                        "fetched": _fmt_date(s.get("fetched_at")),
+                        "fetched": _fmt_date(s.get("fetched_at"), lang),
                         "claim": claim_id, "edited": bool(c.get("edited")),
                     })
                 if index[k] not in refs:
@@ -394,37 +413,70 @@ def _context(pitch: dict, mode: str) -> dict:
             ptype = (c.get("type") or "").lower()
             show = bool(c.get("show_person_name"))
             if ptype == "person" and not show:
-                heading = c.get("unit") or "Research group"
+                heading = c.get("unit") or tr(lang, "Research group")
                 sub = ""
+                ptype = "group"  # the name is hidden, so the card is about the group
             else:
                 heading = c.get("name") or c.get("unit") or ""
                 sub = c.get("unit") if c.get("unit") and c.get("unit") != heading else ""
+            need_id = c.get("need_id")
+            plan = plans[plan_pos[need_id]] if need_id in plan_pos else {}
             items.append({
-                "id": claim_id, "heading": heading, "sub": sub,
+                "id": claim_id, "heading": heading, "sub": sub, "title": c.get("title") or "",
+                "need_key": need_id or (c.get("need") or "") or ("nearby" if c.get("nearby") else ""),
+                "nearby": bool(c.get("nearby")),
+                "need_label": plan.get("label") or c.get("need_label") or "",
+                "need": plan.get("text") or c.get("need") or "",
                 "person": c.get("person") if (show and c.get("person")) else "",
-                "kind": TYPE_LABELS.get(ptype, ""),
+                "kind": tr(lang, TYPE_LABELS.get(ptype, "")),
                 "text": _strip_markers(c.get("text") or ""), "refs": refs,
-                "status": status, "status_label": STATUS_LABELS[status],
+                "status": status, "status_label": tr(lang, STATUS_LABELS[status]),
                 "notes": c.get("notes") or "",
             })
+        if mode == "clean" and key != "why":  # cards that say the same about the same group go out once
+            merged = []
+            for it in items:
+                twin = next((m for m in merged if m["heading"] == it["heading"]
+                             and _norm_text(m["text"]) == _norm_text(it["text"])), None)
+                if twin:
+                    twin["refs"] += [n for n in it["refs"] if n not in twin["refs"]]
+                else:
+                    merged.append(it)
+            items = merged
         if items:
-            sections.append({"key": key, "title": titles.get(key) or title, "part": PARTS[key], "cards": items})
+            sections.append({"key": key, "title": titles.get(key) or tr(lang, title), "part": PARTS[key], "cards": items})
     for s in sources:  # mark sources whose claim was edited
         s["status"] = "edited" if s["edited"] else ("verified" if s["quote"] else "needs_check")
+
+    # the company's plans, each with what this document offers for it
+    offers = [it for sec in sections if sec["key"] != "why" for it in sec["cards"]]
+    plan_rows = []
+    for n in plans:
+        names = {}
+        for it in offers:
+            if it["need_key"] == n.get("id"):
+                names.setdefault(it["heading"], it["id"])
+        plan_rows.append({"label": n.get("label") or "", "text": n.get("text") or "",
+                          "priority": str(n.get("priority") or ""),
+                          "offers": [{"name": k, "claim": v} for k, v in names.items()]})
+    plan_rows.sort(key=lambda r: not r["offers"])  # answered plans first, then the ones the agency is still on
 
     logo_uri = LOGO_PATH.as_uri() if LOGO_PATH.is_file() else None
     company = pitch.get("company") or {}
     return {
-        "mode": mode, "review": mode == "review", "lang": pitch.get("lang") or "en",
+        "mode": mode, "review": mode == "review", "lang": lang,
         "title": pitch.get("title") or "", "intro": pitch.get("intro") or "",
+        "headline": pitch.get("headline") or "", "plans": plan_rows,
+        "n_answered": sum(1 for r in plan_rows if r["offers"]),
+        "n_offers": len({it["heading"] for it in offers}),
         "written": bool(pitch.get("written")), "company": company, "officer": pitch.get("officer") or {},
-        "date": _fmt_date(pitch.get("created_at")) or _fmt_date(date.today()),
+        "date": _fmt_date(pitch.get("created_at"), lang) or _fmt_date(date.today(), lang),
         "case_id": pitch.get("case_id") or "",
         "sections": sections, "sources": sources, "how": pitch.get("how") or "",
         "blocks": [k for k in order if k == "visit" or any(sec["key"] == k for sec in sections)],
-        "visit_title": titles.get("visit") or VISIT_TITLE,
+        "visit_title": titles.get("visit") or tr(lang, VISIT_TITLE),
         "visit_day": [v for v in pitch.get("visit_day") or [] if isinstance(v, dict)],
-        "logo_uri": logo_uri, "agency": AGENCY_NAME,
+        "logo_uri": logo_uri, "agency": tr(lang, AGENCY_NAME),
         "n_cards": sum(len(s["cards"]) for s in sections),
     }
 
@@ -432,9 +484,20 @@ def _context(pitch: dict, mode: str) -> dict:
 def render_html(pitch: dict, mode: str = "review") -> str:
     """The HTML that goes into WeasyPrint. Does not validate."""
     from jinja2 import Environment, FileSystemLoader, select_autoescape
+    from markupsafe import Markup, escape
     env = Environment(loader=FileSystemLoader(str(TEMPLATES)),
                       autoescape=select_autoescape(["html", "j2"]))
-    return env.get_template("pitch.html.j2").render(**_context(pitch, mode))
+    ctx = _context(pitch, mode)
+    lang = ctx["lang"]
+
+    def th(s, **kw):  # a translation that carries markup: the inserted values are escaped here
+        return Markup(tr(lang, s, **{k: escape(v) for k, v in kw.items()}))
+
+    def css(s, **kw):  # a translated CSS string literal, for content: and bookmark-label:
+        return Markup('"' + tr(lang, s, **kw).replace("\\", "\\\\").replace('"', '\\"').replace("<", "\\3c ") + '"')
+
+    env.globals.update(t=lambda s, **kw: tr(lang, s, **kw), th=th, css=css)
+    return env.get_template("pitch.html.j2").render(**ctx)
 
 
 def _patch_macos_dlopen():

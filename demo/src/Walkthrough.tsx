@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import { AbsoluteFill, Audio, Freeze, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from 'remotion'
+import { AbsoluteFill, Audio, Freeze, Img, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from 'remotion'
 import { Camera, type Key } from './Camera'
 import { C, font } from './theme'
-import { CAMERA, CARD_AT, SUBTITLES, CREDIT, CUTS, NARRATION, ROLE_COLORS, SCREEN, TAGLINE, TITLE, VIDEO, VIDEO_END } from './data'
+import { CAMERA, CARD_AT, CARD_LEN, CREDIT, CUTS, INTRO, INTRO_FADE, INTRO_LEN, INTRO_VIDEO, LOGO, NARRATION, ROLE_COLORS, SCREEN, SUBTITLES, TAGLINE, VIDEO, VIDEO_END } from './data'
 import { cues } from './subtitles'
 
 const CUES = cues(NARRATION)
@@ -84,18 +84,41 @@ function Subtitles() {
   )
 }
 
+/**
+ * The splash's last frame, a little higher, with the tagline and credit under it. The logo PNG is the
+ * 1000 px splash stage at 2×; its lockup spans y 272–744 of that stage (with the tag line), centred on 496.
+ */
 function EndCard() {
   const t = useT()
   const a = interpolate(t, [0, 0.7], [0, 1], clamp)
-  const dy = interpolate(t, [0.3, 1.1], [16, 0], clamp)
-  const b = interpolate(t, [0.3, 1.1], [0, 1], clamp)
+  const rise = (from: number) => ({
+    opacity: interpolate(t, [from, from + 0.8], [0, 1], clamp),
+    transform: `translateY(${interpolate(t, [from, from + 0.8], [16, 0], clamp)}px)`,
+  })
+  const top = 400 - 496
   return (
-    <AbsoluteFill style={{ background: C.paper, opacity: a, alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ textAlign: 'center', opacity: b, transform: `translateY(${dy}px)`, marginTop: -80 }}>
-        <div style={{ fontFamily: font.display, fontWeight: 700, fontSize: 112, color: C.ink, lineHeight: 1, letterSpacing: -2 }}>{TITLE}</div>
-        <div style={{ fontFamily: font.display, fontSize: 44, color: C.body, marginTop: 26 }}>{TAGLINE}</div>
-        <div style={{ fontFamily: font.mono, fontSize: 22, color: C.muted, marginTop: 44, letterSpacing: 1.2 }}>{CREDIT}</div>
+    <AbsoluteFill style={{ background: C.paper, opacity: a }}>
+      <div style={{ position: 'absolute', left: 460, top, width: 1000, height: 1000, ...rise(0.3) }}>
+        <Img src={staticFile(LOGO)} style={{ width: 1000, height: 1000 }} />
       </div>
+      <div style={{ position: 'absolute', left: 0, right: 0, top: top + 744 + 64, textAlign: 'center', ...rise(0.9) }}>
+        <div style={{ fontFamily: font.display, fontSize: 44, color: C.body }}>{TAGLINE}</div>
+        <div style={{ fontFamily: font.mono, fontSize: 22, color: C.muted, marginTop: 40, letterSpacing: 1.2 }}>{CREDIT}</div>
+      </div>
+    </AbsoluteFill>
+  )
+}
+
+/** The opening splash, held on its logo, then faded to paper just before the walkthrough fades in. */
+function Intro() {
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
+  const t = frame / fps
+  const last = Math.floor(INTRO_LEN * fps) - 1
+  const video = <OffthreadVideo src={staticFile(INTRO_VIDEO)} muted style={{ width: 1920, height: 1080 }} />
+  return (
+    <AbsoluteFill style={{ background: C.paper, opacity: interpolate(t, [INTRO - INTRO_FADE, INTRO], [1, 0], clamp) }}>
+      {frame >= last ? <Freeze frame={last}>{video}</Freeze> : video}
     </AbsoluteFill>
   )
 }
@@ -113,7 +136,7 @@ function Footage() {
 const screenKeys = (keys: Key[]) => keys.map((k) => ({ ...k, s: k.s * (SCREEN.w / 1920) }))
 const screenStyle = { left: SCREEN.x, top: SCREEN.y, borderRadius: 10, boxShadow: '0 0 0 1px rgba(27,27,31,0.10), 0 10px 30px rgba(27,27,31,0.10)' }
 
-export function Walkthrough() {
+function Main() {
   const { fps } = useVideoConfig()
   const f = (s: number) => Math.round(s * fps)
   return (
@@ -139,6 +162,28 @@ export function Walkthrough() {
           <Audio src={staticFile(`rec/voice/${l.id}.mp3`)} />
         </Sequence>
       ))}
+    </AbsoluteFill>
+  )
+}
+
+function FadeIn({ children }: { children: ReactNode }) {
+  const t = useT()
+  return <AbsoluteFill style={{ opacity: interpolate(t, [0, INTRO_FADE], [0, 1], clamp) }}>{children}</AbsoluteFill>
+}
+
+export function Walkthrough() {
+  const { fps } = useVideoConfig()
+  const f = (s: number) => Math.round(s * fps)
+  return (
+    <AbsoluteFill style={{ background: C.paper }}>
+      <Sequence from={f(INTRO)} durationInFrames={f(CARD_AT + CARD_LEN)} name="walkthrough">
+        <FadeIn>
+          <Main />
+        </FadeIn>
+      </Sequence>
+      <Sequence durationInFrames={f(INTRO)} name="intro">
+        <Intro />
+      </Sequence>
     </AbsoluteFill>
   )
 }
