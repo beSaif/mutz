@@ -362,7 +362,7 @@ def _rule_answer(turn, message, sel):
         q = sel.get("name") or message
     r = turn.search_experts(q)
     if not r["matches"]:
-        return ("No match in Bern (Kei Hung im Topf). I searched " + (r.get("archives_searched") or "our sources") +
+        return ("No match in Bern (Kei Honig im Topf). I searched " + (r.get("archives_searched") or "our sources") +
                 " and found no page with real evidence. Inselspital and BFH are not indexed yet, so check there before dropping this.")
     lines = []
     for x in r["matches"][:2]:

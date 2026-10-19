@@ -76,7 +76,7 @@ def test_demo_path_on_stubs(monkeypatch):
     assert all(n["searched_at"] for n in ns)
     assert ns[1]["coverage"] == "none"                 # honest no match
     page = client.get(f"/leads/{lid}/matches?need={ns[1]['id']}").text
-    assert "Kei Hung im Topf" in page and "Searched" in page
+    assert "Kei Honig im Topf" in page and "Searched" in page
     res = ns[0]["result"]["results"]
     assert res
     for m in res[:2]:
