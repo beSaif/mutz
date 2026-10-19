@@ -90,6 +90,18 @@ Recall@10 only says whether the groups we picked come back in the top 10, not wh
 find them useful. The full numbers, by source and by query type, with synonym parity and exposure, are
 in [docs/eval.md](docs/eval.md) and on the Evaluation screen.
 
+## Try it
+
+The live demo is at https://mutz-117983845448.europe-west6.run.app (login `mutz` / `bearlikeshoney`).
+Or run it yourself with one command; the image has the crawled data and the search models inside:
+
+```bash
+docker run -p 8000:8000 -e KEERA_API_KEY=... ghcr.io/besaif/mutz
+```
+
+Then open http://localhost:8000. The image is about 2.5 GB and runs on Intel and Apple Silicon.
+`scripts/release_image.sh` rebuilds and pushes it.
+
 ## Run it locally
 
 You need Python 3.12 and a key for the Keera gateway (Apertus on CSCS).
