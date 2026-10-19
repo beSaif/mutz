@@ -1,0 +1,74 @@
+[
+  {
+    "name": "leads",
+    "who": "Officer",
+    "from": 0,
+    "until": 12.933
+  },
+  {
+    "name": "paste",
+    "who": "Officer",
+    "from": 12.933,
+    "until": 19.5
+  },
+  {
+    "name": "needs",
+    "who": "Officer",
+    "from": 19.5,
+    "until": 35.933
+  },
+  {
+    "name": "matches",
+    "who": "Officer",
+    "from": 35.933,
+    "until": 53
+  },
+  {
+    "name": "mutz",
+    "who": "Officer",
+    "from": 53,
+    "until": 58.433
+  },
+  {
+    "name": "mutzreply",
+    "who": "Officer",
+    "from": 58.433,
+    "until": 65.633
+  },
+  {
+    "name": "nomatch",
+    "who": "Officer",
+    "from": 65.633,
+    "until": 75.267
+  },
+  {
+    "name": "accept",
+    "who": "Officer",
+    "from": 75.267,
+    "until": 89.233
+  },
+  {
+    "name": "map",
+    "who": "Officer",
+    "from": 89.233,
+    "until": 98.2
+  },
+  {
+    "name": "pitch",
+    "who": "Officer",
+    "from": 98.2,
+    "until": 110.4
+  },
+  {
+    "name": "export",
+    "who": "Officer",
+    "from": 110.4,
+    "until": 114.433
+  },
+  {
+    "name": "pdf",
+    "who": "Company",
+    "from": 114.433,
+    "until": 124.633
+  }
+]

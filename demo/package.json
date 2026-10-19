@@ -1,0 +1,28 @@
+{
+  "name": "demo-video",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "record": "tsx capture/record.ts",
+    "voice": "tsx voice/tts.ts",
+    "studio": "remotion studio",
+    "render": "remotion render Walkthrough out/walkthrough.mp4 --codec h264 --crf 20 && tsx voice/srt.ts"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.529",
+    "@remotion/google-fonts": "4.0.529",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remotion": "4.0.529"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "dotenv": "17.2.3",
+    "playwright": "1.63.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  }
+}
