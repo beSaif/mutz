@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Bärner Mutz{% endblock %} · Bern</title>
-<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="{{ asset('app.css') }}">
 <script>try{if(/[?&]intro=1/.test(location.search)||!localStorage.getItem("mutz-intro"))document.documentElement.classList.add("intro")}catch(e){}</script>
 </head>
-<body{% if (mutz or {}).corner == 'left' %} class="mzl"{% endif %}>
+{% set focus = self.casebar()|trim %}
+<body class="{{ 'mzl' if (mutz or {}).corner == 'left' }}{{ ' focus' if focus }}">
 {% set nav = active_page|default('leads') %}{% set sub = active_sub|default('') %}{% set nc = navc or {} %}
 {% set icons = {
  'plus': '<path d="M5 12h14M12 5v14"/>',
@@ -23,6 +24,7 @@
  'shield': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
  'file': '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
  'search': '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+ 'panel': '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>',
  'buoy': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/>',
 } %}
 {% macro ico(name, s=18) %}<svg class="ico" viewBox="0 0 24 24" width="{{ s }}" height="{{ s }}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ icons[name]|safe }}</svg>{% endmacro %}
@@ -39,10 +41,11 @@
 <hr>
 <a class="rl-ws" href="/" title="Bern Economic Development Agency">BE</a>
 <a class="rl-t on" href="/" title="Leads and insights" aria-current="true">{{ ico('grid', 20) }}</a>
+{% if focus %}<button type="button" class="rl-t" id="sbtoggle" title="Show the menu" aria-label="Show the menu" aria-expanded="false" onclick="var o=document.body.classList.toggle('sbo');this.setAttribute('aria-expanded',o);this.title=this.ariaLabel=o?'Hide the menu':'Show the menu'">{{ ico('panel', 20) }}</button>{% endif %}
 <div class="rl-ft">
 <a class="rl-t" href="/" title="Search leads" onclick="var s=document.querySelector('.ab .srch input');if(s){s.focus();return false}">{{ ico('search', 20) }}</a>
 <a class="rl-t" href="/states" title="States and help">{{ ico('buoy', 20) }}</a>
-<span class="rl-av" title="[Officer name]">ON</span>
+{% if me %}{{ ui.who(me, officers) }}{% endif %}
 </div>
 </nav>
 <aside class="sb" aria-label="Main">
@@ -51,7 +54,7 @@
 <nav class="sbn" aria-label="Main">
 {% call grp('leads', 'Leads', '/', [('all','All leads','/',nc.all,'inbox'),('drafts','Drafts','/?f=drafts',nc.drafts,'pen'),('closed','Sent and closed','/?f=closed',nc.closed,'send')]) %}{% if lead %}<a class="si on cur" href="/leads/{{ lead.id }}" aria-current="page" lang="de">{{ ico('file', 16) }}<span>{{ lead.title }}</span></a>{% endif %}{% endcall %}
 {{ grp('insights', 'Insights', '/insights', [('gaps','Gap report','/insights',none,'chart'),('capability','Capability map','/insights/capability',none,'grid'),('pipeline','Pipeline','/pipeline',none,'gauge')]) }}
-{{ grp('archives', 'Archives', '/archives', [('sources','Sources','/archives',nc.archives,'db'),('add','Add an archive','/archives/add',none,'folder')]) }}
+{{ grp('archives', 'Sources', '/archives', [('sources','All sources','/archives',nc.archives,'db'),('add','Add a source','/archives/add',none,'folder')]) }}
 {{ grp('eval', 'Evaluation', '/eval', [('quality','Search quality','/eval',none,'target'),('checks','Checks and cost','/eval/checks',none,'shield')]) }}
 </nav>
 <div class="sbf">
@@ -89,8 +92,8 @@
 </div>
 {% include "_splash.html" %}
 <template id="tpl-search">{{ ui.mutz("search", 64, 54) }}</template>
-<script src="/static/app.js"></script>
-<script src="/static/intro.js"></script>
+<script src="{{ asset('app.js') }}"></script>
+<script src="{{ asset('intro.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

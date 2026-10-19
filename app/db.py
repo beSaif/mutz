@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import sqlite3
 import threading
 import uuid
@@ -62,9 +63,16 @@ def conn():
     return c
 
 
+# columns added after the first schema; older app.sqlite files get them on start
+MIGRATIONS = [("lead", "owner", "TEXT"), ("decision", "who", "TEXT"), ("entry", "who", "TEXT")]
+
+
 def init():
     with _lock, conn() as c:
         c.executescript(SCHEMA)
+        for t, col, typ in MIGRATIONS:
+            if col not in {r[1] for r in c.execute(f"PRAGMA table_info({t})")}:
+                c.execute(f"ALTER TABLE {t} ADD COLUMN {col} {typ}")
 
 
 def q(sql, args=()):
@@ -101,12 +109,13 @@ def L(s, default=None):
 
 # ---------------------------------------------------------------- leads
 
-def create_lead(title, input_text="", origin="S-GE", website="", sector="", summary="", demo=0, stage="new", input_kind="text"):
+def create_lead(title, input_text="", origin="S-GE", website="", sector="", summary="", demo=0, stage="new", input_kind="text",
+                owner=None):
     lid = new_id()
-    x("INSERT INTO lead(id,title,company,summary,sector,origin,stage,input_kind,input_text,website,demo,created_at,updated_at)"
-      " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-      (lid, title, "", summary, sector, origin, stage, input_kind, input_text, website, demo, now(), now()))
-    add_entry(lid, "one_pager" if input_text else "note", input_text or "Lead created", confidential=1)
+    x("INSERT INTO lead(id,title,company,summary,sector,origin,stage,input_kind,input_text,website,demo,owner,created_at,updated_at)"
+      " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      (lid, title, "", summary, sector, origin, stage, input_kind, input_text, website, demo, owner, now(), now()))
+    add_entry(lid, "one_pager" if input_text else "note", input_text or "Lead created", confidential=1, who=owner)
     return lid
 
 
@@ -136,6 +145,43 @@ def delete_lead(lid):
         x(f"DELETE FROM {t} WHERE lead_id=?", (lid,))
     x("DELETE FROM mutz_thread WHERE key=?", (lid,))
     x("DELETE FROM lead WHERE id=?", (lid,))
+
+
+def reset():
+    """Every lead and what hangs off it, for a clean demo. Officers, caches and the seeded gap report rows stay."""
+    for t in ("need", "decision", "pitch", "pitch_version", "entry", "outreach", "mutz_thread", "lead"):
+        x(f"DELETE FROM {t}")
+    x("DELETE FROM lead_signal WHERE demo != 2")
+
+
+# ---------------------------------------------------------------- officers (no passwords: a cookie says who is working)
+
+OFFICERS = [{"id": "saif", "name": "Saif", "focus": "Life sciences and medtech"},
+            {"id": "jumainah", "name": "Jumainah", "focus": "Cleantech and industry"}]
+
+
+def officers():
+    return kv_get("officers") or OFFICERS
+
+
+def officer(oid):
+    return next((o for o in officers() if o["id"] == oid), None)
+
+
+def add_officer(name, focus=""):
+    base = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "officer"
+    have = {o["id"] for o in officers()}
+    oid, i = base, 2
+    while oid in have:
+        oid, i = f"{base}-{i}", i + 1
+    kv_set("officers", officers() + [{"id": oid, "name": name, "focus": focus}])
+    return oid
+
+
+def owner_name(l):
+    """The lead owner's name for pitches and emails; the placeholder if the lead has none."""
+    o = officer((l or {}).get("owner"))
+    return o["name"] if o else "[Officer name]"
 
 
 # ---------------------------------------------------------------- needs
@@ -184,12 +230,12 @@ def update_need(nid, **kw):
 
 # ---------------------------------------------------------------- decisions
 
-def decide(lid, need_id, entity_id, decision, match=None, added_by="officer"):
+def decide(lid, need_id, entity_id, decision, match=None, added_by="officer", who=None):
     if decision is None:
         x("DELETE FROM decision WHERE lead_id=? AND need_id=? AND entity_id=?", (lid, need_id, entity_id))
         return
-    x("INSERT OR REPLACE INTO decision(lead_id,need_id,entity_id,decision,added_by,match,at) VALUES(?,?,?,?,?,?,?)",
-      (lid, need_id, entity_id, decision, added_by, J(match) if match else None, now()))
+    x("INSERT OR REPLACE INTO decision(lead_id,need_id,entity_id,decision,added_by,match,who,at) VALUES(?,?,?,?,?,?,?,?)",
+      (lid, need_id, entity_id, decision, added_by, J(match) if match else None, who, now()))
 
 
 def decisions(lid):
@@ -231,9 +277,9 @@ def add_version(lid, pitch, built_from):
 
 # ---------------------------------------------------------------- timeline, outreach, mutz
 
-def add_entry(lid, kind, text, confidential=1, shareable=0, added_by="officer"):
-    return x("INSERT INTO entry(lead_id,kind,text,confidential,shareable,added_by,at) VALUES(?,?,?,?,?,?,?)",
-             (lid, kind, text, confidential, shareable, added_by, now()))
+def add_entry(lid, kind, text, confidential=1, shareable=0, added_by="officer", who=None):
+    return x("INSERT INTO entry(lead_id,kind,text,confidential,shareable,added_by,who,at) VALUES(?,?,?,?,?,?,?,?)",
+             (lid, kind, text, confidential, shareable, added_by, who, now()))
 
 
 def entries(lid):

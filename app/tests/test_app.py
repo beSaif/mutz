@@ -137,7 +137,7 @@ def test_matches_sort_filter_and_map_render():
     n = db.needs(lid)[0]
     for q in ("", "&sort=recency&rec=active", "&sort=name&cov=thin&smin=0.25", "&smin=0.75&cov=strong&rec=past"):
         r = client.get(f"/leads/{lid}/matches?need={n['id']}{q}")
-        assert r.status_code == 200 and "How the score is built" in r.text
+        assert r.status_code == 200 and 'id="sortby"' in r.text and 'class="fp"' in r.text
     m = n["result"]["results"][0]
     client.post("/api/decide", json={"lead": lid, "need": n["id"], "entity": m["entity_id"], "decision": "accept"})
     r = client.get(f"/leads/{lid}/map")
@@ -148,7 +148,7 @@ def test_matches_sort_filter_and_map_render():
     assert all(f'data-id="{k}"' in r.text for k in detail)          # every node opens its panel
     mt = next(d for d in detail.values() if d["kind"] == "Match")
     assert mt["needs"] and mt["accepted"] and "facts" in mt and "pages" in mt
-    assert [a for a, _ in mt["profile"]] == ["Evidence", "Role", "Recency", "Type", "Apertus grade"]   # radar axes
+    assert [a for a, _ in mt["profile"]] == ["Evidence", "Role", "Recency", "Type", "AI check"]   # radar axes
     assert all(v is None or 0 <= v <= 1 for _, v in mt["profile"]) and all(p in detail for p in mt["peers"])
     r = client.get(f"/leads/{lid}/pitch")
     assert r.status_code == 200 and f"/leads/{lid}/export" in r.text and "Export and mark as sent" not in r.text
@@ -170,3 +170,83 @@ def test_export_is_its_own_step():
     assert 'aria-current="step">5 Export' in r.text and 'role="meter"' in r.text
     assert db.lead(lid)["step"] == "export"
     assert client.get(f"/leads/{lid}", follow_redirects=False).headers["location"].endswith("/export")
+
+
+def test_officer_switch_owner_mine_and_take_over():
+    c = TestClient(app)
+    c.post("/officer", data={"id": "jumainah"})
+    lid = c.post("/leads/new", data={"title": "Handover lead"}, follow_redirects=False).headers["location"].split("/")[2]
+    assert db.lead(lid)["owner"] == "jumainah"
+    assert "Handover lead" in c.get("/?f=drafts&who=mine").text
+    c.post("/officer", data={"id": "saif"})
+    assert "Handover lead" not in c.get("/?f=drafts&who=mine").text and "Handover lead" in c.get("/?f=drafts").text
+    assert "Assign to me" in c.get(f"/leads/{lid}/brief").text
+    c.post(f"/leads/{lid}/owner")
+    assert db.lead(lid)["owner"] == "saif"
+    assert any("Lead assigned to Saif, was Jumainah" in e["text"] for e in db.entries(lid))
+    assert "Assign to me" not in c.get(f"/leads/{lid}/brief").text
+    assert db.owner_name(db.lead(lid)) == "Saif"
+    assert c.post("/officer", data={"id": "nobody"}).status_code == 400
+
+
+def test_write_the_pitch_turns_cards_into_paragraphs(monkeypatch):
+    lid = db.create_lead("Write lead", origin="S-GE")
+    client.post(f"/leads/{lid}/brief", data={"mode": "keywords", "keywords": "type 1 diabetes exercise study"}, follow_redirects=False)
+    from app import main, pitchgen
+    from common import llm
+    main._search_job(lid, None)
+    n = db.needs(lid)[0]
+    m = n["result"]["results"][0]
+    client.post("/api/decide", json={"lead": lid, "need": n["id"], "entity": m["entity_id"], "decision": "accept"})
+    client.get(f"/leads/{lid}/pitch")
+    draft, _ = db.pitch_draft(lid)
+    mine = next(c for c in draft["cards"] if c["section"] == "matches")
+    mine.update(text="My own words. [1]", edited=True)
+    page = "The study includes a total of 350 women in five countries. All activities take place at home."
+    monkeypatch.setattr(pitchgen, "_passage", lambda url, quote, cap=2500: page)
+
+    def fake(model, messages, **kw):
+        return {"content": "", "tool_calls": [{"name": "write_pitch", "arguments": {
+            "intro": "You plan a trial in Switzerland. This document lists the groups in Bern that work on it.",
+            "cards": [{"id": f"card{k}", "text": "The study includes 350 women in five countries. "
+                       "It won a Nobel prize for the work in Stockholm. All activities take place at home."} for k in range(1, 6)]}}]}
+    monkeypatch.setattr(llm, "chat", fake)
+    r = client.post(f"/api/pitch/{lid}/write", json={"draft": draft}).json()
+    assert not r["ok"] and "Check every card first" in r["error"]          # facts are checked before the pitch is written
+    for c in draft["cards"]:
+        c["checked"] = True
+    r = client.post(f"/api/pitch/{lid}/write", json={"draft": draft}).json()
+    assert r["ok"] and r["draft"]["written_at"]
+    d = r["draft"]
+    assert d["intro"].startswith("You plan")
+    assert next(c for c in d["cards"] if c["card_id"] == mine["card_id"])["text"] == "My own words. [1]"       # officer's words kept
+    w = [c for c in d["cards"] if c["origin"] == "written from quotes"]
+    assert w and all(c["checked"] for c in w)
+    c = w[0]
+    assert "Nobel" not in c["text"] and any("350 women" in s["quote"] for s in c["sources"])
+    assert all(s["quote"] in page for s in c["sources"] if s.get("from_page"))          # new quotes are word for word on the page
+    assert max(int(x) for x in __import__("re").findall(r"\[(\d+)\]", c["text"])) <= len(c["sources"])
+    p = pitchgen.to_contract(d, db.lead(lid))
+    assert p["written"] and not pitch_problems(p)
+
+    monkeypatch.setattr(llm, "chat", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("gateway down")))
+    r = client.post(f"/api/pitch/{lid}/write", json={"draft": d}).json()
+    assert not r["ok"] and "Nothing changed" in r["error"]
+
+
+def pitch_problems(p):
+    from pitch import build
+    return build.validate(p)
+
+
+def test_reset_clears_leads_keeps_seeded_signals():
+    c = TestClient(app)
+    c.post("/insights/seed")
+    seeded = sum(1 for s in db.signals() if s["demo"] == 2)
+    lid = c.post("/leads/new", data={"title": "Reset me"}, follow_redirects=False).headers["location"].split("/")[2]
+    db.add_entry(lid, "note", "x")
+    assert "Reset demo data" in c.get("/").text
+    assert c.post("/leads/reset", follow_redirects=False).status_code == 303
+    assert db.leads() == [] and db.entries(lid) == []
+    assert seeded and sum(1 for s in db.signals() if s["demo"] == 2) == seeded
+    assert all(s["demo"] == 2 for s in db.signals())

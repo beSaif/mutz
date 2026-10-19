@@ -114,7 +114,7 @@
     busy = true;
     addMe(q); input.value = "";
     var wait = document.createElement("div"); wait.className = "m bot"; wait.setAttribute("role", "status");
-    wait.innerHTML = '<span class="w">Bärner Mutz</span><div style="display:flex;gap:10px;align-items:center">' + $("#tpl-search").innerHTML + '<p class="lb">Bear with me… searching the archives.</p></div>';
+    wait.innerHTML = '<span class="w">Bärner Mutz</span><div style="display:flex;gap:10px;align-items:center">' + $("#tpl-search").innerHTML + '<p class="lb">Bear with me… searching the sources.</p></div>';
     msgs.appendChild(wait); msgs.scrollTop = msgs.scrollHeight;
     post("/api/mutz", {key: key, message: q, ctx: Object.assign({page: pageText()}, ctx), selection: selection}).then(function (r) {
       wait.remove(); addBot(r);
@@ -212,6 +212,14 @@
 
   /* ------------------------------------------------------------ Matches */
   window.initMatches = function (lid, searching) {
+    function setAcc(k) {
+      var n = $("#nacc"); if (n) n.textContent = k;
+      var m = $("#mapbtn"), h = $("#maphint"); if (!m) return;
+      m.classList.toggle("off", !k);
+      if (k) { m.removeAttribute("aria-disabled"); m.removeAttribute("tabindex"); } else { m.setAttribute("aria-disabled", "true"); m.setAttribute("tabindex", "-1"); }
+      if (h) h.hidden = !!k;
+    }
+    document.addEventListener("click", function (e) { $$("details.fp[open]").forEach(function (d) { if (!d.contains(e.target)) d.open = false; }); });
     if (searching) {
       var t = setInterval(function () {
         fetch("/api/leads/" + lid + "/status").then(function (r) { return r.json(); }).then(function (d) {
@@ -231,14 +239,13 @@
             box.innerHTML = d === "accept" ? '<span style="font-size:13px;font-weight:700">Accepted</span> <button class="b s" data-decide="">Undo</button>'
               : d === "reject" ? '<span style="font-size:13px;color:#5E5E5E">Rejected</span> <button class="b s" data-decide="">Undo</button>'
               : '<button class="b s" data-decide="reject">Reject</button> <button class="b s p" data-decide="accept">Accept</button>';
-            var n = $("#nacc"); if (n) n.textContent = r.accepted;
+            setAcc(r.accepted);
           });
           return;
         }
         if (e.target.closest("a,button,input")) return;
         $$("article.sel").forEach(function (x) { x.classList.remove("sel"); });
         a.classList.add("sel");
-        $$("[data-bd]").forEach(function (x) { x.classList.toggle("hidden", x.dataset.bd !== a.dataset.entity); });
         window.mutzSelect({entity_id: a.dataset.entity, need: a.dataset.need, name: a.querySelector("h2").textContent});
       });
     });
@@ -249,7 +256,7 @@
         b.disabled = true;
         post("/api/decide", {lead: lid, need: need, entity: m.entity_id, decision: "accept", match: m, added_by: "officer"}).then(function (r) {
           b.outerHTML = '<span style="font-size:13px;font-weight:700">Added to pitch</span>';
-          var n = $("#nacc"); if (n) n.textContent = r.accepted;
+          setAcc(r.accepted);
         });
       });
     });
@@ -258,7 +265,7 @@
         var m = JSON.parse(b.getAttribute("data-anyway"));
         if (!m.reasons || !m.reasons.length) { b.insertAdjacentHTML("afterend", '<span class="lb"> No quote for this need: a pitch card needs a source. Add one on the Pitch screen.</span>'); }
         post("/api/decide", {lead: lid, need: (document.querySelector("#mutz") || {}).dataset.need, entity: m.entity_id, decision: "accept", match: m, added_by: "added by you"})
-          .then(function () { b.outerHTML = '<span style="font-size:13px;font-weight:700">Added by you</span>'; });
+          .then(function (r) { b.outerHTML = '<span style="font-size:13px;font-weight:700">Added by you</span>'; setAcc(r.accepted); });
       });
     });
     $$("[data-missed]").forEach(function (b) {

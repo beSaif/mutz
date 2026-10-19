@@ -156,7 +156,7 @@ def draft_intro(lid, row):
         {"role": "user", "content": f"Language: {lang}\nRecipient: {m.get('name')} ({m.get('unit')})\nWhy them (from their page): “{quote}”\n"
          f"Company sector: {sector}\nShareable needs: " + "; ".join(shareable)}],
         tag="app.intro", temperature=0.2, max_tokens=400)
-    return (r["content"] or "").strip()
+    return (r["content"] or "").strip().replace("[Officer name]", db.owner_name(lead))
 
 
 def outreach_update(oid, b):
@@ -187,7 +187,7 @@ def outreach_update(oid, b):
 def visit_rows(lid):
     draft, _ = db.pitch_draft(lid)
     slots = ["10:00", "11:00", "13:30", "14:30", "15:30", "16:30"]
-    out = [{"time": "09:00", "what": "Welcome at the agency", "note": "[Officer name]", "on": True}]
+    out = [{"time": "09:00", "what": "Welcome at the agency", "note": db.owner_name(db.lead(lid)), "on": True}]
     for t, r in zip(slots, ensure_outreach(lid)):
         note = {"agreed": "Confirmed", "sent": "Waiting for reply", "declined": "Declined", "no reply": "No reply"}.get(r["status"], "Draft not sent")
         out.append({"time": t, "what": r["name"], "note": note, "on": r["status"] == "agreed"})
@@ -274,16 +274,17 @@ def gaps(year):
     table.sort(key=lambda r: (-r["empty"], -r["leads"]))
     top = table[0] if table and table[0]["empty"] else None
     demo_rows = sum(1 for s in rows if s["demo"])
+    demo_leads = len({s["lead_id_hash"] for s in rows if s["demo"] == 2})
     return {"rows": table, "other": len(other["leads"]), "n_leads": len(leads_all), "top": top, "year": year,
             "years": sorted({s["year"] for s in db.signals()} | {datetime.now().year}, reverse=True),
-            "demo_rows": demo_rows, "real_rows": len(rows) - demo_rows, "k_min": K_MIN}
+            "demo_rows": demo_rows, "real_rows": len(rows) - demo_rows, "demo_leads": demo_leads, "k_min": K_MIN}
 
 
 def gaps_csv(year):
     g = gaps(year)
     buf = io.StringIO()
     w = csv.writer(buf)
-    w.writerow(["field", "leads", "leads_with_empty_pot", "share_percent", "bern_coverage", "archives_searched", "year"])
+    w.writerow(["field", "leads", "leads_with_no_match", "share_percent", "bern_coverage", "sources_searched", "year"])
     for r in g["rows"]:
         w.writerow([r["name"], r["leads"], r["empty"], r["share"], r["cov"], r["archives"], year])
     w.writerow(["Other (fewer than 5 leads each)", g["other"], "", "", "", "", year])

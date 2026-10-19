@@ -6,11 +6,11 @@
 <main class="two">
 <section style="flex:999 1 720px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:20px">
 <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px 20px"><h1 style="margin:0;font-size:28px;line-height:1.15">Capability map</h1>
-<span class="cl-key lb"><span><b class="cw strong">Aa</b> Strong</span><span><b class="cw thin">Aa</b> Thin</span><span><b class="cw none">Aa</b> Absent</span><span>Size = units and pages</span></span></div>
+<span class="cl-key lb"><span><b class="cw strong">Aa</b> Strong</span><span><b class="cw thin">Aa</b> Limited</span><span><b class="cw none">Aa</b> Absent</span><span>Size = units and pages</span></span></div>
 {% if computing %}<div role="status" style="display:flex;gap:16px;align-items:center;border:1px solid #111;padding:14px">{{ ui.mutz("search", 54, 46) }}<span style="font-size:14px">Bear with me… checking {{ 13 }} fields.</span></div><script>setTimeout(function(){ location.href = '/insights/capability'; }, 5000);</script>{% endif %}
 {% if cloud %}
 <div class="cloud" id="cloud">
-{% for r in cloud %}<button type="button" class="cw {{ r.cov }}" style="font-size:{{ r.size }}px" data-i="{{ loop.index0 }}" aria-pressed="false" title="{{ r.name }}: {{ {'strong':'strong','thin':'thin','none':'absent'}[r.cov] }} · {{ r.units }} units · {{ r.pages }} pages · {{ r.demand }} leads asking">{{ r.name }}</button>{% endfor %}
+{% for r in cloud %}<button type="button" class="cw {{ r.cov }}" style="font-size:{{ r.size }}px" data-i="{{ loop.index0 }}" aria-pressed="false" title="{{ r.name }}: {{ {'strong':'strong','thin':'limited','none':'absent'}[r.cov] }} · {{ r.units }} units · {{ r.pages }} pages · {{ r.demand }} leads asking">{{ r.name }}</button>{% endfor %}
 </div>
 <div id="cwd" class="cwd hidden" aria-live="polite"></div>
 <script type="application/json" id="clouddata">{{ cloud|tojson }}</script>
@@ -23,7 +23,7 @@
 (function(){
   var el = document.getElementById('cloud'); if (!el) return;
   var D = JSON.parse(document.getElementById('clouddata').textContent), box = document.getElementById('cwd');
-  var COV = {strong: 'Strong', thin: 'Thin', none: 'Absent'};
+  var COV = {strong: 'Strong', thin: 'Limited', none: 'Absent'};
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   $$('#cloud .cw').forEach(function(b){ b.addEventListener('click', function(){
     var on = b.getAttribute('aria-pressed') !== 'true';

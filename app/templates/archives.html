@@ -1,18 +1,19 @@
 {% extends "base.html" %}{% set active_page = "archives" %}{% set active_sub = view %}
-{% block title %}{{ 'Add an archive' if view == 'add' else 'Archives' }}{% endblock %}
+{% block title %}{{ 'Add a source' if view == 'add' else 'Sources' }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
 {% block actions %}
-{% if view == 'add' %}<a class="b s" href="/archives">Back to sources</a>{% else %}<a class="b s" href="/archives/add">Add an archive</a>{% endif %}
-<span class="sp">{{ arch.n }} archives · {{ arch.total|num }} pages{% if arch.last %} · last crawl {{ arch.last|date(True) }}{% endif %}</span>
+{% if view == 'add' %}<a class="b s" href="/archives">Back to sources</a>{% else %}<a class="b s" href="/archives/add">Add a source</a>{% endif %}
+<span class="sp">{{ arch.n }} sources · {{ arch.total|num }} pages{% if arch.last %} · last crawl {{ arch.last|date(True) }}{% endif %}</span>
 {% endblock %}
 {% block content %}
 <main class="two">
 {% if view == 'add' %}
 <section style="flex:1 1 600px;min-width:0;max-width:720px;padding:32px;display:flex;flex-direction:column;gap:12px">
-<h1 style="margin:0;font-size:28px;line-height:1.15">Add an archive</h1>
+<h1 style="margin:0;font-size:28px;line-height:1.15">Add a source</h1>
+<p style="margin:0;font-size:14px">Give the address of a public website, for example a hospital or institute. We check that it is public and allows crawling, then show the one line that adds it to the search.</p>
 <form method="get" action="/archives/add" style="display:flex;flex-direction:column;gap:12px">
 <label for="url" class="lb">Public website</label>
-<input id="url" name="url" value="{{ url or '' }}" placeholder="https://sitem-insel.ch/" class="in">
+<input id="url" name="url" value="{{ url or '' }}" placeholder="For example https://sitem-insel.ch/" class="in">
 <button class="b" style="align-self:flex-start">Check this site</button>
 </form>
 {% if proposal %}
@@ -30,10 +31,10 @@
 <h1 style="margin:0 0 16px;font-size:28px;line-height:1.15">Sources</h1>
 <div style="overflow-x:auto">
 <table class="t" style="min-width:680px">
-<thead><tr><th>Archive</th><th>Pages</th><th>People found</th><th>Languages</th><th>Last crawl</th><th>Skipped</th></tr></thead>
+<thead><tr><th>Source</th><th>Pages</th><th>People found</th><th>Languages</th><th>Last crawl</th><th>Skipped</th></tr></thead>
 <tbody>
 {% for g in arch.groups %}
-<tr><td><b>{{ g.name }}</b><div class="lb">{{ g.sub }}</div></td><td>{{ g.pages|num }}</td><td>{{ people.get(g.id, '–') if people else 'not extracted yet' }}</td><td>{{ g.langs }}</td><td>{{ g.last|date(True) }}</td><td>{{ g.skipped }}{% if g.skipped %} <span class="lb">404, 401 or 403</span>{% endif %}</td></tr>
+<tr><td><b>{{ g.name }}</b><div class="lb">{{ g.sub }}</div></td><td>{{ g.pages|num }}</td><td>{{ people.get(g.id, '–') if people else 'not extracted yet' }}</td><td>{{ g.langs }}</td><td>{{ g.last|date(True) }}</td><td>{{ g.skipped }}{% if g.skipped %} <span class="lb">pages missing or behind a login</span>{% endif %}</td></tr>
 {% else %}
 <tr><td colspan="6">No pages crawled yet</td></tr>
 {% endfor %}

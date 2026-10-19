@@ -135,9 +135,10 @@ export async function roll(page: Page, name: string, who = '') {
       const t = (Date.now() - t0) / 1000
       const file = join(dir, `${String(frames.length).padStart(5, '0')}.jpg`)
       try {
-        await page.screenshot({ path: file, type: 'jpeg', quality: QUALITY })
+        await page.screenshot({ path: file, type: 'jpeg', quality: QUALITY, timeout: 1500 })
       } catch {
-        // mid-navigation the page can't be captured for a moment: keep the previous frame on screen
+        // mid-navigation the page can't be captured for a moment, and a screenshot can hang there until it
+        // times out: keep the previous frame on screen
         await sleep(30)
         continue
       }

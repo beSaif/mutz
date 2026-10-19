@@ -332,12 +332,12 @@ def _archive_answer(turn, message, lang):
     p = propose_source(url)
     if not p.get("ok"):
         return p.get("reason", "That address cannot be added.")
-    turn.actions.append({"kind": "link", "label": "Check and add archive", "href": "/archives?url=" + p["url"]})
-    return {"English": f"I can prepare {p['host']} as a new archive: one entry in config/sources.json, no code change. "
+    turn.actions.append({"kind": "link", "label": "Check and add source", "href": "/archives?url=" + p["url"]})
+    return {"English": f"I can prepare {p['host']} as a new source: one entry in config/sources.json, no code change. "
                        "crawl.py checks robots.txt first and skips login pages. Shall I open it?",
-            "German": f"Ich kann {p['host']} als neues Archiv vorbereiten: ein Eintrag in config/sources.json, kein Code. "
+            "German": f"Ich kann {p['host']} als neue Quelle vorbereiten: ein Eintrag in config/sources.json, kein Code. "
                       "crawl.py prüft zuerst robots.txt. Soll ich es öffnen?",
-            "French": f"Je peux préparer {p['host']} comme nouvelle archive : une entrée dans config/sources.json, sans code. "
+            "French": f"Je peux préparer {p['host']} comme nouvelle source : une entrée dans config/sources.json, sans code. "
                       "crawl.py vérifie d'abord robots.txt. Je l'ouvre ?"}[lang]
 
 
@@ -362,7 +362,7 @@ def _rule_answer(turn, message, sel):
         q = sel.get("name") or message
     r = turn.search_experts(q)
     if not r["matches"]:
-        return ("Kei Hung im Topf. I searched " + (r.get("archives_searched") or "the archives") +
+        return ("No match in Bern (Kei Hung im Topf). I searched " + (r.get("archives_searched") or "our sources") +
                 " and found no page with real evidence. Inselspital and BFH are not indexed yet, so check there before dropping this.")
     lines = []
     for x in r["matches"][:2]:
@@ -433,7 +433,7 @@ def ask(body):
     return reply
 
 
-def confirm(body):
+def confirm(body, who=None):
     a = body.get("action") or {}
     ctx = body.get("ctx") or {}
     lid, nid = ctx.get("lead"), ctx.get("need")
@@ -449,7 +449,7 @@ def confirm(body):
         names = []
         for it in a.get("items") or []:
             db.decide(lid, nid, it["entity_id"], "accept", match=it.get("match"),
-                      added_by="officer via Mutz" if kind == "add_to_pitch" else "added by you")
+                      added_by="officer via Mutz" if kind == "add_to_pitch" else "added by you", who=who)
             names.append((it.get("match") or {}).get("name", it["entity_id"]))
         return {"message": "Added to the pitch: " + ", ".join(names) + ".", "reload": True}
     if kind == "missed":

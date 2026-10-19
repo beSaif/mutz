@@ -101,15 +101,24 @@ TYPE_FILTER = [("all", "All"), ("person", "People"), ("study", "Studies"), ("uni
 NEED_LABEL = {"research": "R&D partner", "infrastructure": "Infrastructure", "supplier": "Supplier",
               "funding": "Funding", "transfer": "Tech transfer", "other": "Other"}
 # Matches screen: how the list can be ordered and narrowed. Every option says what it does (no silent reranking).
-SORTS = [("score", "Score", "Highest score first, as the search ranked it. A unit's best people follow it, at most 3 per unit."),
+SORTS = [("score", "Best match", "Highest score first, as the search ranked it. A unit's best people follow it, at most 3 per unit."),
          ("evidence", "Evidence", "How closely the quotes match the need, before the role, recency and type weights."),
          ("recency", "Most recent", "Latest year found on its public pages, newest first."),
          ("activity", "Active first", "Active, then quiet, then past. Score decides within each group."),
          ("name", "Name", "A to Z.")]
 REC_ORDER = {"active": 0, "quiet": 1, "past": 2}
 REC_LABEL = {"active": "Active", "quiet": "Quiet", "past": "Past"}
-SCORE_BANDS = [("0.75", "0.75 or more"), ("0.5", "0.5 or more"), ("0.25", "0.25 or more")]
+SCORE_BANDS = [("0.75", "Top"), ("0.5", "Good or better"), ("0.25", "Fair or better")]
 GRADE_LABEL = {3: "Direct", 2: "Partial", 1: "Adjacent"}
+CHECK_LABEL = {"abstain": "Says no match when Bern has nothing, instead of guessing",
+               "entity_resolution": "The same person on two sites counts once",
+               "recency_active": "Recent work is marked active"}
+
+
+def fit(score):
+    """The score as a word for the Matches list; the number stays in the tooltip and under How the score is built."""
+    s = score or 0
+    return "Top" if s >= 0.75 else "Good" if s >= 0.5 else "Fair" if s >= 0.25 else "Weak"
 STAGES = ["new", "triaged", "pitched", "visit", "won", "lost"]
 LOST_REASONS = ["Chose another canton", "No Bern strength", "Project stopped", "No reply"]
 
@@ -148,6 +157,8 @@ T.env.filters["tlabel"] = lambda t: TYPE_LABEL.get(ftype(t), (t or "").capitaliz
 T.env.filters["nlabel"] = lambda t: NEED_LABEL.get(t, (t or "").capitalize())
 T.env.filters["num"] = lambda n: f"{n:,}" if isinstance(n, int) else n
 T.env.globals["now"] = lambda: datetime.now()
+# static URLs carry the file's mtime, so a changed app.js or app.css is never served from the browser cache
+T.env.globals["asset"] = lambda f: f"/static/{f}?v={int((ROOT / 'static' / f).stat().st_mtime)}"
 T.env.filters["cq"] = stubs.clean_quote
 def cite_html(text, reasons):
     """Escape a grounded explanation and turn its [k] (k-th quote of this result) into links numbered for the page."""
@@ -171,6 +182,7 @@ def _archives(ids):
 
 
 T.env.filters["archives"] = _archives
+T.env.filters["fit"] = fit
 SRC_NAMES = {"artorg": "ARTORG Center", "dcb": "Diabetes Center Berne", "unibe": "University of Bern"}
 T.env.filters["srcname"] = lambda s: SRC_NAMES.get(s) or (f"unibe {s[6:]}" if str(s).startswith("unibe_") else s)
 
@@ -235,6 +247,11 @@ def kg_counts():
         return {}
 
 
+def me(request):
+    """The officer working in this browser (cookie), the first one if none was picked."""
+    return db.officer(request.cookies.get("officer", "")) or db.officers()[0]
+
+
 def ctx(request, **kw):
     lg = LOGO.exists()
     kw.setdefault("lead", None)
@@ -243,6 +260,11 @@ def ctx(request, **kw):
     kw["stubbed"] = contracts.stubbed()
     kw["request"] = request
     kw["navc"] = nav_counts()
+    kw["me"] = me(request)
+    kw["officers"] = db.officers()
+    kw["names"] = {o["id"]: o["name"] for o in kw["officers"]}
+    if isinstance(kw.get("case"), dict):
+        kw["case"]["me"] = kw["me"]["id"]
     return kw
 
 
@@ -418,8 +440,12 @@ def lead_progress(l):
 
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request, q: str = "", f: str = ""):
+def home(request: Request, q: str = "", f: str = "", who: str = ""):
     rows = db.leads()
+    mine = me(request)["id"]
+    n_mine = sum(1 for r in rows if r.get("owner") == mine)
+    if who == "mine":
+        rows = [r for r in rows if r.get("owner") == mine]
     if q:
         rows = [r for r in rows if q.lower() in (r["title"] + " " + (r["summary"] or "") + " " + (r["sector"] or "")).lower()]
     groups = {"drafts": [], "closed": []}
@@ -434,13 +460,42 @@ def home(request: Request, q: str = "", f: str = ""):
             bubble = f"Grüessech! The {r['title']} pitch is {p['cards'] - p['checked']} ticks from done."
             break
     f = f if f in groups else ""
-    return render(request, "home.html", groups=groups, arch=arch, q=q, f=f, total=len(rows), bubble=bubble,
+    return render(request, "home.html", groups=groups, arch=arch, q=q, f=f, who=who if who == "mine" else "", n_mine=n_mine,
+                  total=len(rows), bubble=bubble,
                   mutz={"screen": "Leads", "bubble": bubble})
 
 
+def back(request, default="/"):
+    """Same site path of the page the form was sent from, for redirects after a switch."""
+    u = urlparse(request.headers.get("referer", ""))
+    return (u.path + (f"?{u.query}" if u.query else "")) if u.path.startswith("/") and not u.path.startswith("//") else default
+
+
+@app.post("/officer")
+def officer_switch(request: Request, id: str = Form(""), name: str = Form("")):
+    oid = db.add_officer(name.strip()[:40]) if name.strip() else id
+    if not db.officer(oid):
+        raise HTTPException(400, "Unknown officer")
+    r = RedirectResponse(back(request), 303)
+    r.set_cookie("officer", oid, max_age=60 * 60 * 24 * 365, samesite="lax")
+    return r
+
+
+@app.post("/leads/{lid}/owner")
+def lead_take_over(request: Request, lid: str):
+    l = get_lead(lid)
+    m = me(request)
+    if l.get("owner") != m["id"]:
+        prev = db.officer(l.get("owner"))
+        db.update_lead(lid, owner=m["id"])
+        db.add_entry(lid, "note", f"Lead assigned to {m['name']}" + (f", was {prev['name']}" if prev else ""),
+                     confidential=0, who=m["id"])
+    return RedirectResponse(back(request, f"/leads/{lid}"), 303)
+
+
 @app.post("/leads/new")
-def lead_new(title: str = Form("New lead"), origin: str = Form("S-GE")):
-    lid = db.create_lead(title.strip() or "New lead", origin=origin)
+def lead_new(request: Request, title: str = Form("New lead"), origin: str = Form("S-GE")):
+    lid = db.create_lead(title.strip() or "New lead", origin=origin, owner=me(request)["id"])
     db.update_lead(lid, opened=1)
     return RedirectResponse(f"/leads/{lid}/brief", 303)
 
@@ -449,21 +504,32 @@ DEMO_FIXTURE = Path("needs/fixtures/demo_onepager.txt")
 
 
 @app.post("/leads/demo")
-def lead_demo():
+def lead_demo(request: Request):
     """The demo case is agent E's fixture (Kestrelyn Health Oy, invented), so demo, eval and pitch line up."""
     text, title = DEMO_TEXT, "Sport wearable lead"
     if DEMO_FIXTURE.exists():
         text, title = DEMO_FIXTURE.read_text().strip(), "Kestrelyn Health Oy"
     lid = db.create_lead(title, input_text=text, origin="S-GE", sector="medtech",
-                         summary="Glucose and lactate patch for women in endurance sport", demo=1)
+                         summary="Glucose and lactate patch for women in endurance sport", demo=1, owner=me(request)["id"])
     db.update_lead(lid, opened=1)
     return RedirectResponse(f"/leads/{lid}/brief?extract=1", 303)
 
 
 @app.post("/leads/seed")
 def lead_seed():
-    for s in SEED_LEADS:
-        db.create_lead(s["title"], input_text=s["text"], origin=s["origin"], sector=s["sector"], summary=s["summary"], demo=1)
+    offs = db.officers()
+    for i, s in enumerate(SEED_LEADS):  # shared out between the officers, so Mine and All differ
+        db.create_lead(s["title"], input_text=s["text"], origin=s["origin"], sector=s["sector"], summary=s["summary"], demo=1,
+                       owner=offs[i % len(offs)]["id"])
+    return RedirectResponse("/", 303)
+
+
+@app.post("/leads/reset")
+def leads_reset():
+    """Clean slate for a demo: every lead, its pitch and exports go. Officers and the seeded gap report rows stay."""
+    import shutil
+    db.reset()
+    shutil.rmtree(EXPORTS, ignore_errors=True)
     return RedirectResponse("/", 303)
 
 
@@ -488,7 +554,7 @@ def case_ctx(l, step):
     return {"step": step, "done": {"brief": bool(db.needs(l["id"])), "matches": has_matches,
                                    "map": bool(db.accepted(l["id"])),
                                    "pitch": sent or bool(cards and all(c.get("checked") for c in cards)), "export": sent},
-            "saved": saved, "sent": sent}
+            "saved": saved, "sent": sent, "owner": db.officer(l.get("owner"))}
 
 
 @app.get("/leads/{lid}", response_class=HTMLResponse)
@@ -502,14 +568,16 @@ def lead_open(lid: str):
 
 
 @app.get("/leads/{lid}/brief", response_class=HTMLResponse)
-def brief(request: Request, lid: str, mode: str = "", extract: int = 0, err: str = ""):
+def brief(request: Request, lid: str, mode: str = "", extract: int = 0, err: str = "", source: int = 0):
     l = get_lead(lid)
     if not l["opened"]:
         db.update_lead(lid, opened=1)
     mode = mode or l["input_kind"] or "text"
     ns = db.needs(lid)
     arch = archive_stats()
-    return render(request, "brief.html", lead=l, needs=ns, mode=mode, case=case_ctx(l, "brief"), arch=arch,
+    # two steps: the source first, then the needs read from it; ?source=1 goes back to the source
+    view = "source" if (not ns or source or err) else "needs"
+    return render(request, "brief.html", lead=l, needs=ns, mode=mode, case=case_ctx(l, "brief"), arch=arch, view=view,
                   auto_extract=bool(extract and not ns and l["input_text"]), err=err,
                   mutz={"screen": "Brief", "lead": lid, "pot": None})
 
@@ -542,9 +610,9 @@ async def brief_submit(request: Request, lid: str, text: str = Form(""), website
             pass  # deleted after the officer approves the needs (Find matches); kept until then for re-reading
     apply_needs(lid, out)
     if text and not l["input_text"]:
-        db.add_entry(lid, "one_pager", text[:2000])
+        db.add_entry(lid, "one_pager", text[:2000], who=me(request)["id"])
     if website.strip():
-        db.add_entry(lid, "website", website.strip(), confidential=0)
+        db.add_entry(lid, "website", website.strip(), confidential=0, who=me(request)["id"])
     return RedirectResponse(f"/leads/{lid}/brief?mode={mode}", 303)
 
 
@@ -719,6 +787,7 @@ def decorate(n, lid):
         d = dec.get((n["id"], r["entity_id"]))
         r["decision"] = d["decision"] if d else None
         r["added_by"] = d["added_by"] if d else None
+        r["who"] = d.get("who") if d else None
         g = contracts.grants_for(r["entity_id"]) if r.get("entity_id") else []
         r["grants"], r["grants_other"] = relevant_grants(g, n)
         out.append(r)
@@ -726,7 +795,7 @@ def decorate(n, lid):
     for (nid, eid), d in dec.items():
         if nid == n["id"] and d["decision"] == "accept" and d["match"] and all(x["entity_id"] != eid for x in out):
             m = dict(d["match"])
-            m.update(ftype=ftype(m.get("type")), decision="accept", added_by=d["added_by"], grants=[], grants_other=0)
+            m.update(ftype=ftype(m.get("type")), decision="accept", added_by=d["added_by"], who=d.get("who"), grants=[], grants_other=0)
             out.append(m)
     for r in out:
         r["is_adjacent"] = bool(r.get("adjacent") or "adjacent" in (r.get("tags") or []))
@@ -850,7 +919,7 @@ async def decide(request: Request):
         match = next((r for r in n["result"].get("results", []) if r["entity_id"] == eid), None)
     if b.get("match"):
         match = b["match"]
-    db.decide(lid, nid, eid, b.get("decision"), match=match, added_by=b.get("added_by", "officer"))
+    db.decide(lid, nid, eid, b.get("decision"), match=match, added_by=b.get("added_by", "officer"), who=me(request)["id"])
     l = db.lead(lid)
     if l["step"] in ("brief", "matches") and b.get("decision") == "accept":
         db.update_lead(lid, step="matches")
@@ -872,9 +941,9 @@ async def missed(request: Request):
 # ---------------------------------------------------------------- evidence map
 
 _PAGES = {}
-HOW_NOTE = {"Read": "Read: the quote stands word for word on the page.",
-            "Derived": "Derived: worked out from the page, not quoted. Check it before use.",
-            "Missing": "Missing: no crawled page states it."}
+HOW_NOTE = {"Quoted on page": "Quoted on page: the quote stands word for word on the page.",
+            "Inferred": "Inferred: worked out from the page, not quoted. Check it before use.",
+            "No source": "No source: no crawled page states it."}
 
 
 def page_meta(url):
@@ -899,7 +968,7 @@ def profile(r):
     clamp = lambda v: None if v is None else max(0.0, min(1.0, round(float(v), 2)))
     return [["Evidence", clamp(parts.get("Evidence"))], ["Role", clamp(parts.get("Role"))],
             ["Recency", clamp(parts.get("Recency"))], ["Type", clamp(parts.get("Type"))],
-            ["Apertus grade", clamp(r["grade"] / 3) if r.get("grade") else None]]
+            ["AI check", clamp(r["grade"] / 3) if r.get("grade") else None]]
 
 
 def build_map(lid, only_accepted=True):
@@ -927,23 +996,23 @@ def build_map(lid, only_accepted=True):
             leaves = []
             if r.get("function"):
                 fsrc = (r.get("reasons") or [{}])[0]
-                leaves.append({"kind": "Function", "how": "Derived", "label": r["function"], "url": fsrc.get("url"),
+                leaves.append({"kind": "Function", "how": "Inferred", "label": r["function"], "url": fsrc.get("url"),
                                "quote": fsrc.get("quote"), "deep_link": fsrc.get("deep_link") or fsrc.get("url"),
                                "style": "derived", "src": host(fsrc.get("url", ""))})
             elif r["ftype"] == "person":
-                leaves.append({"kind": "Function", "how": "Missing", "label": "Not stated on any source", "style": "missing"})
+                leaves.append({"kind": "Function", "how": "No source", "label": "Not stated on any source", "style": "missing"})
             for s_ in (r.get("reasons") or [])[:3]:
-                leaves.append({"kind": "Fact", "how": "Read", "label": s_.get("quote", ""), "url": s_.get("url"), "quote": s_.get("quote"),
+                leaves.append({"kind": "Fact", "how": "Quoted on page", "label": s_.get("quote", ""), "url": s_.get("url"), "quote": s_.get("quote"),
                                "deep_link": s_.get("deep_link") or s_.get("url"), "style": "read", "src": host(s_.get("url", ""))})
             for g in (r.get("grants") or [])[:1]:
-                leaves.append({"kind": "Grant", "how": "Read", "label": g.get("title", ""), "url": g.get("url"), "quote": g.get("title"),
+                leaves.append({"kind": "Grant", "how": "Quoted on page", "label": g.get("title", ""), "url": g.get("url"), "quote": g.get("title"),
                                "deep_link": g.get("url"), "style": "read", "src": host(g.get("url", "")) or "SNSF"})
             if not leaves:
-                leaves = [{"kind": "Fact", "how": "Missing", "label": "No quote stored", "style": "missing"}]
+                leaves = [{"kind": "Fact", "how": "No source", "label": "No quote stored", "style": "missing"}]
             for k, f in enumerate(leaves):
                 f["id"], f["sid"] = f"{mid}:f{k}", f"{mid}:s{k}"
                 src = _src(f.get("url"), f.get("quote"), f.get("deep_link")) if f.get("url") else None
-                detail[f["id"]] = {"kind": "Fact", "title": f["label"], "sub": f["kind"] + " · " + f["how"], "how": f["how"],
+                detail[f["id"]] = {"kind": "Fact", "title": f["label"], "sub": f["kind"] if f["kind"] != "Fact" else None, "how": f["how"],
                                    "how_note": HOW_NOTE[f["how"]], "quote": f.get("quote"), "src": src,
                                    "match": r.get("name"), "match_id": mid, "need": n["label"], "need_i": ni + 1,
                                    "entity": r["entity_id"], "need_id": n["id"], "accepted": acc}
@@ -958,7 +1027,8 @@ def build_map(lid, only_accepted=True):
                     pages.append(_src(x.get("url")))
             people = [{"name": p.get("name"), "role": p.get("function")} for p in (r.get("contacts") or r.get("people") or [])]
             detail[mid] = {
-                "kind": "Match", "title": r.get("name"), "sub": TYPE_LABEL.get(r["ftype"], "Match") + (" · accepted" if acc else " · suggested, not accepted"),
+                "kind": "Match", "title": r.get("name"), "sub": TYPE_LABEL.get(r["ftype"], "Match") + ((" · accepted" + (f" by {db.officer(r['who'])['name']}" if db.officer(r.get("who")) else ""))
+                                                               if acc else " · suggested, not accepted"),
                 "type": TYPE_LABEL.get(r["ftype"], "Match"), "unit": r.get("unit") if r.get("unit") != r.get("name") else None,
                 "role": r.get("function"), "person": r["ftype"] == "person", "people": people,
                 "recency": " · ".join(x for x in [REC_LABEL.get(r.get("recency"), r.get("recency") or ""),
@@ -1019,6 +1089,10 @@ def ensure_draft(lid):
         if add:
             draft = pitchgen.add_cards(draft, l, db.needs(lid), add)
             db.save_pitch(lid, draft)
+    owner = db.owner_name(l)
+    if (draft.get("officer") or {}).get("name") != owner:  # the contact on the pitch is whoever owns the lead now
+        draft["officer"] = {**(draft.get("officer") or {}), "name": owner}
+        db.save_pitch(lid, draft)
     return draft
 
 
@@ -1059,6 +1133,25 @@ async def pitch_rewrite(lid: str, request: Request):
     return {"ok": True, "text": text}
 
 
+@app.post("/api/pitch/{lid}/write")
+async def pitch_write(lid: str, request: Request):
+    """Turn the checked facts into pitch text. The editor sends its draft so unsaved edits are not lost."""
+    b = await request.json()
+    l = get_lead(lid)
+    draft = b.get("draft") or ensure_draft(lid)
+    left = sum(1 for c in pitchgen.visible_cards(draft) if not c.get("checked"))
+    if left:  # the pitch is written from checked facts only
+        return {"ok": False, "error": f"Check every card first. {left} left."}
+    try:
+        draft = pitchgen.write_pitch(draft, l, db.needs(lid))
+    except Exception as e:
+        log.warning("pitch write failed: %s", e)
+        db.save_pitch(lid, draft)
+        return {"ok": False, "error": "Apertus did not write the pitch this time. Nothing changed. Try again in a minute."}
+    db.save_pitch(lid, draft)
+    return {"ok": True, "draft": draft, "saved": fmt_date(db.now(), True)}
+
+
 @app.post("/api/pitch/{lid}/reset")
 def pitch_reset(lid: str):
     db.x("DELETE FROM pitch WHERE lead_id=?", (lid,))
@@ -1066,7 +1159,7 @@ def pitch_reset(lid: str):
 
 
 # ---------------------------------------------------------------- export: review, PDF, send
-# Its own step after the pitch: the pitch screen only builds content, nothing leaves from there.
+# Its own step after the pitch: cards are checked in the pitch editor, export only shows what goes out and sends it.
 
 @app.get("/leads/{lid}/review")
 def review_old(request: Request, lid: str):
@@ -1092,31 +1185,17 @@ def review(request: Request, lid: str, done: int = 0, err: str = ""):
              "edited": sum(1 for c in cards if c.get("edited") and c.get("sources")),
              "nosource": sum(1 for c in cards if not c.get("sources")),
              "unchecked": sum(1 for c in cards if not c.get("checked")), "total": len(cards)}
-    titles = {s["id"]: s["title"] for s in draft["sections"]}
     vs = db.versions(lid)
     ready = not problems and not stats["nosource"] and not stats["unchecked"]
-    return render(request, "review.html", lead=l, draft=draft, stats=stats, problems=problems, cards=cards, titles=titles,
-                  versions=vs, done=done, err=err, case=case_ctx(l, "export"),
+    first_unchecked = next((c["card_id"] for c in cards if not c.get("checked")), "")
+    return render(request, "review.html", lead=l, draft=draft, stats=stats, problems=problems,
+                  versions=vs, done=done, err=err, first_unchecked=first_unchecked, case=case_ctx(l, "export"),
                   mutz={"screen": "Export", "lead": lid, "corner": "left",
                         "bubble": "Every card is checked. Good to send." if ready and not done else None})
 
 
-@app.post("/api/pitch/{lid}/check")
-async def pitch_check(lid: str, request: Request):
-    """Tick one card from the export screen; same flag as the pitch editor's checkbox."""
-    body = await request.json()
-    get_lead(lid)
-    draft = ensure_draft(lid)
-    for c in draft["cards"]:
-        if c.get("card_id") == body["card_id"]:
-            c["checked"] = bool(body["checked"])
-    db.save_pitch(lid, draft)
-    cards = pitchgen.visible_cards(draft)
-    return {"ok": True, "checked": sum(1 for c in cards if c.get("checked")), "total": len(cards)}
-
-
 @app.post("/leads/{lid}/export")
-def export(lid: str, override: str = Form("")):
+def export(request: Request, lid: str, override: str = Form("")):
     l = get_lead(lid)
     draft = ensure_draft(lid)
     cards = pitchgen.visible_cards(draft)
@@ -1139,7 +1218,7 @@ def export(lid: str, override: str = Form("")):
     (out / "pitch.json").write_text(json.dumps({**p, "draft": draft}, ensure_ascii=False, indent=1))
     built_from = [e["id"] for e in db.entries(lid)]
     db.add_version(lid, {**p, "draft": draft}, built_from)
-    db.add_entry(lid, "pitch", f"Pitch v{n} sent", confidential=0)
+    db.add_entry(lid, "pitch", f"Pitch v{n} sent", confidential=0, who=me(request)["id"])
     db.update_lead(lid, stage="pitched", step="sent")
     db.update_signal_stage(lid, "pitched")
     return RedirectResponse(f"/leads/{lid}/export?done={n}", 303)
@@ -1169,11 +1248,12 @@ def after(request: Request, lid: str):
 
 
 @app.post("/leads/{lid}/entry")
-def add_info(lid: str, kind: str = Form("note"), text: str = Form(...), confidential: str = Form(""),
+def add_info(request: Request, lid: str, kind: str = Form("note"), text: str = Form(...), confidential: str = Form(""),
              shareable: str = Form("")):
     get_lead(lid)
     if text.strip():
-        db.add_entry(lid, kind, text.strip(), confidential=1 if confidential else 0, shareable=1 if shareable else 0)
+        db.add_entry(lid, kind, text.strip(), confidential=1 if confidential else 0, shareable=1 if shareable else 0,
+                     who=me(request)["id"])
     return RedirectResponse(f"/leads/{lid}/after", 303)
 
 
@@ -1196,7 +1276,7 @@ def diff_action(lid: str, action: str):
 
 
 @app.post("/leads/{lid}/stage")
-def set_stage(lid: str, stage: str = Form(...), lost_reason: str = Form("")):
+def set_stage(request: Request, lid: str, stage: str = Form(...), lost_reason: str = Form("")):
     get_lead(lid)
     if stage not in STAGES:
         raise HTTPException(400)
@@ -1204,7 +1284,8 @@ def set_stage(lid: str, stage: str = Form(...), lost_reason: str = Form("")):
         return RedirectResponse(f"/leads/{lid}/after?err=reason", 303)
     db.update_lead(lid, stage=stage, lost_reason=lost_reason or None)
     db.update_signal_stage(lid, stage, lost_reason or None)
-    db.add_entry(lid, "note", f"Status: {stage}" + (f", {lost_reason}" if lost_reason else ""), confidential=0)
+    db.add_entry(lid, "note", f"Status: {stage}" + (f", {lost_reason}" if lost_reason else ""), confidential=0,
+                 who=me(request)["id"])
     return RedirectResponse(f"/leads/{lid}/follow" if stage == "visit" else f"/leads/{lid}/after", 303)
 
 
@@ -1338,7 +1419,7 @@ def evaluation(request: Request):
         missed = sum(1 for _ in open(mp))
     view = "checks" if request.url.path.endswith("/checks") else "quality"
     return render(request, "eval.html", ev=ev, splits=splits, tests=tests, weakest=weakest, missed=missed, view=view,
-                  arch=archive_stats(), usage=gateway_usage(), mutz={"screen": "Evaluation"})
+                  check_label=CHECK_LABEL, arch=archive_stats(), usage=gateway_usage(), mutz={"screen": "Evaluation"})
 
 
 def gateway_usage():
@@ -1382,7 +1463,7 @@ def mutz_thread(key: str = "global"):
 async def mutz_confirm(request: Request):
     from app import mutz
     b = await request.json()
-    return mutz.confirm(b)
+    return mutz.confirm(b, who=me(request)["id"])
 
 
 @app.exception_handler(500)

@@ -8,7 +8,7 @@
 <h1 style="margin:0;font-size:24px">Timeline</h1>
 <div class="tl">
 {% for e in entries %}
-<div class="it {{ 'red' if loop.last and e.kind in ('email','call','note') }}"><span class="lb">{{ e.at|date }} · {{ {'one_pager':'one pager','website':'website','pitch':'pitch','email':'email','call':'call notes','note':'note'}.get(e.kind, e.kind) }}{% if e.added_by and e.added_by != 'officer' %} · added through Bärner Mutz{% endif %}</span>
+<div class="it {{ 'red' if loop.last and e.kind in ('email','call','note') }}"><span class="lb">{{ e.at|date }} · {{ {'one_pager':'one pager','website':'website','pitch':'pitch','email':'email','call':'call notes','note':'note'}.get(e.kind, e.kind) }}{% if e.who and names.get(e.who) %} · {{ names[e.who] }}{% endif %}{% if e.added_by and e.added_by != 'officer' %} · added through Bärner Mutz{% endif %}</span>
 <b style="display:block">{{ {'one_pager':'Company description','website':'Company website'}.get(e.kind) or (e.text if e.kind == 'pitch' else e.kind|capitalize) }}</b>
 {% if e.kind in ('email','call','note') %}<p style="margin:4px 0 0">{{ e.text|truncate(400) }}</p>{% elif e.kind == 'website' %}<p class="lb" style="margin:2px 0 0">{{ e.text }}</p>{% endif %}
 <span class="lb">{{ 'Confidential' if e.confidential else 'Public' }}{% if e.kind in ('email','call','note') %} · {{ 'shareable' if e.shareable else 'not shareable' }}{% endif %}</span></div>
@@ -65,7 +65,7 @@
 {% endif %}
 <div style="background:#F2F2F2;padding:14px;font-size:14px">
 <b style="display:block;margin-bottom:4px">Versions</b>
-{% if versions %}<div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:4px 12px">{% for v in versions %}<b>v{{ v.n }}</b><span>Sent {{ v.sent_at|date }} · from entries {{ v.built_from|join(', ') }}</span><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/clean.pdf">Clean PDF</a><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/pitch.json">JSON</a>{% endfor %}</div>{% else %}<p style="margin:0">No version sent yet. <a href="/leads/{{ lead.id }}/review">Review and export</a></p>{% endif %}
+{% if versions %}<div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:4px 12px">{% for v in versions %}<b>v{{ v.n }}</b><span>Sent {{ v.sent_at|date }}{% if v.built_from %} · built from {{ v.built_from|length }} timeline entr{{ 'ies' if v.built_from|length != 1 else 'y' }}{% endif %}</span><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/clean.pdf">Clean PDF</a><a href="/leads/{{ lead.id }}/export/v{{ v.n }}/pitch.json">JSON</a>{% endfor %}</div>{% else %}<p style="margin:0">No version sent yet. <a href="/leads/{{ lead.id }}/review">Review and export</a></p>{% endif %}
 </div>
 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid #111;padding-top:14px"><span style="flex:1"></span><form method="post" action="/leads/{{ lead.id }}/stage"><input type="hidden" name="stage" value="visit"><button class="b">Visit accepted: contact researchers</button></form></div>
 </section>

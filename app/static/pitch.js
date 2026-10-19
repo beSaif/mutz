@@ -53,13 +53,13 @@
     }
     function heading(c) { return c.type === "person" && !c.show_person_name ? "Group at " + (c.unit || "the University of Bern") : c.name; }
     function kindOf(c, i) {
-      if (c.section === "why") return "Point " + (i + 1);
+      if (c.section === "why") return draft.written_at ? "" : "Point " + (i + 1);  // written, the reasons read as paragraphs
       return c.type === "person" ? "Researcher" : (c.type || "match").replace(/^./, function (x) { return x.toUpperCase(); });
     }
     function status(c) {
       if (!(c.sources || []).length) return ["x", "No source: cannot be exported"];
-      if (c.checked) return ["ok", "Checked"];
-      return [c.edited ? "e" : "", (c.edited ? "Edited by you" : "Verified quote") + " · not checked yet"];
+      if (c.checked) return ["ok", "✓ Checked"];
+      return [c.edited ? "e" : "", (c.edited ? "Edited by you · " : "") + "Not checked yet"];
     }
     /* pages: cover, then one page per part (sections of the same part share it), then sources */
     function pages() {
@@ -84,15 +84,17 @@
       draft.sections.forEach(function (s, i) {
         if (s.deleted) return;
         var p = part(s), fixed = s.id === "cover" || s.auto;
-        if (p && p !== lastPart) el.insertAdjacentHTML("beforeend", '<p class="ol-h">' + PART_LABEL[p] + "</p>");
-        if (!p && lastPart) el.insertAdjacentHTML("beforeend", '<p class="ol-h">&nbsp;</p>');
+        if (p && p !== lastPart) el.insertAdjacentHTML("beforeend", '<p class="ol-h" title="' + esc(GUIDE[p]) + '">' + PART_LABEL[p] + "</p>");
+        if (!p && lastPart) el.insertAdjacentHTML("beforeend", '<p class="ol-h" aria-hidden="true"></p>');
         lastPart = p;
         var n = cards(s.id).length;
         var d = document.createElement("div");
-        d.className = "ol" + (s.hidden ? " off" : "");
+        d.className = "ol" + (p ? " sub" : "") + (s.hidden ? " off" : "");
         d.draggable = !fixed; d.dataset.i = i; d.dataset.sec = s.id;
-        d.innerHTML = '<span aria-hidden="true" style="visibility:' + (fixed ? "hidden" : "visible") + '">⋮⋮</span><a href="#sec-' + esc(s.id) + '" style="flex:1;text-decoration:none;color:inherit">' + esc(s.title) + (s.id === "matches" || s.id === "infra" || s.id === "why" ? " (" + n + ")" : "") + "</a>" +
-          (fixed ? '<span class="lb">' + (s.auto ? "auto" : "") + "</span>" : '<button class="ic" data-eye aria-label="' + (s.hidden ? "Show " : "Hide ") + esc(s.title) + '">' + (s.hidden ? EYEOFF : EYE) + '</button><button class="ic" data-bin aria-label="Delete ' + esc(s.title) + '">' + BIN + "</button>");
+        if (!fixed) d.title = "Drag to reorder";
+        d.innerHTML = '<a href="#sec-' + esc(s.id) + '">' + esc(s.title) + "</a>" +
+          (s.id === "matches" || s.id === "infra" || s.id === "why" ? "<i>" + n + "</i>" : "") +
+          (fixed ? "" : '<button class="ic" data-eye aria-label="' + (s.hidden ? "Show " : "Hide ") + esc(s.title) + '">' + (s.hidden ? EYEOFF : EYE) + '</button><button class="ic" data-bin aria-label="Delete ' + esc(s.title) + '">' + BIN + "</button>");
         d.querySelector("a").addEventListener("click", function (e) { e.preventDefault(); go(s.id); });
         var eye = d.querySelector("[data-eye]"); if (eye) eye.addEventListener("click", function () { s.hidden = !s.hidden; save(); render(); });
         var bin = d.querySelector("[data-bin]"); if (bin) bin.addEventListener("click", function () { s.deleted = true; toast('Section “' + s.title + '” deleted', function () { s.deleted = false; }); save(); render(); });
@@ -108,10 +110,6 @@
         });
         el.appendChild(d);
       });
-      var vis = allVisible();
-      var ck = vis.filter(function (c) { return c.checked; }).length, pc = vis.length ? Math.round(100 * ck / vis.length) : 0;
-      $("#checkedcount").innerHTML = '<div class="meter" title="Cards checked: ' + ck + " of " + vis.length + '"><span class="meter-l"><span>Cards checked</span><span class="lb">' + ck + " of " + vis.length + "</span></span>" +
-        '<span class="bar" role="meter" aria-label="Cards checked" aria-valuemin="0" aria-valuemax="' + vis.length + '" aria-valuenow="' + ck + '"><i style="width:' + pc + '%"></i></span></div>';
     }
     function toast(msg, undoFn) {
       undo = undoFn;
@@ -163,7 +161,7 @@
       list.forEach(function (c, i) {
         var st = status(c), n = nums[c.card_id] || [];
         h += '<div class="pc' + (selected === c.card_id ? " sel" : "") + (c.locked ? " lk" : "") + '" data-card="' + esc(c.card_id) + '" tabindex="-1">' +
-          '<p class="pc-k">' + esc(kindOf(c, i)) + ' <span class="pc-st ' + st[0] + '">· ' + esc(st[1]) + (c.locked ? " · locked" : "") + "</span></p>" +
+          '<p class="pc-k">' + esc(kindOf(c, i)) + ' <span class="pc-st ' + st[0] + '">' + (kindOf(c, i) ? "· " : "") + esc(st[1]) + (c.locked ? " · locked" : "") + "</span></p>" +
           (s.id !== "why" ? "<h3>" + esc(heading(c)) + "</h3>" + (c.unit && c.unit !== heading(c) && c.unit !== c.name ? '<p class="pc-sub">' + esc(c.unit) + "</p>" : "") : "") +
           '<p class="pc-t ed" lang="' + esc(draft.lang || "en") + '"' + (c.locked ? "" : ' contenteditable="true"') + ' spellcheck="true" data-text>' + esc(shown(c, n)) + "</p>" +
           '<p class="pc-src">' + (c.sources || []).map(function (x, k) { return '<a href="' + esc(x.deep_link || x.url) + '" target="_blank" rel="noopener" title="' + esc(x.quote || "") + '">[' + n[k] + "] " + esc(host(x.url)) + "</a>"; }).join(" ") + "</p></div>";
@@ -213,8 +211,10 @@
     }
     function refresh(c) {  // after a text edit: status line, outline count, inspector; the page keeps the caret elsewhere
       var d = document.querySelector('[data-card="' + c.card_id + '"] .pc-st'), st = status(c);
-      if (d) { d.className = "pc-st " + st[0]; d.textContent = "· " + st[1] + (c.locked ? " · locked" : ""); }
-      outline(); if (selected === c.card_id) inspector();
+      if (d) { d.className = "pc-st " + st[0]; d.textContent = (kindOf(c, 0) ? "· " : "") + st[1] + (c.locked ? " · locked" : ""); }
+      var ck = document.querySelector('[data-card="' + c.card_id + '"] .pc-ev [data-check]');  // an edit undoes the check
+      if (ck && !c.checked && ck.textContent.charAt(0) === "✓") { ck.textContent = "Yes, looks right"; ck.classList.add("p"); }
+      outline(); dock(); docPanel($("#inspector"));
     }
     function pick(id) {
       if (selected === id) return;
@@ -224,63 +224,89 @@
       var c = card(id); if (c && window.mutzSelect) window.mutzSelect({card_id: id, name: c.text});
     }
 
-    /* ---------------- inspector */
+    function show(id) {  // select a card and bring it into view, from the dock or a ?card= link
+      var d = document.querySelector('#pages [data-card="' + id + '"]'); if (!d) return;
+      pick(id);
+      $("#canvas").scrollTo({top: d.getBoundingClientRect().top - $("#canvas").getBoundingClientRect().top + $("#canvas").scrollTop - 80, behavior: "smooth"});
+    }
+    function nextUnchecked() {
+      var vis = allVisible().filter(function (c) { return !c.checked && (c.sources || []).length; });
+      var at = vis.map(function (c) { return c.card_id; }).indexOf(selected);
+      return vis.length ? vis[(at + 1) % vis.length] : null;
+    }
+
+    /* ---------------- review box: drawn under the selected card, never printed */
     function inspector() {
-      var el = $("#inspector"), c = selected && card(selected);
-      if (!c || c.deleted) { selected = null; return docPanel(el); }
-      var nums = numbering()[c.card_id] || [], i = cards(c.section).indexOf(c);
+      docPanel($("#inspector"));
+      document.querySelectorAll("#pages .pc-ev").forEach(function (x) { x.remove(); });
+      var c = selected && card(selected), d = c && document.querySelector('#pages [data-card="' + c.card_id + '"]');
+      if (!c || c.deleted || !d) { selected = null; return; }
+      var nums = numbering()[c.card_id] || [], lk = c.locked ? " disabled" : "";
       var other = (draft.lang || "en") === "de" ? ["en", "In English"] : ["de", "In German"];
-      el.innerHTML =
-        '<div style="display:flex;align-items:baseline;gap:8px"><span class="lb" style="flex:1">' + esc((sec(c.section) || {}).title || "") + " · " + esc(kindOf(c, i)) + '</span><button type="button" class="lb ins-x" data-close>Close</button></div>' +
-        '<h2 style="font-size:18px;margin:4px 0 14px" lang="de">' + esc(c.name || heading(c)) + "</h2>" +
-        '<label class="ins-ck"><input type="checkbox" data-check ' + (c.checked ? "checked" : "") + '><span><b>Checked against its sources</b><span class="lb" style="display:block">Every card must be checked before the clean PDF goes out.</span></span></label>' +
-        (c.type === "person" ? '<label class="lb" style="display:flex;gap:8px;margin:10px 0 0"><input type="checkbox" data-name ' + (c.show_person_name ? "checked" : "") + "><span>Name the person in the pitch (" + esc(c.name) + "). Off: the card says “Group at " + esc(c.unit || "the University of Bern") + "”.</span></label>" : "") +
-        '<h3 class="rh">Sources</h3>' +
+      d.insertAdjacentHTML("beforeend", '<div class="pc-ev">' +
+        '<p class="pc-ev-h">What the sources say</p>' +
         ((c.sources || []).length ? (c.sources || []).map(function (s, k) {
-          return '<div class="ins-src"><p style="margin:0"><b>[' + nums[k] + "]</b> " + esc(host(s.url)) + (s.added_by_officer ? ' <span class="lb">· added by you</span>' : "") + "</p>" +
-            (s.quote ? '<p class="lb" style="margin:2px 0 4px;font-style:italic;color:#111">“' + esc(s.quote) + "”</p>" : "") +
-            '<a href="' + esc(s.deep_link || s.url) + '" target="_blank" rel="noopener" style="font-size:13px">' + (s.quote ? "Open at quote" : "Open page") + "</a></div>";
-        }).join("") : '<p class="lb" style="color:#B8000F;margin:0 0 8px">No source: this card cannot be exported. Add one below or delete the card.</p>') +
-        '<label class="lb" for="ins-src">Add a source URL, then press Enter</label><input id="ins-src" data-src placeholder="https://" class="in" style="font-size:13px;padding:6px 8px;width:100%;margin-top:4px">' +
-        '<h3 class="rh">Rewrite from its sources only</h3>' +
-        '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="b s" data-rw="shorter"' + (c.locked ? " disabled" : "") + '>Shorter</button><button class="b s" data-rw="jargon"' + (c.locked ? " disabled" : "") + '>Less jargon</button><button class="b s" data-rw="' + other[0] + '"' + (c.locked ? " disabled" : "") + ">" + other[1] + "</button></div>" +
-        '<p class="lb hidden" data-msg style="margin:8px 0 0"></p>' +
-        '<h3 class="rh">Card</h3>' +
-        '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="b s" data-lock>' + (c.locked ? "Allow edits" : "Lock") + '</button><button class="b s" data-del>Delete</button><a class="b s" href="/leads/' + lid + '/map">Show in map</a></div>' +
-        '<p style="margin:14px 0 0"><a href="#" data-mutz-ask="Is this claim backed? “' + esc((c.text || "").slice(0, 160)) + '”" style="font-size:13px">Ask Bärner Mutz: is this backed?</a></p>';
-      el.querySelector("[data-close]").addEventListener("click", function () { selected = null; document.querySelectorAll("#pages .pc.sel").forEach(function (d) { d.classList.remove("sel"); }); inspector(); });
-      el.querySelector("[data-check]").addEventListener("change", function (e) { c.checked = e.target.checked; save(); refresh(c); });
-      var nm = el.querySelector("[data-name]"); if (nm) nm.addEventListener("change", function (e) { c.show_person_name = e.target.checked; save(); doc(); });
-      el.querySelector("[data-lock]").addEventListener("click", function () { c.locked = !c.locked; save(); render(); });
-      el.querySelector("[data-del]").addEventListener("click", function () { c.deleted = true; selected = null; toast('Card “' + (c.name || "card").slice(0, 40) + '” deleted', function () { c.deleted = false; }); save(); render(); });
-      el.querySelector("[data-src]").addEventListener("keydown", function (e) {
+          return '<p class="pc-q"><b>[' + nums[k] + "]</b><span>" + (s.quote ? "“" + esc(s.quote) + "” " : "") +
+            '<a href="' + esc(s.deep_link || s.url) + '" target="_blank" rel="noopener">' + esc(host(s.url)) + " ↗</a></span></p>";
+        }).join("") : '<p class="pc-q" style="color:var(--red-h)">No source. Add one under More, or delete the card.</p>') +
+        '<p class="pc-ask">Does the card say only this?</p>' +
+        '<div class="pc-act">' +
+        (c.checked ? '<button type="button" class="b s" data-check>✓ Checked · undo</button>' : '<button type="button" class="b s p" data-check' + ((c.sources || []).length ? "" : " disabled") + ">Yes, looks right</button>") +
+        '<details class="pc-menu"><summary class="b s">Rewrite</summary><div>' +
+        '<button type="button" data-rw="shorter"' + lk + '>Shorter</button><button type="button" data-rw="jargon"' + lk + '>Less jargon</button><button type="button" data-rw="' + other[0] + '"' + lk + ">" + other[1] + "</button></div></details>" +
+        '<button type="button" class="b s" data-del>Delete</button>' +
+        '<details class="pc-menu"><summary class="b s">More</summary><div>' +
+        '<button type="button" data-addsrc>Add a source</button>' +
+        '<button type="button" data-lock>' + (c.locked ? "Unlock the text" : "Lock the text") + "</button>" +
+        '<a href="/leads/' + lid + '/map">Show in the map</a>' +
+        '<a href="#" data-mutz-ask="Is this claim backed? “' + esc((c.text || "").slice(0, 160)) + '”">Ask Bärner Mutz</a></div></details></div>' +
+        '<input data-src class="in hidden" placeholder="Paste a https:// address, then press Enter" aria-label="Add a source URL">' +
+        (c.type === "person" ? '<label class="lb pc-nm"><input type="checkbox" data-name ' + (c.show_person_name ? "checked" : "") + "><span>Name " + esc(c.name) + " in the pitch. Off: “Group at " + esc(c.unit || "the University of Bern") + "”.</span></label>" : "") +
+        '<p class="lb hidden" data-msg></p></div>');
+      var ev = d.querySelector(".pc-ev");
+      function msg(t) { var m = ev.querySelector("[data-msg]"); m.textContent = t; m.classList.remove("hidden"); }
+      ev.querySelectorAll(".pc-menu").forEach(function (m) {  // one menu open at a time
+        m.addEventListener("toggle", function () { if (m.open) ev.querySelectorAll(".pc-menu").forEach(function (o) { if (o !== m) o.open = false; }); });
+      });
+      ev.querySelector("[data-check]").addEventListener("click", function () {
+        c.checked = !c.checked; save(); refresh(c);
+        var nx = c.checked && nextUnchecked();
+        if (nx) show(nx.card_id);
+        else { inspector(); dock(); if (c.checked) toast(draft.written_at ? "Every card is checked. Continue to export when you are ready." : "Every card is checked. Write the pitch next.", null); }
+      });
+      ev.querySelector("[data-lock]").addEventListener("click", function () { c.locked = !c.locked; save(); render(); });
+      ev.querySelector("[data-del]").addEventListener("click", function () { c.deleted = true; selected = null; toast('Card “' + (c.name || "card").slice(0, 40) + '” deleted', function () { c.deleted = false; }); save(); render(); });
+      ev.querySelector("[data-addsrc]").addEventListener("click", function () { var i = ev.querySelector("[data-src]"); i.classList.remove("hidden"); i.focus(); ev.querySelectorAll(".pc-menu").forEach(function (o) { o.open = false; }); });
+      var nm = ev.querySelector("[data-name]"); if (nm) nm.addEventListener("change", function (e) { c.show_person_name = e.target.checked; save(); render(); });
+      ev.querySelector("[data-src]").addEventListener("keydown", function (e) {
         if (e.key !== "Enter") return; e.preventDefault();
         var u = e.target.value.trim(); if (!/^https?:\/\/\S+\.\S+/.test(u)) { msg("Enter a full address starting with https://"); return; }
         c.sources = (c.sources || []).concat([{url: u, quote: "", deep_link: u, added_by_officer: true}]); c.edited = true; c.checked = false; save(); render();
       });
-      el.querySelectorAll("[data-rw]").forEach(function (b) {
+      ev.querySelectorAll("[data-rw]").forEach(function (b) {
         b.addEventListener("click", function () {
-          b.disabled = true; msg("Rewriting from this card's sources only…");
+          b.closest("details").open = false; b.disabled = true; msg("Rewriting from this card's sources only…");
           window.mutzPost("/api/pitch/" + lid + "/rewrite", {card_id: c.card_id, instruction: b.dataset.rw}).then(function (r) {
             if (!r.ok) { msg(r.error); b.disabled = false; return; }
             c.text = r.text; c.checked = false; save(); render();
           }).catch(function () { msg("The Apertus gateway did not answer. The card is unchanged. Try again in a minute."); b.disabled = false; });
         });
       });
-      function msg(t) { var m = el.querySelector("[data-msg]"); m.textContent = t; m.classList.remove("hidden"); }
     }
-    function docPanel(el) {
+    function docPanel(el) {  // the side panel: three steps, check the facts, write the pitch, export
       var vis = allVisible(), nos = vis.filter(function (c) { return !(c.sources || []).length; }).length;
-      el.innerHTML = '<h2 style="font-size:18px;margin:0 0 4px">Pitch structure</h2><p class="lb" style="margin:0 0 12px">The document answers three questions, in this order.</p>' +
-        ["why", "what", "how"].map(function (p) {
-          var ss = draft.sections.filter(function (s) { return !s.deleted && part(s) === p; });
-          return '<div class="ins-part"><p class="pg-k" style="margin:0 0 2px">' + PART_LABEL[p] + "</p><p style=\"margin:0 0 6px;font-size:14px\">" + GUIDE[p] + "</p>" +
-            ss.map(function (s) { var n = s.id === "visit" ? (draft.visit || []).length + " lines" : cards(s.id).length + " card" + (cards(s.id).length === 1 ? "" : "s"); return '<a href="#sec-' + esc(s.id) + '" data-go="' + esc(s.id) + '" class="ins-go' + (s.hidden ? " off" : "") + '"><span>' + esc(s.title) + "</span><span class=\"lb\">" + n + (s.hidden ? " · hidden" : "") + "</span></a>"; }).join("") + "</div>";
-        }).join("") +
-        '<h3 class="rh">Checks</h3>' +
-        '<div class="ins-row"><span>Cards without a source</span><b' + (nos ? ' style="color:#B8000F"' : "") + ">" + nos + "</b></div>" +
-        '<p class="lb" style="margin:10px 0 0">Click a card on the page to check it, see its quotes or rewrite it.</p>';
-      el.querySelectorAll("[data-go]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); go(a.dataset.go); }); });
+      var ck = vis.filter(function (c) { return c.checked; }).length, pc = vis.length ? Math.round(100 * ck / vis.length) : 0;
+      var at = ck < vis.length || !vis.length ? 1 : draft.written_at ? 3 : 2;
+      var head = {1: ["Check the facts", "Click a card on the page and compare it with its sources."],
+        2: ["Write the pitch", "Every fact is checked. Apertus now turns them into paragraphs for " + (meta.company || "the company") + ", from their source pages only."],
+        3: ["Read it through", "Edit any line on the page, then export."]}[at];
+      el.innerHTML = '<h2 style="font-size:18px;margin:0 0 4px">' + head[0] + '</h2><p class="lb" style="margin:0 0 14px">' + esc(head[1]) + "</p>" +
+        (at === 1 ? '<div class="meter" title="Cards checked: ' + ck + " of " + vis.length + '"><span class="meter-l"><span>Cards checked</span><span class="lb">' + ck + " of " + vis.length + "</span></span>" +
+          '<span class="bar" role="meter" aria-label="Cards checked" aria-valuemin="0" aria-valuemax="' + vis.length + '" aria-valuenow="' + ck + '"><i style="width:' + pc + '%"></i></span></div>' : "") +
+        (nos ? '<p style="margin:12px 0 0;font-size:14px;color:#B8000F">' + nos + " card" + (nos === 1 ? " has" : "s have") + " no source. Add one or delete the card.</p>" : "") +
+        '<ol class="isteps">' + ["Check the facts", "Write the pitch", "Export"].map(function (t, i) {
+          var n = i + 1; return '<li class="' + (n < at ? "done" : n === at ? "on" : "") + '"><b>' + (n < at ? "✓" : n) + "</b>" + t + "</li>";
+        }).join("") + "</ol>";
     }
 
     /* ---------------- zoom and page number */
@@ -307,13 +333,56 @@
       document.querySelectorAll("#outline .ol").forEach(function (o) { o.classList.toggle("on", o.dataset.sec === at); });
     }
     $("#canvas").addEventListener("scroll", pageNo, {passive: true});
+    document.addEventListener("click", function (e) {  // a click elsewhere closes an open Rewrite or More menu
+      document.querySelectorAll(".pc-menu[open]").forEach(function (m) { if (!m.contains(e.target)) m.open = false; });
+    });
+    document.addEventListener("keydown", function (e) {  // Escape closes the card overlay
+      if (e.key !== "Escape" || !selected || e.target.closest("[contenteditable]")) return;
+      selected = null; document.querySelectorAll("#pages .pc.sel").forEach(function (d) { d.classList.remove("sel"); }); inspector();
+    });
     $("#canvas").addEventListener("click", function (e) {  // a click on the grey canvas, outside any card, shows the document panel
       if (!e.target.closest(".pc") && !e.target.closest("[contenteditable]") && selected) { selected = null; document.querySelectorAll("#pages .pc.sel").forEach(function (d) { d.classList.remove("sel"); }); inspector(); }
     });
 
-    function render() { outline(); doc(); inspector(); }
+    /* ---------------- write the pitch: the facts become paragraphs, then export */
+    var writing = false;
+    function dock() {
+      var el = $("#pdock"), exp = "/leads/" + lid + "/export";
+      var left = allVisible().filter(function (c) { return !c.checked && (c.sources || []).length; }).length;
+      if (draft.written_at) {
+        el.innerHTML = (left ? '<button type="button" class="b p" data-next style="justify-content:center">Next card to check</button>' +
+            '<p class="lb" style="margin:0">' + left + " card" + (left === 1 ? "" : "s") + ' left to check against their sources</p><a class="b s" href="' + exp + '" style="justify-content:center">Continue to export</a>'
+          : '<a class="b p" href="' + exp + '" style="justify-content:center">Continue to export</a>') +
+          '<button type="button" class="b s" data-write style="justify-content:center">Write it again</button>';
+      } else if (left) {  // the pitch is written from checked facts only
+        el.innerHTML = '<button type="button" class="b p" data-next style="justify-content:center">Next card to check</button>' +
+          '<p class="lb" style="margin:0">' + left + " card" + (left === 1 ? "" : "s") + " left. Then you can write the pitch.</p>";
+      } else {
+        el.innerHTML = '<button type="button" class="b p" data-write style="justify-content:center"' + (writing ? " disabled" : "") + ">" + (writing ? "Writing the pitch…" : "Write the pitch") + "</button>" +
+          (writing ? '<p class="lb" style="margin:0">This takes up to a minute.</p>' : "");
+      }
+      var b = el.querySelector("[data-write]"); if (b) b.addEventListener("click", write);
+      var nx = el.querySelector("[data-next]"); if (nx) nx.addEventListener("click", function () { var c = nextUnchecked(); if (c) show(c.card_id); });
+    }
+    function write() {
+      if (writing) return;
+      clearTimeout(saveT);  // the request carries the draft, unsaved edits included
+      writing = true; dock(); $("#pages").classList.add("busy");
+      var done = function () { writing = false; $("#pages").classList.remove("busy"); };
+      window.mutzPost("/api/pitch/" + lid + "/write", {draft: draft}).then(function (r) {
+        done();
+        if (!r.ok) { dock(); toast(r.error, null); return; }
+        draft = r.draft; selected = null; render();
+        var s = $("#saved"); if (s) s.textContent = "Draft saved " + r.saved;
+        $("#canvas").scrollTo({top: 0, behavior: "smooth"});
+      }).catch(function () { done(); dock(); toast("Apertus did not write the pitch this time. Nothing changed. Try again in a minute.", null); });
+    }
+
+    function render() { outline(); doc(); inspector(); dock(); }
     render();
     applyZoom();
-    if (section && /[?&]section=/.test(location.search)) setTimeout(function () { go(section); }, 50);
+    var want = new URLSearchParams(location.search).get("card");
+    if (want) setTimeout(function () { show(want); }, 50);
+    else if (section && /[?&]section=/.test(location.search)) setTimeout(function () { go(section); }, 50);
   };
 })();

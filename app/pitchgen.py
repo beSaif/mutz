@@ -225,6 +225,194 @@ def rewrite(card, instruction, lang=None):
     return t
 
 
+PITCH_STYLE = ("You turn checked, sourced facts into a pitch letter from the Bern Economic Development Agency to a company. "
+               "Address the company as 'you'. It reads as one argument: why Bern, then what Bern offers for each of the company's plans. "
+               "Rewrite every card in your own words, never copy its current text. Each card becomes a paragraph of 3 to 5 sentences: "
+               "start from the company's own need ('For your plan to ..., ...'), then say what the group does, what it has done "
+               "(studies, methods, patient groups, countries, sizes) and how the company could work with it. "
+               "A card in section why says why this matters for the company; a card in section matches or infra describes the group's work. "
+               "Two cards never get the same text. Every fact comes from that card's page passages, close to their wording; "
+               "do not guess what the group could do beyond what the passages say. No source markers. The intro only restates the company's own plans and says what the document lists; "
+               "it never names a group and never states a fact about Bern.")
+
+
+def _norm(t):
+    t = re.sub(r"[#*_>`]", " ", t or "")
+    t = t.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
+    return re.sub(r"\s+", " ", t).strip().lower()
+
+
+_CHUNKS = None
+
+
+def _passage(url, quote, cap=2500):
+    """The text around a quote on its crawled page: the chunk that holds it and the one after."""
+    global _CHUNKS
+    if _CHUNKS is None:
+        import json
+        from app.stubs import DATA
+        _CHUNKS = {}
+        p = DATA / "chunks.jsonl"
+        if p.exists():
+            with p.open() as f:
+                for line in f:
+                    try:
+                        c = json.loads(line)
+                    except ValueError:
+                        continue
+                    _CHUNKS.setdefault(c.get("url"), []).append((c.get("chunk_id") or "", c.get("text") or ""))
+        for v in _CHUNKS.values():
+            v.sort()
+    chunks = [t for _, t in _CHUNKS.get(url) or []]
+    if not chunks:
+        return ""
+    q = _norm(quote)[:80]
+    i = next((k for k, t in enumerate(chunks) if q and q in _norm(t)), 0)
+    return "\n".join(chunks[i:i + 2])[:cap]
+
+
+def _deep(url, q):
+    from urllib.parse import quote as enc
+    w = q.split()
+    frag = enc(q) if len(w) <= 8 else enc(" ".join(w[:4])) + "," + enc(" ".join(w[-4:]))
+    return f"{url.split('#', 1)[0]}#:~:text={frag}"
+
+
+_STOP = set("this that with from have their they them there these those which while where when what about into over also than then such each more most other only very will would could should been being were your yours does done make made uses used using across after before under between within study".split())
+
+
+def _words(t):
+    t = re.sub(r"[-‐‑‒–—]", " ", _norm(t))  # real-world and real‑world are the same words
+    return {w for w in re.findall(r"[a-zà-ÿ0-9]{4,}", t) if w not in _STOP}
+
+
+def _sentences(t):
+    t = re.sub(r"^#+.*$", "", t or "", flags=re.M)
+    return [x.strip() for x in re.split(r"(?<![\s(][A-Z]\.)(?<=[.!?])\s+|\n+", t) if len(x.strip()) >= 30]
+
+
+def _ground(c, text, passages, need):
+    """Cite the written card in code, sentence by sentence. Each sentence is matched with the sentences on the
+    card's own pages: a close match becomes its source, quoted word for word; a sentence that only restates the
+    company's need stays without one; anything else has nothing behind it and is dropped."""
+    srcs = list(c.get("sources") or [])
+    page = [(u, x) for u, t in passages.items() for x in _sentences(t)]
+    page += [(x["url"], x["quote"]) for x in srcs if x.get("quote")]
+    nw = _words(need)
+    own = _words(" ".join(x for x in (c.get("name"), c.get("unit")) if x))  # the group's own name needs no source
+    out = []
+    for sent in re.split(r"(?<![\s(][A-Z]\.)(?<=[.?!])\s+(?=[A-ZÄÖÜÀ-Ý])", re.sub(r"\s*\[[^\]]{0,6}\]", "", text)):
+        w = _words(sent) - own
+        if not w:
+            continue
+        ranked = sorted(page, key=lambda p: -len(w & _words(p[1])))
+        got, cov = [], set()
+        for u, q in ranked[:3]:
+            gain = (w & _words(q)) - cov
+            if len(gain) >= 2:
+                got.append((u, q))
+                cov |= gain
+        backed, restates = len(cov) >= 0.5 * len(w), len(w & nw) + len(cov) >= 0.6 * len(w)
+        if backed or (restates and got):
+            marks = []
+            for u, q in got:
+                i = next((k for k, x in enumerate(srcs) if _norm(x.get("quote")) == _norm(q)), None)
+                if i is None:
+                    fetched = next((x.get("fetched_at") for x in srcs if x.get("url") == u), None)
+                    srcs.append({"url": u, "quote": q, "deep_link": _deep(u, q), "fetched_at": fetched, "from_page": True})
+                    i = len(srcs) - 1
+                if f"[{i + 1}]" not in marks:
+                    marks.append(f"[{i + 1}]")
+            out.append(sent.rstrip() + " " + "".join(marks))
+        elif restates:
+            out.append(sent.rstrip())
+    return " ".join(out).strip(), srcs
+
+
+def _written_ok(text, need_marker=False):
+    return _ok(text) and (not need_marker or re.search(r"\[\d+\]", text))
+
+
+def write_pitch(draft, lead, needs):
+    """Fill the document once every card is checked: a cover opening and every card as a
+    paragraph tied to the company's need, written from the passages around its quotes. How to start keeps its fixed
+    wording, since it is where a promised meeting would slip in. Locked and hand-edited cards keep their words. Each
+    field is checked like a card; a field that fails keeps what it had. Raises when the gateway does not answer."""
+    from common import llm
+    prof = lead.get("profile") or {}
+    company = prof.get("name") or lead.get("title")
+    hidden = {s["id"] for s in draft["sections"] if s.get("hidden") or s.get("deleted")}
+    secs = [s for s in draft["sections"] if s["id"] in ("why", "matches", "infra") and s["id"] not in hidden]
+    cards = [c for c in visible_cards(draft) if c["section"] in {s["id"] for s in secs}]
+    free = [c for c in cards if not c.get("locked") and not c.get("edited")]
+    ids = {f"card{k}": c for k, c in enumerate(free, 1)}
+    secs = [s for s in secs if any(c["section"] == s["id"] for c in cards)]  # an empty section gets no opening to fill
+    covered = {c.get("need_id") for c in cards}  # the intro may only mention needs this document answers
+    passages = {}
+    lines = [f"Company: {company}. What it makes: {prof.get('product') or ''}. About it: {prof.get('summary') or lead.get('summary') or ''}",
+             "Its plans this document answers: " + "; ".join(n["text"] for n in needs if n.get("text") and n["id"] in covered),
+             "Its plans the agency is still looking into: " + ("; ".join(n["text"] for n in needs if n.get("text") and n["id"] not in covered) or "none"), ""]
+    for s in secs:
+        lines.append(f"## Section {s['id']} · {s['title']}")
+        for c in cards:
+            if c["section"] != s["id"]:
+                continue
+            cid = next((k for k, v in ids.items() if v is c), None)
+            who = c["name"] if c["type"] != "person" or c.get("show_person_name") else f"a research group at {c['unit'] or 'the University of Bern'}"
+            if not cid:
+                lines.append(f"- fixed, do not rewrite · {who}: {c['text']}")
+                continue
+            pg = passages.setdefault(cid, {})
+            for x in c.get("sources") or []:
+                if x.get("url") and x["url"] not in pg:
+                    pg[x["url"]] = _passage(x["url"], x.get("quote")) or x.get("quote") or ""
+            lines.append(f"- id={cid} · {who} · the company's need: {c.get('need') or '-'}\n  checked quotes: " +
+                         " | ".join(f"“{x['quote']}”" for x in c.get("sources", []) if x.get("quote")) +
+                         "".join(f"\n  page passage ({u}):\n  {t}" for u, t in pg.items()))
+    tool = llm.tool("write_pitch", "Write the pitch text from the checked facts and their page passages.", {
+        "type": "object", "properties": {
+            "intro": {"type": "string", "description": "Cover opening, 3 to 5 sentences: what the company is building and looking for, "
+                      "what this document lists, and which of its plans the agency is still looking into. No figures about the company."},
+            "cards": {"type": "array", "items": {"type": "object", "properties": {
+                "id": {"type": "string"}, "text": {"type": "string", "description": "3 to 5 sentences."}},
+                "required": ["id", "text"]}}},
+        "required": ["intro", "cards"]})
+    lang_name = {"de": "German", "fr": "French"}.get(draft.get("lang"), "English")
+    style = STYLE.replace("Max 2 sentences per card. ", "").replace(" End each card with its source marker like [1].", "")
+    msgs = [{"role": "system", "content": PITCH_STYLE + " " + style + f" Write in {lang_name}. "
+             "Return one card per id given (card1, card2, ...); leave out cards marked fixed."},
+            {"role": "user", "content": "\n".join(lines)}]
+    got = None
+    for temp in (0.3, 0.1):  # Apertus now and then runs on to the token limit and the call does not parse: once more, cooler
+        r = llm.chat(llm.LARGE, msgs, tools=[tool], tool_choice=llm.force("write_pitch"), tag="app.pitch_write",
+                     temperature=temp, max_tokens=3000)
+        got = r["tool_calls"][0]["arguments"] if r["tool_calls"] else None
+        if isinstance(got, dict) and got.get("cards"):
+            break
+    if not isinstance(got, dict):
+        raise ValueError("Apertus returned no pitch text")
+    changed = 0
+    intro = _clean(got.get("intro"))
+    if _written_ok(intro):
+        draft["intro"] = intro
+        changed += 1
+    old = {_norm(re.sub(r"\[\d+\]", "", c["text"])) for c in cards}
+    for it in got.get("cards") or []:
+        c = ids.get(str((it or {}).get("id")).strip())
+        if not c:
+            continue
+        t, srcs = _ground(c, _clean(it.get("text")), passages.get(next(k for k, v in ids.items() if v is c), {}), c.get("need") or "")
+        if not _written_ok(t, need_marker=bool(srcs)) or _norm(re.sub(r"\[\d+\]", "", t)) in old:
+            continue
+        # the facts were checked before writing, and every new sentence is cited from its page in code: it stays checked
+        c["text"], c["sources"], c["origin"] = t, srcs, "written from quotes"
+        changed += 1
+    if not changed:
+        raise ValueError("No written text passed the checks")
+    draft["written_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return draft
+
+
 def visible_cards(draft):
     hidden = {s["id"] for s in draft["sections"] if s.get("hidden") or s.get("deleted")}
     order = [s["id"] for s in draft["sections"]]
@@ -251,6 +439,7 @@ def to_contract(draft, lead):
     return {"case_id": lead["id"], "company": {"name": prof.get("name") or lead.get("company") or lead["title"],
                                                "country": prof.get("country", ""), "summary": prof.get("product") or lead.get("summary") or ""},
             "title": draft.get("title") or lead["title"], "intro": draft.get("intro", ""), "how": draft.get("how", HOW),
+            "written": bool(draft.get("written_at")),
             "officer": draft.get("officer") or {"name": "", "email": ""}, "cards": cards,
             "sections": [s for s in draft["sections"] if not s.get("hidden") and not s.get("deleted")],
             "visit": draft.get("visit", []), "lang": draft.get("lang", "en"), "created_at": draft.get("created_at"),

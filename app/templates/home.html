@@ -3,18 +3,25 @@
 {% block title %}{{ heads.get(f, "Leads") }}{% endblock %}
 {% block viewclass %}panes{% endblock %}
 {% block actions %}
-<form method="get" action="/" class="srch" role="search">{% if f %}<input type="hidden" name="f" value="{{ f }}">{% endif %}<input id="sr" name="q" aria-label="Search leads" value="{{ q }}" class="in" placeholder="Search company, sector, expert"></form>
+<form method="get" action="/" class="srch" role="search">{% if f %}<input type="hidden" name="f" value="{{ f }}">{% endif %}{% if who %}<input type="hidden" name="who" value="{{ who }}">{% endif %}<input id="sr" name="q" aria-label="Search leads" value="{{ q }}" class="in" placeholder="Search company, sector, expert"></form>
 <a class="ic" href="{{ request.url.path }}{% if f %}?f={{ f }}{% endif %}" title="Refresh" aria-label="Refresh"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13.5 8A5.5 5.5 0 1 1 11.9 4.1M12 1v3.3H8.7" fill="none" stroke="#111" stroke-width="1.6"/></svg></a>
-{% if total %}<form method="post" action="/leads/demo"><button class="b s">Load the sport wearable demo</button></form>{% endif %}
 {% if q %}<a class="b s" href="/{% if f %}?f={{ f }}{% endif %}">Clear search</a>{% endif %}
 <span class="sp">{% set shown = (groups[f]|length) if f else total %}{% if shown %}1–{{ shown }} of {{ shown }}{% else %}0 leads{% endif %}</span>
+{% if total and not q %}<form method="post" action="/leads/reset" onsubmit="return confirm('Delete every lead, pitch and export? Officers and the example gap report rows stay. This cannot be undone.')"><button class="b s" title="Start the demo from an empty list">Reset demo data</button></form>{% endif %}
 {% endblock %}
 {% block content %}
 <main class="two">
 <section style="flex:1 1 640px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:28px">
+{% set wq = ("&who=" ~ who) if who else "" %}
+<div style="display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap">
 <h1 style="margin:0;font-size:28px;line-height:1.15">{{ heads.get(f, "Leads") }}</h1>
+<nav class="tb" aria-label="Whose leads" style="margin-left:auto">{% set base = "/?" ~ (("f=" ~ f ~ "&") if f else "") ~ (("q=" ~ q|urlencode ~ "&") if q else "") %}
+<a href="{{ base }}" class="{{ 'on' if not who }}"{% if not who %} aria-current="true"{% endif %}>All</a>
+<a href="{{ base }}who=mine" class="{{ 'on' if who }}"{% if who %} aria-current="true"{% endif %}>Mine · {{ n_mine }}</a></nav>
+</div>
+{% if who and total == 0 and not q %}<p class="lb" style="margin:0">{{ me.name }} has no leads yet. <a href="/{% if f %}?f={{ f }}{% endif %}">Show all leads</a> or take one over from its page.</p>{% endif %}
 
-{% if total == 0 and not q %}
+{% if total == 0 and not q and not who %}
 <section class="pn" aria-label="No leads yet" style="max-width:640px">
 <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
 {{ ui.mutz("idle", 80, 75) }}
@@ -36,9 +43,9 @@
 {% set p = r.p %}
 <a class="row" href="/leads/{{ r.id }}">
 <span><b{% if kind == 'closed' %} style="color:#111"{% endif %}>{{ r.title }}</b><span class="lb" style="display:block">{{ r.summary or (r.sector or 'No summary yet') }}{% if r.demo %} · demo{% endif %}</span></span>
-<span class="lb">{{ r.origin }} · {{ r.created_at|date }}</span>
+<span class="lb own">{% if r.owner and names.get(r.owner) %}{{ ui.av(names[r.owner]) }}{{ names[r.owner] }} · {% endif %}{{ r.origin }} · {{ r.created_at|date }}</span>
 {% if kind == 'new' %}
-<span style="display:inline-flex;gap:8px;align-items:center;font-size:14px">{{ ui.pot(p.pot, 18, 20, False) }}{% if p.pot %}{{ {"strong":"Likely strong","thin":"Thin","none":"No match"}[p.pot] }}{% else %}Not checked{% endif %}</span>
+<span style="display:inline-flex;gap:8px;align-items:center;font-size:14px">{{ ui.pot(p.pot, 18, 20, False) }}{% if p.pot %}{{ {"strong":"Likely strong","thin":"Limited","none":"No match"}[p.pot] }}{% else %}Not checked{% endif %}</span>
 {% elif kind == 'draft' %}
 <span style="font-size:14px">{% if p.cards %}Pitch · {{ p.checked }} of {{ p.cards }} checked<span class="bar" style="width:150px"><i style="width:{{ (100 * p.checked / p.cards)|int }}%"></i></span>{% elif p.accepted or p.searched %}Matches · {{ p.accepted }} accepted<span class="bar" style="width:150px"><i style="width:40%"></i></span>{% elif p.needs %}Brief · {{ p.needs }} needs<span class="bar" style="width:150px"><i style="width:15%"></i></span>{% else %}Brief · not read yet{% endif %}</span>
 {% else %}
@@ -50,7 +57,7 @@
 {% if f and total and not groups[f] %}<p class="lb" style="margin:0">Nothing here{% if q %} for “{{ q }}”{% endif %}. <a href="/">Show all leads</a></p>{% endif %}
 {# the overview shows three per section; the folder in the sidebar shows them all #}
 {% for g, kind in [("drafts", "draft"), ("closed", "closed")] if groups[g] and f in ("", g) %}{% set rs = groups[g] if f else groups[g][:3] %}
-<div><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>{{ heads[g] }}</h2>{% if rs|length < groups[g]|length %}<a class="lb" href="/?f={{ g }}{% if q %}&q={{ q|urlencode }}{% endif %}">Show all {{ groups[g]|length }}</a>{% endif %}</div>
+<div><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>{{ heads[g] }}</h2>{% if rs|length < groups[g]|length %}<a class="lb" href="/?f={{ g }}{% if q %}&q={{ q|urlencode }}{% endif %}{{ wq }}">Show all {{ groups[g]|length }}</a>{% endif %}</div>
 <div style="border-top:1px solid #111;margin-top:8px{{ ';color:#5E5E5E' if g == 'closed' }}">{% for r in rs %}{{ leadrow(r, kind) }}{% endfor %}</div></div>
 {% endfor %}
 </section>

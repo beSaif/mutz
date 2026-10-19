@@ -4,11 +4,9 @@
 {% block viewclass %}panes{% endblock %}
 {% block content %}
 <main id="pitchapp">
-<aside aria-label="Outline" style="flex:0 0 250px;padding:20px 16px 20px 24px;border-right:1px solid #D9D9D9">
-<p class="lb" style="margin:0 0 8px">Outline</p>
+<aside aria-label="Outline" class="olbar">
 <div id="outline"></div>
 <div id="toast" role="status"></div>
-<div style="margin:16px 0 0" id="checkedcount"></div>
 </aside>
 <section class="pcol" style="flex:1 1 600px;min-width:0;background:#E6E6E6" aria-label="Document">
 <div class="pe-bar">
@@ -20,13 +18,13 @@
 </section>
 <aside class="pcol" aria-label="Inspector" style="flex:0 0 330px;border-left:1px solid #D9D9D9">
 <div class="pane" id="inspector" style="padding:20px 24px 88px"></div>
-<div class="dock r" style="padding:12px 24px;display:flex;flex-direction:column;gap:6px">
+<div class="dock r" id="pdock" style="padding:12px 24px;display:flex;flex-direction:column;gap:6px">
 <a class="b p" href="/leads/{{ lead.id }}/export" style="justify-content:center">Continue to export</a>
 </div>
 </aside>
 </main>
 {% endblock %}
 {% block scripts %}
-<script src="/static/pitch.js"></script>
+<script src="{{ asset('pitch.js') }}"></script>
 <script>initPitch({{ lead.id|tojson }}, {{ draft|tojson }}, {{ section|tojson }}, {{ {"logo": logo, "company": (lead.profile or {}).get("name") or lead.title, "date": today}|tojson }});</script>
 {% endblock %}

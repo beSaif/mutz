@@ -3,7 +3,7 @@
 {% block viewclass %}panes{% endblock %}
 {% block actions %}
 <a class="b s" href="{{ request.url.path }}">Reload results</a>
-<span class="sp">{% if ev %}Last run {{ ev.run_at|date(True) }} · {{ ev.split }} set · {{ ev.label or ev.backend }}{% else %}No run yet{% endif %}</span>
+<span class="sp"{% if ev %} title="{{ ev.label or ev.backend }}"{% endif %}>{% if ev %}Last run {{ ev.run_at|date(True) }} · {{ ev.split }} set{% else %}No run yet{% endif %}</span>
 {% endblock %}
 {% block content %}
 {% set mt = (ev or {}).get('metrics', {}) %}
@@ -15,26 +15,26 @@
 {% if view != 'checks' %}
 <section style="flex:1 1 620px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:22px">
 <div><h1 style="margin:0;font-size:28px;line-height:1.15">Search quality</h1>
-<p class="lb" style="margin:4px 0 0">{% if ev %}Last run {{ ev.run_at|date(True) }} · {{ ev.split }} set · {{ ev.n_scored or ev.n }} of {{ ev.n }} queries scored{% if ev.n_skipped %}, {{ ev.n_skipped }} skipped{% endif %} · {{ ev.label or ev.backend }}{% else %}No run yet{% endif %}</p></div>
+<p class="lb" style="margin:4px 0 0">{% if ev %}Last run {{ ev.run_at|date(True) }} · {{ ev.split }} set · {{ ev.n_scored or ev.n }} of {{ ev.n }} queries scored{% if ev.n_skipped %}, {{ ev.n_skipped }} skipped{% endif %}<span style="display:block">Setup: {{ ev.label or ev.backend }}</span>{% else %}No run yet{% endif %}</p></div>
 {% if ev %}
 <div>
 <div class="cr lb" style="border-bottom-color:#111"><span>Criterion</span><span>{{ ev.split|capitalize }} set · other splits</span><span>Target</span></div>
-<div class="cr"><span><b>Expected experts in top 10</b><span class="lb" style="display:block">Recall@10</span></span><span>{{ rate(mt.get('recall_at_10'), 0.8) }}<span class="lb" style="display:block">{{ sm('recall_at_10') }}</span></span><span class="lb">≥ 80%</span></div>
-<div class="cr"><span><b>Lay terms find the same experts</b><span class="lb" style="display:block">Synonym parity · {{ (mt.get('synonym_groups') or {})|length }} groups</span></span><span>{{ rate(mt.get('synonym_parity')) }}<span class="lb" style="display:block">top 10 overlap {{ pct(mt.get('synonym_overlap')) }}</span></span><span class="lb">high</span></div>
+<div class="cr"><span><b>Expected experts in top 10</b><span class="lb" style="display:block">Share of the experts we expected that show up in the first 10 results · Recall@10</span></span><span>{{ rate(mt.get('recall_at_10'), 0.8) }}<span class="lb" style="display:block">{{ sm('recall_at_10') }}</span></span><span class="lb">≥ 80%</span></div>
+<div class="cr"><span><b>Lay terms find the same experts</b><span class="lb" style="display:block">A plain word and the expert term bring up the same people · synonym parity, {{ (mt.get('synonym_groups') or {})|length }} groups</span></span><span>{{ rate(mt.get('synonym_parity')) }}<span class="lb" style="display:block">top 10 overlap {{ pct(mt.get('synonym_overlap')) }}</span></span><span class="lb">high</span></div>
 <div class="cr"><span><b>Results with a supporting public page</b>{% if mt.get('citation_failures') %}<span class="lb" style="display:block">{{ mt.citation_failures|length }} failures</span>{% endif %}</span><span>{{ rate(mt.get('citation_validity'), 1.0) }}</span><span class="lb">100%</span></div>
 <div class="cr"><span><b>Required fields filled</b><span class="lb" style="display:block">{% for k, v in (mt.get('field_completeness_by_field') or {}).items() %}{{ k|replace('_',' ') }} {{ pct(v) }}{{ ' · ' if not loop.last }}{% endfor %}</span></span><span>{{ rate(mt.get('field_completeness')) }}</span><span class="lb">high</span></div>
 <div class="cr"><span><b>New site through config</b><span class="lb" style="display:block">config/sources.json</span></span><span class="v">1 step</span><span class="lb">yes</span></div>
-{% if weakest %}<div class="cr" style="background:#F2F2F2;padding-left:8px;padding-right:8px"><span><b>Weakest category</b></span><span><b>{{ weakest[0]|replace('_',' ') }}</b><span class="lb" style="display:block">{{ pct(weakest[1]) }} Recall@10</span></span><span class="lb">fix next</span></div>{% endif %}
+{% if weakest %}<div class="cr" style="background:#F2F2F2;padding-left:8px;padding-right:8px"><span><b>Weakest category</b></span><span><b>{{ weakest[0]|replace('_',' ') }}</b><span class="lb" style="display:block">{{ pct(weakest[1]) }} of expected experts found</span></span><span class="lb">fix next</span></div>{% endif %}
 </div>
 {% if mt.get('recall_by_category') %}
-<div><h2 style="margin:0 0 6px;font-size:18px">Recall@10 by kind of query</h2>
-<div style="overflow-x:auto"><table class="t" style="min-width:420px"><thead><tr><th>Category</th><th>Recall@10</th></tr></thead><tbody>
+<div><h2 style="margin:0 0 6px;font-size:18px">Expected experts found, by kind of query</h2>
+<div style="overflow-x:auto"><table class="t" style="min-width:420px"><thead><tr><th>Kind of query</th><th>Found in top 10 <span class="lb">Recall@10</span></th></tr></thead><tbody>
 {% for k, v in mt.recall_by_category|dictsort(by='value') %}<tr><td>{{ k|replace('_',' ') }}</td><td>{{ pct(v) }}</td></tr>{% endfor %}
 </tbody></table></div></div>
 {% endif %}
 {% if mt.get('per_source_coverage') %}
 <div><h2 style="margin:0 0 6px;font-size:18px">Coverage per source</h2>
-<div style="overflow-x:auto"><table class="t" style="min-width:520px"><thead><tr><th>Source</th><th>Pages</th><th>Entities</th><th>Gold targets</th><th>Recall@10</th><th>Results shown</th></tr></thead><tbody>
+<div style="overflow-x:auto"><table class="t" style="min-width:520px"><thead><tr><th>Source</th><th>Pages</th><th>Entities</th><th>Expected experts</th><th>Found in top 10</th><th>Results shown</th></tr></thead><tbody>
 {% for k, v in mt.per_source_coverage.items() %}{% if v is mapping %}<tr><td>{{ k|srcname }}</td><td>{{ v.pages }}</td><td>{{ v.entities }}</td><td>{{ v.gold_targets }}</td><td>{{ pct(v.recall_at_10) if v.gold_targets else '–' }}</td><td>{{ v.results_shown }}</td></tr>{% endif %}{% endfor %}
 </tbody></table></div></div>
 {% endif %}
@@ -52,16 +52,16 @@
 {% set checks = mt.get('checks') or {} %}
 {% if tests or checks %}<div><h2 style="margin:0 0 6px;font-size:18px">Pipeline checks</h2>
 {% for t in tests %}<div class="tc"><b {% if not t.passed %}style="color:#B8000F"{% endif %}>{{ 'Pass' if t.passed else 'Fail' }}</b><span>{{ t.name }}</span></div>{% endfor %}
-{% for k, v in checks.items() %}{% set name, res = (k.split(':') + [''])[:2] %}<div class="tc"><b {% if res == 'fail' %}style="color:#B8000F"{% endif %}>{{ res|capitalize }}</b><span>{{ name|replace('_',' ')|capitalize }}{% if v > 1 %} ({{ v }}){% endif %}</span></div>{% endfor %}
+{% for k, v in checks.items() %}{% set name, res = (k.split(':') + [''])[:2] %}<div class="tc"><b {% if res == 'fail' %}style="color:#B8000F"{% endif %}>{{ res|capitalize }}</b><span>{{ check_label.get(name, name|replace('_',' ')|capitalize) }}{% if v > 1 %} <span class="lb">{{ v }} checks</span>{% endif %}<span class="lb" style="display:block">{{ name|replace('_',' ') }}</span></span></div>{% endfor %}
 </div>{% endif %}
 {% set ex = mt.get('exposure') or {} %}
 {% if ex %}<div><h2 style="margin:0 0 6px;font-size:18px">Fair discoverability</h2>
 <p style="margin:0 0 6px;font-size:14px">{{ ex.units_exposed }} units appear in the top 10 across all queries. The most shown unit has {{ pct(ex.top1_share) }} of the slots, the top five {{ pct(ex.top5_share) }}.</p>
-<p class="lb" style="margin:0">Gini {{ ex.gini }} · normalised entropy {{ ex.entropy_norm }} (1 is perfectly even)</p></div>{% endif %}
+<p class="lb" style="margin:0">Spread: Gini {{ ex.gini }} (0 is perfectly even) · normalised entropy {{ ex.entropy_norm }} (1 is perfectly even)</p></div>{% endif %}
 {% if missed %}<div><h2 style="margin:0 0 6px;font-size:18px">Missed experts</h2><p style="margin:0;font-size:14px">{{ missed }} flagged</p></div>{% endif %}
 <div id="sovereignty"><h2 style="margin:0 0 6px;font-size:18px">Cost and sovereignty</h2>
-<p style="margin:0 0 6px;font-size:14px">{{ usage.calls|num }} gateway calls so far · {{ (usage.tin + usage.tout)|num }} tokens · {{ arch.total|num }} pages crawled{% if mt.get('latency_mean_s') %} · search {{ mt.latency_mean_s|round(1) }} s mean, {{ mt.latency_p95_s|round(1) }} s p95{% endif %}.</p>
-<p class="lb" style="margin:0">Apertus 70B on CSCS · embeddings local{% if ev and ev.heldout_lock %} · held out lock {{ ev.heldout_lock }}{% endif %}</p></div>
+<p style="margin:0 0 6px;font-size:14px">{{ usage.calls|num }} calls to Apertus so far · {{ (usage.tin + usage.tout)|num }} tokens · {{ arch.total|num }} pages crawled{% if mt.get('latency_mean_s') %} · a search takes {{ mt.latency_mean_s|round(1) }} s on average, {{ mt.latency_p95_s|round(1) }} s at most for 95 in 100{% endif %}.</p>
+<p class="lb" style="margin:0">Apertus 70B runs on CSCS in Switzerland · the search model runs on this machine{% if ev and ev.heldout_lock %} · held out test set locked: {{ ev.heldout_lock }}{% endif %}</p></div>
 </section>
 {% endif %}
 </main>

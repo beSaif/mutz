@@ -10,13 +10,13 @@
 <div style="flex:1 1 220px;min-width:0"><h2 style="margin:0 0 6px;font-size:21px">Paste a company description, upload the PDF, or try the demo case.</h2>
 <p class="lb" style="margin:0">Grüessech! Bärner si gmüetlech. I bi d Usnahm.<br>Hello! Bernese people take it slow. I'm the exception.</p></div></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><form method="post" action="/leads/new"><button class="b p">New lead</button></form><form method="post" action="/leads/demo"><button class="b">Load the sport wearable demo</button></form></div>
-<p class="lb" style="margin:0">{{ arch.n }} archives ready · {{ arch.total|num }} pages{% if arch.last %} · last crawl {{ arch.last|date(True) }}{% endif %}</p>
+<p class="lb" style="margin:0">{{ arch.n }} sources ready · {{ arch.total|num }} pages{% if arch.last %} · last crawl {{ arch.last|date(True) }}{% endif %}</p>
 </section>
 <section class="pn" aria-label="Searching">
 <span class="k">2 · Searching</span>
 <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.mutz("search", 88, 74) }}
 <div style="flex:1 1 220px;min-width:0" role="status"><h2 style="margin:0 0 6px;font-size:21px">Bear with me…</h2>
-<p style="margin:0;font-size:14px">Searching {{ arch.n }} archives, {{ arch.total|num }} pages. Need 2 of 4: sensor and machine learning research.</p></div></div>
+<p style="margin:0;font-size:14px">Searching {{ arch.n }} sources, {{ arch.total|num }} pages. Need 2 of 4: sensor and machine learning research.</p></div></div>
 <div style="border-top:1px solid #D9D9D9;padding-top:8px">
 <div class="sl"><b>Done</b><span>Needs and terms in DE, FR, EN</span></div>
 <div class="sl"><b>Done</b><span>Keyword and meaning search across chunks</span></div>
@@ -27,13 +27,13 @@
 <section class="pn" aria-label="No match">
 <span class="k">3 · No match for a need</span>
 <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">{{ ui.pot("none", 64, 70, True, 1.2) }}
-<div style="flex:1 1 220px;min-width:0"><h2 style="margin:0 0 6px;font-size:21px">Kei Hung im Topf.</h2><p class="lb" style="margin:0 0 8px">No honey in the pot.</p>
+<div style="flex:1 1 220px;min-width:0"><h2 style="margin:0 0 6px;font-size:21px">No match in Bern</h2><p class="lb" style="margin:0 0 8px"><span lang="de">Kei Hung im Topf</span>: no honey in the pot. An empty pot means nothing with evidence.</p>
 <p style="margin:0;font-size:14px">Research partner: lithium battery recycling. Not found in the indexed sources with real evidence. Better not to pitch this need yet.</p></div></div>
 <div style="border-top:1px solid #D9D9D9;padding-top:8px;font-size:14px">
 <div class="sl"><b>Searched</b><span>{% for g in arch.groups %}{{ g.name }}{{ ', ' if not loop.last }}{% endfor %}</span></div>
 <div class="sl"><b>Terms</b><span>battery recycling, Batterie, lithium</span></div>
-<div class="sl"><b>Not indexed</b><span>Inselspital, BFH, sitem-insel. Check there before dropping this need.</span></div></div>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="b">Rephrase the need</span><a class="b" href="/archives/add">Add an archive</a><span class="b">Leave out of the pitch</span></div>
+<div class="sl"><b>Not in our sources yet</b><span>Inselspital, BFH, sitem-insel. Check there before dropping this need.</span></div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="b">Rephrase the need</span><a class="b" href="/archives/add">Add a source</a><span class="b">Leave out of the pitch</span></div>
 <p class="lb" style="margin:0">Logged anonymously for the <a href="/insights">gap report</a>: field and coverage only, no company name.</p>
 </section>
 <section class="pn" aria-label="Error">

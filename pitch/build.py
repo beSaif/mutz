@@ -417,7 +417,7 @@ def _context(pitch: dict, mode: str) -> dict:
     return {
         "mode": mode, "review": mode == "review", "lang": pitch.get("lang") or "en",
         "title": pitch.get("title") or "", "intro": pitch.get("intro") or "",
-        "company": company, "officer": pitch.get("officer") or {},
+        "written": bool(pitch.get("written")), "company": company, "officer": pitch.get("officer") or {},
         "date": _fmt_date(pitch.get("created_at")) or _fmt_date(date.today()),
         "case_id": pitch.get("case_id") or "",
         "sections": sections, "sources": sources, "how": pitch.get("how") or "",

@@ -94,6 +94,8 @@ async function main() {
   const browser = await chromium.launch()
   const ctx = await browser.newContext({ viewport: SIZE, deviceScaleFactor: DPR })
   await prepare(ctx)
+  // the opening splash plays once per browser; mark it seen so the walkthrough starts on the lead list
+  await ctx.addInitScript(`try { localStorage.setItem('mutz-intro', '1') } catch (e) {}`)
   const page = await ctx.newPage()
   page.on('dialog', (d) => d.accept())
 
@@ -346,10 +348,10 @@ img{width:1000px;display:block;box-shadow:0 1px 3px rgba(0,0,0,.18);scroll-margi
 
   // 14. archive: the sources, then a new site in one step ------------------------------------------
   await retake('archive', '/insights/capability', async () => {
-    await click(page, side('Sources'))
+    await click(page, side('All sources'))
     await page.waitForURL('**/archives')
     await hold(1800)
-    await click(page, side('Add an archive'))
+    await click(page, side('Add a source'))
     await page.waitForSelector('#url')
     await type(page, page.locator('#url'), 'sitem-insel.ch', { cps: 22, lead: 6 })
     await click(page, page.getByRole('button', { name: 'Check this site' }))

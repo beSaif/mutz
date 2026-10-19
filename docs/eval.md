@@ -85,37 +85,37 @@ for that reason.
 
 ### Dev (tuning set)
 <!-- results:dev -->
-Run 2026-10-18T14:29:59+00:00, backend `search.query`, k=10. **C: bge-m3 + bge-reranker blended + 70B grade/reason; idf need coverage**.
+Run 2026-10-19T08:30:41+00:00, backend `search.query`, k=10.
 
 ```
-split dev | backend search.query (C: bge-m3 + bge-reranker blended + 70B grade/reason; idf need coverage) | kg yes | 46 recall queries, 5 skipped (manual/needs), 0 errors
+split dev | backend search.query | kg yes | 46 recall queries, 5 skipped (manual/needs), 0 errors
 Recall@10            88%   (hit rate 89%, target >= 80%; adjacent excluded)
-Synonym parity       Jaccard 0.358, overlap 0.471 over 3 groups
+Synonym parity       Jaccard 0.421, overlap 0.5 over 3 groups
 Citation validity    100% of reasons quote their page; 100% of results fully cited; failures none
 Field completeness   100%  name 100% unit 100% source_link 100% function 100% email 100% phone 100%
-Exposure             88 units shown, gini 0.503, top1 10%, top5 25%, entropy 0.897, 26% of index units ever shown
+Exposure             82 units shown, gini 0.485, top1 11%, top5 26%, entropy 0.902, 24% of index units ever shown
 Checks               abstain:pass=1, entity_resolution:pass=2, recency_active:pass=1
 Recall by category   infrastructure 100%, lay 83%, multilingual 100%, person 100%, service 50%, site_term 89%, synonym 67%, typo 100%
 ```
 
 | source | pages | entities | gold targets | recall@10 | results shown |
 |---|---|---|---|---|---|
-| artorg | 363 | 253 | 19 | 79% | 58 |
-| dcb | 450 | 86 | 7 | 71% | 24 |
-| unibe_bcpm | 183 | 150 | 2 | 100% | 14 |
-| unibe_dbmr | 199 | 245 | 2 | 100% | 26 |
-| unibe_dcbp | 199 | 164 | 2 | 100% | 17 |
-| unibe_iap | 131 | 102 | 2 | 100% | 15 |
-| unibe_ibmm | 134 | 109 | 2 | 100% | 16 |
-| unibe_ifik | 197 | 162 | 2 | 50% | 12 |
+| artorg | 363 | 253 | 19 | 79% | 53 |
+| dcb | 450 | 86 | 7 | 71% | 23 |
+| unibe_bcpm | 183 | 150 | 2 | 100% | 10 |
+| unibe_dbmr | 199 | 245 | 2 | 100% | 18 |
+| unibe_dcbp | 199 | 164 | 2 | 100% | 15 |
+| unibe_iap | 131 | 102 | 2 | 100% | 10 |
+| unibe_ibmm | 134 | 109 | 2 | 100% | 15 |
+| unibe_ifik | 197 | 162 | 2 | 50% | 10 |
 | unibe_ispm | 198 | 228 | 2 | 100% | 11 |
-| unibe_izb | 199 | 120 | 2 | 100% | 6 |
-| unibe_medizin | 198 | 143 | 2 | 100% | 15 |
+| unibe_izb | 199 | 120 | 2 | 100% | 3 |
+| unibe_medizin | 198 | 143 | 2 | 100% | 12 |
 | unibe_mic | 96 | 50 | 2 | 100% | 10 |
-| unibe_neuroscience | 158 | 146 | 2 | 100% | 21 |
-| unibe_ngs | 28 | 20 | 2 | 100% | 4 |
-| unibe_pki | 190 | 76 | 2 | 100% | 12 |
-| unibe_tki | 103 | 54 | 2 | 100% | 7 |
+| unibe_neuroscience | 158 | 146 | 2 | 100% | 20 |
+| unibe_ngs | 28 | 20 | 2 | 100% | 2 |
+| unibe_pki | 190 | 76 | 2 | 100% | 9 |
+| unibe_tki | 103 | 54 | 2 | 100% | 8 |
 <!-- /results:dev -->
 
 Stub backend (keyword baseline, harness floor only):
@@ -168,7 +168,37 @@ The 16:05 run returned 16 results with `adjacent: true`. All 16 were dropped bef
 
 ### Held out (run once after the freeze)
 <!-- results:heldout -->
-not run yet
+Run 2026-10-19T08:34:52+00:00, backend `search.query`, k=10.
+
+```
+split heldout | backend search.query | kg yes | 23 recall queries, 4 skipped (manual/needs), 0 errors
+Recall@10            89%   (hit rate 91%, target >= 80%; adjacent excluded)
+Synonym parity       Jaccard n/a, overlap n/a over 0 groups
+Citation validity    100% of reasons quote their page; 100% of results fully cited; failures none
+Field completeness   100%  name 100% unit 100% source_link 100% function 100% email 100% phone 100%
+Exposure             56 units shown, gini 0.389, top1 8%, top5 29%, entropy 0.934, 17% of index units ever shown
+Checks               abstain:pass=1, fields:fail=1
+Recall by category   infrastructure 100%, lay 91%, multilingual 92%, service 0%, site_term 100%
+```
+
+| source | pages | entities | gold targets | recall@10 | results shown |
+|---|---|---|---|---|---|
+| artorg | 363 | 253 | 9 | 67% | 21 |
+| dcb | 450 | 86 | 3 | 67% | 9 |
+| unibe_bcpm | 183 | 150 | 1 | 100% | 11 |
+| unibe_dbmr | 199 | 245 | 1 | 100% | 12 |
+| unibe_dcbp | 199 | 164 | 1 | 100% | 4 |
+| unibe_iap | 131 | 102 | 1 | 100% | 2 |
+| unibe_ibmm | 134 | 109 | 1 | 100% | 3 |
+| unibe_ifik | 197 | 162 | 1 | 100% | 8 |
+| unibe_ispm | 198 | 228 | 1 | 100% | 11 |
+| unibe_izb | 199 | 120 | 1 | 100% | 3 |
+| unibe_medizin | 198 | 143 | 1 | 100% | 7 |
+| unibe_mic | 96 | 50 | 1 | 100% | 3 |
+| unibe_neuroscience | 158 | 146 | 1 | 100% | 9 |
+| unibe_ngs | 28 | 20 | 1 | 100% | 6 |
+| unibe_pki | 190 | 76 | 1 | 100% | 2 |
+| unibe_tki | 103 | 54 | 1 | 100% | 4 |
 <!-- /results:heldout -->
 
 Stub backend (keyword baseline, harness floor only):

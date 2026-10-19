@@ -61,7 +61,7 @@
   </p>
   {% for it in sec.cards %}
   <div class="card" id="{{ it.id }}">
-    <p class="kind">{% if sec.key == "why" %}Point {{ loop.index }}{% elif it.kind %}{{ it.kind }}{% endif %}{% if review %} <span class="status {{ it.status }}">· {{ it.status_label }}</span>{% endif %}</p>
+    <p class="kind">{% if sec.key == "why" %}{% if not written %}Point {{ loop.index }}{% endif %}{% elif it.kind %}{{ it.kind }}{% endif %}{% if review %} <span class="status {{ it.status }}">· {{ it.status_label }}</span>{% endif %}</p>
     {% if sec.key != "why" %}
     <h3>{{ it.heading }}</h3>
     {% if it.sub %}<p class="sub">{{ it.sub }}</p>{% endif %}
