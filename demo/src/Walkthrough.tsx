@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { AbsoluteFill, Audio, Freeze, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from 'remotion'
 import { Camera, type Key } from './Camera'
 import { C, font } from './theme'
-import { CAMERA, CARD_AT, CREDIT, CUTS, NARRATION, ROLE_COLORS, SCREEN, TAGLINE, TITLE, VIDEO, VIDEO_END } from './data'
+import { CAMERA, CARD_AT, SUBTITLES, CREDIT, CUTS, NARRATION, ROLE_COLORS, SCREEN, TAGLINE, TITLE, VIDEO, VIDEO_END } from './data'
 import { cues } from './subtitles'
 
 const CUES = cues(NARRATION)
@@ -133,7 +133,7 @@ export function Walkthrough() {
       <Sequence from={f(CARD_AT)} name="end card">
         <EndCard />
       </Sequence>
-      <Subtitles />
+      {SUBTITLES && <Subtitles />}
       {NARRATION.map((l) => (
         <Sequence key={l.id} from={f(l.at)} name={l.id}>
           <Audio src={staticFile(`rec/voice/${l.id}.mp3`)} />

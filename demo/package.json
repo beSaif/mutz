@@ -7,7 +7,8 @@
     "record": "tsx capture/record.ts",
     "voice": "tsx voice/tts.ts",
     "studio": "remotion studio",
-    "render": "remotion render Walkthrough out/walkthrough.mp4 --codec h264 --crf 20 && tsx voice/srt.ts"
+    "render": "remotion render Walkthrough out/walkthrough.mp4 --codec h264 --crf 20",
+    "srt": "tsx voice/srt.ts"
   },
   "dependencies": {
     "@remotion/cli": "4.0.529",

@@ -20,6 +20,9 @@ export const TITLE = 'mutz'
 export const TAGLINE = 'From a company’s one pager to the right experts in Bern.'
 export const CREDIT = 'Hack Apertus Liebefeld ’26 · Bern Economic Development Agency'
 
+/** Burn the narration in as subtitles under the screen (`pnpm srt` writes the same cues as out/walkthrough.srt). */
+export const SUBTITLES = false
+
 /** Tag colour per role passed to roll(); leave `who` empty there to show no tags. */
 export const ROLE_COLORS: Record<string, string> = { Officer: C.accent, Company: C.navy }
 
