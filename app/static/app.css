@@ -253,6 +253,8 @@ pre{font:12.5px/1.55 ui-monospace,Menlo,monospace;background:var(--panel2);paddi
 .kids>.br.derived::before,.br.derived>.kids::before{border-left-style:dashed}
 .kids>.br.missing::before,.br.missing>.kids::before{border-left:var(--lw) dotted #9A9A9A}
 .kids>.br.on::before,.br.on>.kids::before{border-left-width:4px;border-left-color:var(--red);left:calc(50% - 2px)}
+/* the horizontal run from a parent to its selected child; map.html sets --hl-l and --hl-w */
+.kids.hl::after{content:"";position:absolute;z-index:1;left:var(--hl-l);width:var(--hl-w);top:calc(var(--gap)/2 - 2px);border-top:4px solid var(--red)}
 .tn{flex:none;height:var(--nh);border:1.5px solid var(--black);background:#fff;padding:5px 26px 5px 9px;font:12px/1.3 var(--font);color:var(--black);text-decoration:none;display:flex;flex-direction:column;justify-content:center;text-align:left;position:relative;cursor:pointer;overflow:hidden}
 .tn small{font-size:11px;color:var(--grey);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tn .lab{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -285,6 +287,22 @@ pre{font:12.5px/1.55 ui-monospace,Menlo,monospace;background:var(--panel2);paddi
 .rlg{display:flex;flex-direction:column;gap:4px;font-size:13px}
 .rl{display:flex;align-items:center;gap:8px}
 .qt{margin:0;font-size:15px;font-style:italic;border-left:3px solid var(--black);padding-left:12px}
+/* evidence map side panel: status line, quotes with their page, the folded ranking */
+.mst{margin:0;font-size:13px;font-weight:700}
+.mst.ok::before{content:"✓";margin-right:6px}
+.mst .lb{font-weight:400}
+.drawer h2.hq{font-size:18px;line-height:1.35}
+.evs{display:flex;flex-direction:column;gap:14px}
+.src{margin:4px 0 0;font-size:13px;overflow-wrap:anywhere}
+.drawer .sd dd,.drawer .sd dd [lang=de]{hyphens:manual}
+.rk{border-top:1px solid var(--rule);padding-top:12px}
+.rk summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;cursor:pointer;font-size:14px;font-weight:700;list-style:none}
+.rk summary::-webkit-details-marker{display:none}
+.rk summary>span:first-child::before{content:"▸";display:inline-block;width:14px;transition:transform .15s}
+.rk[open] summary>span:first-child::before{transform:rotate(90deg)}
+.rk summary .lb{font-weight:400}
+.fx{display:grid;grid-template-columns:72px minmax(0,1fr) 36px;gap:8px 10px;align-items:center;font-size:13px;margin:12px 0}
+.fx .bar{margin:0}
 /* mutz */
 #mutz{position:fixed;right:24px;bottom:0;z-index:50;display:flex;align-items:flex-end;gap:12px}
 #mutz.left{right:auto;left:calc(var(--sbw) + 24px);flex-direction:row-reverse}

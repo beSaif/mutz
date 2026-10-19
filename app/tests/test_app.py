@@ -148,8 +148,8 @@ def test_matches_sort_filter_and_map_render():
     assert all(f'data-id="{k}"' in r.text for k in detail)          # every node opens its panel
     mt = next(d for d in detail.values() if d["kind"] == "Match")
     assert mt["needs"] and mt["accepted"] and "facts" in mt and "pages" in mt
-    assert [a for a, _ in mt["profile"]] == ["Evidence", "Role", "Recency", "Type", "AI check"]   # radar axes
-    assert all(v is None or 0 <= v <= 1 for _, v in mt["profile"]) and all(p in detail for p in mt["peers"])
+    assert [a for a, _ in mt["profile"]] == ["Evidence", "Role", "Recency", "Type", "AI check"]   # ranking factors
+    assert all(v is None or 0 <= v <= 1 for _, v in mt["profile"])
     for d in detail.values():   # knowledge graph neighbours: map links point at map nodes
         if d["kind"] == "Match" and d.get("kg"):
             assert all(n.get("go") in detail for n in d["kg"]["links"] if n.get("go"))

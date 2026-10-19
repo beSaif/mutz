@@ -941,9 +941,9 @@ async def missed(request: Request):
 # ---------------------------------------------------------------- evidence map
 
 _PAGES = {}
-HOW_NOTE = {"Quoted on page": "Quoted on page: the quote stands word for word on the page.",
-            "Inferred": "Inferred: worked out from the page, not quoted. Check it before use.",
-            "No source": "No source: no crawled page states it."}
+HOW_NOTE = {"Quoted on page": "Word for word on the page.",
+            "Inferred": "Worked out from the page, not quoted word for word. Check before use.",
+            "No source": "No page states this. Check before use."}
 
 
 def page_meta(url):
@@ -1061,7 +1061,7 @@ def kg_connections(eids, on_map):
 
 
 def profile(r):
-    """A match's ranking factors on one 0-1 scale, for the radar: score_parts' rows plus the Apertus grade."""
+    """A match's ranking factors on one 0-1 scale, for the ranking bars: score_parts' rows plus the Apertus grade."""
     parts = {k: v for k, v, _ in ((r.get("parts") or {}).get("rows") or [])}
     clamp = lambda v: None if v is None else max(0.0, min(1.0, round(float(v), 2)))
     return [["Evidence", clamp(parts.get("Evidence"))], ["Role", clamp(parts.get("Role"))],
@@ -1092,13 +1092,13 @@ def build_map(lid, only_accepted=True):
             acc = (n["id"], r["entity_id"]) in accd
             mid = f"m:{n['id']}:{r['entity_id']}"
             leaves = []
-            if r.get("function"):
-                fsrc = (r.get("reasons") or [{}])[0]
-                leaves.append({"kind": "Function", "how": "Inferred", "label": r["function"], "url": fsrc.get("url"),
-                               "quote": fsrc.get("quote"), "deep_link": fsrc.get("deep_link") or fsrc.get("url"),
-                               "style": "derived", "src": host(fsrc.get("url", ""))})
+            if r["ftype"] == "person" and r.get("function"):   # a unit's function is its type ("centre"), not a role
+                # the role comes from the staff listing, not from the matched quote, so it links the page and quotes nothing
+                purl = (r.get("contact") or {}).get("profile_url") or (r.get("reasons") or [{}])[0].get("url")
+                leaves.append({"kind": "Role", "how": "Inferred", "label": r["function"], "url": purl, "quote": None,
+                               "deep_link": purl, "style": "derived", "src": host(purl or "")})
             elif r["ftype"] == "person":
-                leaves.append({"kind": "Function", "how": "No source", "label": "Not stated on any source", "style": "missing"})
+                leaves.append({"kind": "Role", "how": "No source", "label": "Not stated on any source", "style": "missing"})
             for s_ in (r.get("reasons") or [])[:3]:
                 leaves.append({"kind": "Fact", "how": "Quoted on page", "label": s_.get("quote", ""), "url": s_.get("url"), "quote": s_.get("quote"),
                                "deep_link": s_.get("deep_link") or s_.get("url"), "style": "read", "src": host(s_.get("url", ""))})
@@ -1110,12 +1110,12 @@ def build_map(lid, only_accepted=True):
             for k, f in enumerate(leaves):
                 f["id"], f["sid"] = f"{mid}:f{k}", f"{mid}:s{k}"
                 src = _src(f.get("url"), f.get("quote"), f.get("deep_link")) if f.get("url") else None
-                detail[f["id"]] = {"kind": "Fact", "title": f["label"], "sub": f["kind"] if f["kind"] != "Fact" else None, "how": f["how"],
+                detail[f["id"]] = {"kind": "Fact", "kicker": "Quote" if f["kind"] == "Fact" else f["kind"], "title": f["label"], "how": f["how"],
                                    "how_note": HOW_NOTE[f["how"]], "quote": f.get("quote"), "src": src,
                                    "match": r.get("name"), "match_id": mid, "need": n["label"], "need_i": ni + 1,
                                    "entity": r["entity_id"], "need_id": n["id"], "accepted": acc}
                 if src:
-                    detail[f["sid"]] = {"kind": "Source", "title": src.get("title") or src["host"], "sub": src["host"], "src": src,
+                    detail[f["sid"]] = {"kind": "Source", "kicker": "Source page", "title": src.get("title") or src["host"], "sub": src["host"], "src": src,
                                         "quote": f.get("quote"), "fact_id": f["id"], "match": r.get("name")}
             seen, pages = set(), []
             for x in (r.get("reasons") or []):
@@ -1124,9 +1124,12 @@ def build_map(lid, only_accepted=True):
                     seen.add(u)
                     pages.append(_src(x.get("url")))
             people = [{"name": p.get("name"), "role": p.get("function")} for p in (r.get("contacts") or r.get("people") or [])]
+            officer = db.officer(r.get("who")) if acc else None
+            unit = r.get("unit") if r.get("unit") != r.get("name") else None
+            head = [r.get("function") or "Role not stated", unit] if r["ftype"] == "person" else [(r.get("function") or "").capitalize(), unit]
             detail[mid] = {
-                "kind": "Match", "title": r.get("name"), "sub": TYPE_LABEL.get(r["ftype"], "Match") + ((" · accepted" + (f" by {db.officer(r['who'])['name']}" if db.officer(r.get("who")) else ""))
-                                                               if acc else " · suggested, not accepted"),
+                "kind": "Match", "kicker": TYPE_LABEL.get(r["ftype"], "Match"), "title": r.get("name"),
+                "sub": " · ".join(x for x in head if x) or None, "accepted_by": officer["name"] if officer else None,
                 "type": TYPE_LABEL.get(r["ftype"], "Match"), "unit": r.get("unit") if r.get("unit") != r.get("name") else None,
                 "role": r.get("function"), "person": r["ftype"] == "person", "people": people,
                 "recency": " · ".join(x for x in [REC_LABEL.get(r.get("recency"), r.get("recency") or ""),
@@ -1143,11 +1146,8 @@ def build_map(lid, only_accepted=True):
             matches_out.append({"entity": r["entity_id"], "id": mid, "name": r.get("name"), "type": TYPE_LABEL.get(r["ftype"], "Match"),
                                 "accepted": acc, "facts": leaves,
                                 "badge": entity_needs[r["entity_id"]] if entity_needs[r["entity_id"]] > 1 else 0})
-        mids = [mt["id"] for mt in matches_out]
-        for mid_ in mids:  # the radar overlays the next two matches of the same need
-            detail[mid_]["peers"] = [x for x in mids if x != mid_][:2]
         nid = f"n:{n['id']}"
-        detail[nid] = {"kind": "Need", "title": n["label"], "sub": f"Need {ni + 1}", "text": n["text"],
+        detail[nid] = {"kind": "Need", "kicker": f"Need {ni + 1}", "title": n["label"], "text": n["text"],
                        "sentence": n.get("from_sentence") or None,
                        "from": {"pdf": "the PDF", "website": "the website", "keywords": "your keywords"}.get(n.get("source"), "the pasted text"),
                        "cov": n.get("coverage") or "none", "shown": len(ms), "accepted_n": sum(1 for r in ms if (n["id"], r["entity_id"]) in accd),

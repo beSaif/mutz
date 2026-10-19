@@ -9,7 +9,6 @@
 <span class="kk"><i style="border-top:2px solid #111"></i>Quoted on page</span>
 <span class="kk"><i style="border-top:2px dashed #111"></i>Inferred</span>
 <span class="kk"><i style="border-top:2px dotted #9A9A9A"></i>No source</span>
-<span class="kk"><i style="border-top:4px solid var(--red)"></i>Selected</span>
 <span style="flex:1"></span>
 <label class="lb"><input type="checkbox" {% if not all %}checked{% endif %} onchange="location.search=this.checked?'':'?all=1'"> Accepted matches only</label>
 </div>
@@ -65,127 +64,99 @@
   var tree = document.getElementById('map'); if (!tree) return;
   var D = JSON.parse(document.getElementById('mapdata').textContent);
   var panel = document.getElementById('detail'), cur = null;
-  var COV = {strong: 'Strong', thin: 'Limited', none: 'No match'};
+  var COV = {strong: _t('Strong coverage'), thin: _t('Limited coverage'), none: _t('Nothing found yet')};
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function row(k, v){ return v ? '<dt>' + esc(k) + '</dt><dd>' + v + '</dd>' : ''; }
   function link(u, t){ return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(t) + '</a>' : ''; }
-  function page(s){ return s ? esc(s.title || s.host) + '<span class="lb" style="display:block">' + esc(s.host) + (s.fetched ? ' · fetched ' + esc(s.fetched) : '') + '</span>' : ''; }
-  function list(title, items){ return items.length ? '<h3 class="rh">' + esc(title) + ' (' + items.length + ')</h3>' + items.map(function(x){ return '<div class="li">' + x + '</div>'; }).join('') : ''; }
-  function meter(n, of, label, note){ var p = of ? Math.round(100 * n / of) : 0;
-    return '<div class="meter" title="' + esc(label) + ': ' + n + ' of ' + of + '"><span class="meter-l"><span>' + esc(label) + '</span><span class="lb">' + n + ' of ' + of + ' ' + esc(note) + '</span></span><span class="bar" role="meter" aria-label="' + esc(label) + '" aria-valuemin="0" aria-valuemax="' + of + '" aria-valuenow="' + n + '"><i style="width:' + p + '%"></i></span></div>'; }
-  /* score profile: the match's ranking factors on one 0-1 scale, with up to two other matches of the same need.
-     Monochrome by design (docs/DESIGN.md): solid black, dashed black, grey; identity also in the legend. */
-  var LOOK = [{c: '#111', d: '', w: 2, f: 'rgba(17,17,17,.08)'}, {c: '#111', d: '5 4', w: 1.5, f: 'none'}, {c: '#9A9A9A', d: '', w: 1.5, f: 'none'}];
-  function radar(d){
-    var set = [d].concat((d.peers || []).map(function(id){ return D[id]; }).filter(Boolean)), ax = d.profile;
-    if (!ax || !ax.length) return '';
-    var W = 360, H = 226, cx = 180, cy = 116, R = 88, n = ax.length;
-    function pt(i, v){ var a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + Math.cos(a) * R * v, cy + Math.sin(a) * R * v]; }
-    var g = '';
-    [0.25, 0.5, 0.75, 1].forEach(function(r){ g += '<polygon points="' + ax.map(function(_, i){ return pt(i, r).join(','); }).join(' ') + '" fill="none" stroke="#D9D9D9" stroke-width="1"/>'; });
-    ax.forEach(function(a, i){
-      var e = pt(i, 1), l = pt(i, 1.17), anc = Math.abs(l[0] - cx) < 4 ? 'middle' : l[0] > cx ? 'start' : 'end';
-      g += '<line x1="' + cx + '" y1="' + cy + '" x2="' + e[0] + '" y2="' + e[1] + '" stroke="#D9D9D9" stroke-width="1"/>' +
-        '<text x="' + l[0] + '" y="' + (l[1] + 4) + '" text-anchor="' + anc + '" font-size="11" fill="#5E5E5E">' + esc(a[0]) + '</text>';
-    });
-    set.slice().reverse().forEach(function(m, ri){
-      var k = set.length - 1 - ri, s = LOOK[k], pts = m.profile.map(function(a, i){ return pt(i, a[1] || 0); });
-      g += '<polygon points="' + pts.map(function(p){ return p.join(','); }).join(' ') + '" fill="' + s.f + '" stroke="' + s.c + '" stroke-width="' + s.w + '"' + (s.d ? ' stroke-dasharray="' + s.d + '"' : '') + ' stroke-linejoin="round"/>';
-      pts.forEach(function(p, i){
-        var v = m.profile[i][1], tip = m.title + ' · ' + m.profile[i][0] + ' ' + (v == null ? 'not graded' : v.toFixed(2));
-        g += '<g><title>' + esc(tip) + '</title><circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (k ? 3 : 4) + '" fill="' + (v == null ? '#fff' : s.c) + '" stroke="' + s.c + '" stroke-width="1.5"/><circle cx="' + p[0] + '" cy="' + p[1] + '" r="9" fill="transparent"/></g>';
-      });
-    });
-    var leg = set.map(function(m, k){ var s = LOOK[k];
-      return '<span class="rl"><svg width="24" height="8" aria-hidden="true"><line x1="0" y1="4" x2="24" y2="4" stroke="' + s.c + '" stroke-width="' + s.w + '"' + (s.d ? ' stroke-dasharray="' + s.d + '"' : '') + '/></svg><span lang="de"' + (k ? '' : ' style="font-weight:700"') + '>' + esc(m.title) + '</span><span class="lb">' + (m.score != null ? 'score ' + m.score : '') + '</span></span>'; }).join('');
-    var tbl = '<table class="sc"><thead><tr><th></th>' + set.map(function(m){ return '<th lang="de">' + esc(m.title) + '</th>'; }).join('') + '</tr></thead><tbody>' +
-      ax.map(function(a, i){ return '<tr><td>' + esc(a[0]) + '</td>' + set.map(function(m, k){ var v = m.profile[i][1]; return '<td' + (k ? '' : ' class="hl"') + '>' + (v == null ? 'not graded' : v.toFixed(2)) + '</td>'; }).join('') + '</tr>'; }).join('') +
-      '<tr><td>Score</td>' + set.map(function(m, k){ return '<td' + (k ? '' : ' class="hl"') + '>' + (m.score != null ? m.score : '–') + '</td>'; }).join('') + '</tr></tbody></table>';
-    return '<h3 class="rh">Score profile</h3><svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-width:' + W + 'px" role="img" aria-label="Score profile of ' + esc(d.title) + (set.length > 1 ? ', compared with ' + esc(set.slice(1).map(function(m){ return m.title; }).join(' and ')) : '') + '">' + g + '</svg>' +
-      '<div class="rlg">' + leg + '</div><p class="lb" style="margin:0">Each axis runs from 0 at the centre to 1. The score multiplies the first four, so a larger shape is not always a higher score.</p>' +
-      '<details><summary class="lb" style="cursor:pointer">Show as table</summary>' + tbl + '</details>';
-  }
-  /* knowledge graph around a match: the match on the left, one row per neighbour on the right.
-     A filled dot is also a match on this map and opens it; the others open their page. */
-  var MORE = {'Colleague': 'colleagues', 'People': 'people', 'Project': 'projects', 'Facility': 'facilities', 'Has group': 'groups'};
-  function cut(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
-  function wrap(s, n, lines){ var out = [], line = '';
-    String(s).split(/\s+/).forEach(function(w){ if ((line + ' ' + w).trim().length > n && line) { out.push(line); line = w; } else line = (line + ' ' + w).trim(); });
-    if (line) out.push(line);
-    if (out.length > lines) { out = out.slice(0, lines); out[lines - 1] = cut(out[lines - 1] + ' …', n); }
-    return out; }
-  function kg(d){
-    var k = d.kg; if (!k || !k.links.length) return '';
-    var L = k.links, RH = 36, W = 352, H = Math.max(L.length * RH, 64), cy = H / 2, X = 138, g = '';
-    L.forEach(function(n, i){
-      var y = i * RH + RH / 2;
-      if (n.more) { g += '<text x="' + X + '" y="' + (y + 4) + '" font-size="12" fill="#5E5E5E">+ ' + n.more + ' more ' + esc(MORE[n.rel] || '') + '</text>'; return; }
-      var on = !!n.go, tip = n.rel + ': ' + n.name + (n.sub ? ' (' + n.sub + ')' : '');
-      g += '<path d="M110,' + cy + ' C124,' + cy + ' 120,' + y + ' ' + (X - 4) + ',' + y + '" fill="none" stroke="' + (on ? '#111' : '#9A9A9A') + '" stroke-width="' + (on ? 1.5 : 1) + '"/>';
-      var a = on ? '<a href="#" data-go="' + esc(n.go) + '">' : n.url ? '<a href="' + esc(n.url) + '" target="_blank" rel="noopener">' : '<g>';
-      g += a + '<title>' + esc(tip) + '</title><rect x="' + (X - 8) + '" y="' + (y - RH / 2) + '" width="' + (W - X + 8) + '" height="' + RH + '" fill="transparent"/>' +
-        '<circle cx="' + X + '" cy="' + y + '" r="3.5" fill="' + (on ? '#111' : '#fff') + '" stroke="#111" stroke-width="1.5"/>' +
-        '<text x="' + (X + 10) + '" y="' + (y - 2) + '" font-size="13" fill="#111"' + (on ? ' font-weight="700"' : '') + ' lang="de">' + esc(cut(n.name, 29)) + '</text>' +
-        '<text x="' + (X + 10) + '" y="' + (y + 12) + '" font-size="11" fill="#5E5E5E">' + esc(cut(n.rel + (n.sub ? ' · ' + n.sub : ''), 36)) + '</text>' + (a === '<g>' ? '</g>' : '</a>');
-    });
-    var t = wrap(d.title, 14, 3), th = t.length * 15 + 16;
-    g += '<rect x="1" y="' + (cy - th / 2) + '" width="108" height="' + th + '" fill="#fff" stroke="#111" stroke-width="2"/>' +
-      t.map(function(s, i){ return '<text x="10" y="' + (cy - th / 2 + 20 + i * 15) + '" font-size="12" font-weight="700" fill="#111" lang="de">' + esc(s) + '</text>'; }).join('');
-    var rows = L.filter(function(n){ return !n.more; }).map(function(n){
-      return '<tr><td>' + esc(n.rel) + '</td><td lang="de">' + (n.go ? go(n.go, n.name) : n.url ? link(n.url, n.name) : esc(n.name)) + (n.go ? ' <span class="lb">on this map</span>' : '') + (n.sub ? '<span class="lb" style="display:block">' + esc(n.sub) + '</span>' : '') + '</td></tr>'; }).join('');
-    return '<h3 class="rh">In the knowledge graph</h3><svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-width:' + W + 'px" role="group" aria-label="Knowledge graph around ' + esc(d.title) + '">' + g + '</svg>' +
-      '<div class="rlg"><span class="rl"><svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#111"/></svg>Also a match on this map</span><span class="rl"><svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#fff" stroke="#111" stroke-width="1.5"/></svg>Opens its page</span></div>' +
-      '<p class="lb" style="margin:0">Linked from ' + k.pages + ' crawled page' + (k.pages === 1 ? '' : 's') + (k.expertise.length ? ' · expertise: ' + esc(k.expertise.slice(0, 3).join(', ')) : '') + '</p>' +
-      k.possible_same.map(function(s){ return '<p class="lb" style="margin:0"><b>Possibly the same person as ' + esc(s.name) + '</b> (' + esc(s.reason.split(',')[0]) + '). Check before use.</p>'; }).join('') +
-      '<details><summary class="lb" style="cursor:pointer">Show as list</summary><table class="sc"><tbody>' + rows + '</tbody></table></details>';
-  }
   function go(id, label){ return '<a href="#" data-go="' + esc(id) + '">' + esc(label) + '</a>'; }
+  function head(t){ return '<h3 class="rh">' + esc(t) + '</h3>'; }
+  // where a quote stands: the page title as the link, host and fetch date after it
+  function where(s, label){ return s && s.url ? '<p class="src">' + link(s.deep_link || s.url, label || s.title || s.host) + ' <span class="lb">' + esc(s.host) + (s.fetched ? ' · ' + esc(s.fetched) : '') + '</span></p>' : ''; }
+  function meter(n, of, label, note){ var p = of ? Math.round(100 * n / of) : 0;
+    return '<div class="meter" title="' + esc(label) + ': ' + esc(_t('{n} of {total}', {n: n, total: of})) + '"><span class="meter-l"><span>' + esc(label) + '</span><span class="lb">' + esc(_t('{n} of {total}', {n: n, total: of})) + ' ' + esc(note) + '</span></span><span class="bar" role="meter" aria-label="' + esc(label) + '" aria-valuemin="0" aria-valuemax="' + of + '" aria-valuenow="' + n + '"><i style="width:' + p + '%"></i></span></div>'; }
+  /* why it fits: Apertus's sentence, then the quotes and grants behind it, each with its page */
+  function why(d){
+    var ev = d.facts.slice(0, 2).map(function(f){ return '<div>' + (f.quote ? '<p class="qt">“' + esc(f.quote) + '”</p>' : '') + where(f) + '</div>'; })
+      .concat(d.grants.slice(0, 2).map(function(g){ return '<div><p style="margin:0;font-size:14px">' + esc(g.title) + '</p><p class="src"><span class="lb">' + esc(g.year ? _t('SNSF grant from {year}', {year: g.year}) : _t('SNSF grant')) + ' · </span>' + link(g.url, 'data.snf.ch') + '</p></div>'; }));
+    if (!d.why && !ev.length) return head(_t('Why it fits')) + '<p class="lb" style="margin:0">' + esc(_t('No quote stored. Check the pages before use.')) + '</p>';
+    return head(_t('Why it fits')) + (d.why ? '<p style="margin:0;font-size:15px">' + esc(d.why) + '</p>' : '') + '<div class="evs">' + ev.join('') + '</div>' +
+      (d.facts.length > 2 ? '<p class="lb" style="margin:0">' + esc(d.facts.length === 3 ? _t('{n} more quote in the tree', {n: 1}) : _t('{n} more quotes in the tree', {n: d.facts.length - 2})) + '</p>' : '') +
+      (d.grants_other ? '<p class="lb" style="margin:0">' + esc(d.grants_other === 1 ? _t('{n} more grant on other topics', {n: 1}) : _t('{n} more grants on other topics', {n: d.grants_other})) + '</p>' : '');
+  }
+  /* the knowledge graph around a match, one row per relation, a few names each. Bold names are also on this map and open there. */
+  var REL = {'Head': 'Led by', 'Colleague': 'Colleagues', 'Project': 'Projects', 'Facility': 'Facilities', 'Has group': 'Groups'};
+  var CAP = {'Colleague': 3, 'People': 3, 'Project': 2, 'Facility': 2, 'Has group': 2};
+  var LINES = {'Project': 1, 'Facility': 1, 'Has group': 1, 'Member of': 1};   // long names go one per line, people run on
+  function name(n){ return n.go ? '<a href="#" data-go="' + esc(n.go) + '" style="font-weight:700" title="' + esc(_t('Also on this map')) + '">' + esc(n.name) + '</a>' : n.url ? link(n.url, n.name) : esc(n.name); }
+  function kg(d){
+    var k = d.kg, by = {}, order = [], h = '', onmap = false;
+    if (!d.person && d.people.length) h += row(_t('Contacts'), d.people.slice(0, 3).map(function(p){ return '<b lang="de">' + esc(p.name) + '</b>'; }).join(', ') +
+      (d.people.length > 3 ? ' <span class="lb" style="white-space:nowrap">' + esc(_t('+{n} more', {n: d.people.length - 3})) + '</span>' : ''));
+    (k ? k.links : []).forEach(function(n){
+      if (!by[n.rel]) { by[n.rel] = {names: [], more: 0}; order.push(n.rel); }
+      if (n.more) by[n.rel].more += n.more; else by[n.rel].names.push(n);
+    });
+    order.forEach(function(rel){
+      var g = by[rel], cap = CAP[rel] || 9, shown = g.names.slice(0, cap), more = g.more + Math.max(0, g.names.length - cap);
+      shown.forEach(function(n){ if (n.go) onmap = true; });
+      h += row(_t(REL[rel] || rel), '<span lang="de">' + shown.map(name).join(LINES[rel] ? '<br>' : ', ') + '</span>' + (more ? (LINES[rel] ? '<br>' : ' ') + '<span class="lb" style="white-space:nowrap">' + esc(_t('+{n} more', {n: more})) + '</span>' : ''));
+    });
+    if (!h) return '';
+    return head(d.person ? _t('Works with') : _t('Connected to')) + '<dl class="sd">' + h + '</dl>' +
+      (onmap ? '<p class="lb" style="margin:0">' + esc(_t('Names in bold are also on this map.')) + '</p>' : '') +
+      (k ? k.possible_same : []).map(function(s){ return '<p class="lb" style="margin:0"><b>' + esc(_t('Possibly the same person as {name}', {name: s.name})) + '</b> (' + esc(s.reason.split(',')[0]) + '). ' + esc(_t('Check before use.')) + '</p>'; }).join('');
+  }
+  /* the ranking, folded away: one bar per factor, and where the match stands among the others for its need */
+  function ranking(d){
+    var same = Object.keys(D).map(function(id){ return D[id]; }).filter(function(x){ return x.kind === 'Match' && x.need_id === d.need_id && x.score != null; })
+      .sort(function(a, b){ return b.score - a.score; }), pos = same.indexOf(d) + 1;
+    var bars = (d.profile || []).map(function(a){ var v = a[1];
+      return '<span>' + esc(_t(a[0])) + '</span><span class="bar" role="img" aria-label="' + esc(_t(a[0])) + ' ' + (v == null ? esc(_t('not graded')) : v.toFixed(2)) + '"><i style="width:' + Math.round(100 * (v || 0)) + '%"></i></span><span class="lb">' + (v == null ? '–' : v.toFixed(2)) + '</span>'; }).join('');
+    return '<details class="rk"><summary><span>' + esc(_t('How Mutz ranked this')) + '</span><span class="lb">' + (d.score != null ? esc(_t('score {score}', {score: d.score.toFixed(2)})) : '') + (pos && same.length > 1 ? ' · ' + esc(_t('{n} of {total} on this map', {n: pos, total: same.length})) : '') + '</span></summary>' +
+      '<div class="fx">' + bars + '</div><dl class="sd">' + row(_t('Recency'), d.recency ? esc(d.recency.split(' · ').map(function(x){ return _t(x); }).join(' · ')) + (d.recency_basis ? '<span class="lb" style="display:block">' + esc(d.recency_basis) + '</span>' : '') : '') + row(_t('AI check'), esc(d.grade && d.grade.replace(/, (\w+)$/, function(m, w){ return ', ' + _t(w); }))) + '</dl>' +
+      '<p class="lb" style="margin:0">' + esc(_t('The score multiplies evidence, role, recency and type. The AI check is Apertus grading the quotes against the need.')) + '</p></details>';
+  }
+  function status(d){
+    var acc = d.needs.filter(function(n){ return n.accepted; }), ns = acc.length ? acc : d.needs;
+    return '<p class="mst' + (acc.length ? ' ok' : '') + '">' + esc(acc.length ? (d.accepted_by ? _t('Accepted by {name} for', {name: d.accepted_by}) : _t('Accepted for')) : _t('Suggested for')) + ' ' +
+      ns.map(function(n){ return esc(_t('Need {n}', {n: n.i})) + ' · ' + esc(_t(n.label)); }).join(', ') + '</p>';
+  }
   function body(d){
     var h = '';
     if (d.kind === 'Need') {
-      h += '<dl class="sd">' + row('Need', esc(d.text)) + row('From', esc(d.from)) + row('Coverage', esc(COV[d.cov] || 'Not checked')) + '</dl>';
-      if (d.sentence) h += '<h3 class="rh">The sentence it came from</h3><p class="qt">“' + esc(d.sentence) + '”</p>';
-      h += meter(d.accepted_n, d.found, 'Matches accepted', 'found by the search');
-      if (d.shown > d.accepted_n) h += '<p class="lb" style="margin:0">' + (d.shown - d.accepted_n) + ' more suggested on the map</p>';
-      if (d.terms.length) h += '<h3 class="rh">Search terms</h3><div class="fg">' + d.terms.map(function(t){ return '<span class="tg on">' + esc(t) + '</span>'; }).join('') + '</div>';
+      h += '<p class="mst">' + esc(COV[d.cov] || _t('Not checked')) + ' · ' + esc(_t('from ' + d.from)) + '</p><p style="margin:0;font-size:15px">' + esc(d.text) + '</p>';
+      if (d.sentence) h += head(_t('In the brief')) + '<p class="qt">“' + esc(d.sentence) + '”</p>';
+      h += meter(d.accepted_n, d.found, _t('Matches accepted'), _t('found by the search'));
+      if (d.shown > d.accepted_n) h += '<p class="lb" style="margin:0">' + esc(_t('{n} more suggested on the map', {n: d.shown - d.accepted_n})) + '</p>';
+      if (d.terms.length) h += head(_t('Searched for')) + '<div class="fg">' + d.terms.map(function(t){ return '<span class="tg on">' + esc(t) + '</span>'; }).join('') + '</div>';
     } else if (d.kind === 'Match') {
-      var ev = [d.coverage ? (COV[d.coverage] || d.coverage) + ' evidence' : '', d.grade ? 'AI check ' + d.grade : '', d.score != null ? 'score ' + d.score : ''].filter(Boolean).join(' · ');
-      h += '<dl class="sd">' + row('Kind', esc(d.type)) + row(d.person ? 'Unit' : 'Part of', esc(d.unit)) + row(d.person ? 'Role' : '', esc(d.person ? (d.role || 'Not stated on any source') : '')) +
-        row('Recency', d.recency ? esc(d.recency) + (d.recency_basis ? '<span class="lb" style="display:block">' + esc(d.recency_basis) + '</span>' : '') : '') +
-        row('Evidence', esc(ev)) +
-        row('Needs', d.needs.map(function(n){ return 'Need ' + n.i + ' · ' + esc(n.label) + (n.accepted ? '' : ' <span class="lb">suggested</span>'); }).join('<br>')) + '</dl>';
-      h += radar(d);
-      if (d.why) h += '<h3 class="rh">Why it matches</h3><p style="margin:0;font-size:14px">' + esc(d.why) + '</p>';
-      h += kg(d);
-      h += list('Facts and quotes', d.facts.map(function(f){ return (f.quote ? '<p class="qt" style="font-size:14px">“' + esc(f.quote) + '”</p>' : '') + '<p style="margin:4px 0 0">' + page(f) + link(f.deep_link, f.quote ? 'Open at quote' : 'Open page') + '</p>'; }));
-      h += list(d.person ? 'Contacts' : 'People', d.people.map(function(p){ return '<b lang="de">' + esc(p.name) + '</b>' + (p.role ? '<span class="lb" style="display:block">' + esc(p.role) + '</span>' : ''); }));
-      h += list('SNSF grants', d.grants.map(function(g){ return esc(g.title) + '<span class="lb" style="display:block">' + (g.year ? 'from ' + esc(g.year) + ' · ' : '') + link(g.url, 'Open on data.snf.ch') + '</span>'; }));
-      if (d.grants_other) h += '<p class="lb" style="margin:0">' + d.grants_other + ' more grant' + (d.grants_other === 1 ? '' : 's') + ' on other topics</p>';
-      h += list('Source pages', d.pages.map(function(s){ return page(s) + link(s.url, 'Open page'); }));
+      h += status(d) + why(d) + kg(d) + ranking(d);
     } else if (d.kind === 'Fact') {
+      h += '<p class="mst' + (d.how === 'Quoted on page' ? ' ok' : '') + '">' + esc(_t(d.how)) + '<span class="lb"> · ' + esc(_t(d.how_note)) + '</span></p>';
       // the title already is the quote for read facts, so only show it again when it differs
       if (d.quote && d.quote !== d.title) h += '<p class="qt">“' + esc(d.quote) + '”</p>';
-      h += '<dl class="sd">' + row('How it was found', '<b>' + esc(d.how) + '</b><span class="lb" style="display:block">' + esc(d.how_note.replace(/^[^:]+: /, '')) + '</span>') +
-        row('Page', page(d.src)) + row('Match', go(d.match_id, d.match)) + row('Need', 'Need ' + d.need_i + ' · ' + esc(d.need)) + '</dl>';
+      h += '<dl class="sd">' + row(_t('On page'), d.src ? where(d.src, d.src.title || d.src.host) : '') + row(_t('Supports'), go(d.match_id, d.match) + '<span class="lb" style="display:block">' + esc(_t('Need {n}', {n: d.need_i})) + ' · ' + esc(_t(d.need)) + '</span>') + '</dl>';
     } else if (d.kind === 'Source') {
-      h += '<dl class="sd">' + row('Page', esc(d.src.title || 'No title stored')) + row('Address', '<span style="overflow-wrap:anywhere">' + esc(d.src.url) + '</span>') +
-        row('Fetched', esc(d.src.fetched)) + row('Quote used', d.quote ? '“' + esc(d.quote) + '”' : '') + row('For', go(d.fact_id, d.match)) + '</dl>';
+      if (d.quote) h += '<p class="qt">“' + esc(d.quote) + '”</p>';
+      h += '<dl class="sd">' + row(_t('Address'), '<span style="overflow-wrap:anywhere">' + esc(d.src.url) + '</span>') + row(_t('Fetched'), esc(d.src.fetched)) + row(_t('For'), go(d.fact_id, d.match)) + '</dl>';
     }
     return h;
   }
   function actions(d){
     var a = [];
     var u = d.kind === 'Source' ? (d.src.deep_link || d.src.url) : d.kind === 'Fact' && d.src ? (d.src.deep_link || d.src.url) : null;
-    if (u) a.push('<a class="b" href="' + esc(u) + '" target="_blank" rel="noopener">' + (d.quote ? 'Open at quote' : 'Open page') + '</a>');
-    if ((d.kind === 'Match' || d.kind === 'Fact') && d.accepted) a.push('<button type="button" class="b" data-remove>Remove from pitch</button>');
-    if (d.kind === 'Match' || d.kind === 'Need') a.push('<a class="b" href="/leads/' + lid + '/matches?need=' + encodeURIComponent(d.need_id || cur.slice(2)) + '">Show on Matches</a>');
+    if (u) a.push('<a class="b" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(d.quote ? _t('Open at quote') : _t('Open page')) + '</a>');
+    if ((d.kind === 'Match' || d.kind === 'Fact') && d.accepted) a.push('<button type="button" class="b" data-remove>' + esc(_t('Remove from pitch')) + '</button>');
+    if (d.kind === 'Match' || d.kind === 'Need') a.push('<a class="b" href="/leads/' + lid + '/matches?need=' + encodeURIComponent(d.need_id || cur.slice(2)) + '">' + esc(_t('Show on Matches')) + '</a>');
     return a.length ? '<div style="display:flex;gap:8px;flex-wrap:wrap">' + a.join('') + '</div>' : '';
   }
+  function kick(k){ var m = /^Need (\d+)$/.exec(k); return m ? _t('Need {n}', {n: m[1]}) : _t(k); }   // kickers come in English from the server
   function show(id){
     var d = D[id]; if (!d) return;
     cur = id;
-    panel.innerHTML = '<div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><p class="dk">' + esc(d.kind) + '</p><h2' + (d.kind === 'Match' ? ' lang="de"' : '') + '>' + esc(d.title) + '</h2>' +
-      (d.sub ? '<p class="lb" style="margin:4px 0 0">' + esc(d.sub) + '</p>' : '') + '</div><button type="button" class="ic" data-close aria-label="Close details, Esc"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="#111" stroke-width="1.8"/></svg></button></div>' +
+    var quote = d.kind === 'Fact' && d.quote && d.quote === d.title;
+    panel.innerHTML = '<div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><p class="dk">' + esc(kick(d.kicker || d.kind)) + '</p><h2' + (d.kind === 'Match' ? ' lang="de"' : '') + (quote ? ' class="hq"' : '') + '>' + (quote ? '“' + esc(d.title) + '”' : esc(d.kind === 'Need' ? _t(d.title) : d.title)) + '</h2>' +
+      (d.sub ? '<p class="lb" style="margin:4px 0 0">' + esc(d.sub.replace(/^Role not stated/, _t('Role not stated'))) + '</p>' : '') + '</div><button type="button" class="ic" data-close aria-label="' + esc(_t('Close details, Esc')) + '"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="#111" stroke-width="1.8"/></svg></button></div>' +
       body(d) + actions(d);
     panel.classList.remove('hidden'); panel.scrollTop = 0;
     panel.querySelector('[data-close]').addEventListener('click', close);
@@ -193,8 +164,17 @@
     var rm = panel.querySelector('[data-remove]');
     if (rm) rm.addEventListener('click', function(){ mutzPost('/api/decide', {lead: lid, need: d.need_id, entity: d.entity, decision: null}).then(function(){ location.reload(); }); });
   }
+  function hl(){   // red run along the bar from each parent's centre to its selected child's centre
+    $$('#map .kids.hl').forEach(function(k){ k.classList.remove('hl'); });
+    $$('#map .kids>.br.on').forEach(function(c){
+      var k = c.parentNode, a = k.offsetWidth / 2, b = c.offsetLeft + c.offsetWidth / 2;
+      if (Math.abs(a - b) < 2) return;
+      k.style.setProperty('--hl-l', (Math.min(a, b) - 2) + 'px'); k.style.setProperty('--hl-w', (Math.abs(a - b) + 4) + 'px'); k.classList.add('hl');
+    });
+  }
   function close(){
     panel.classList.add('hidden'); cur = null;
+    $$('#map .kids.hl').forEach(function(k){ k.classList.remove('hl'); });
     $$('#map .on').forEach(function(x){ x.classList.remove('on'); });
     $$('#map .tn.sel').forEach(function(x){ x.classList.remove('sel'); });
   }
@@ -206,6 +186,7 @@
     btn.classList.add('sel');
     for (var br = btn.parentNode; br && br !== tree; br = br.parentNode) if (br.classList.contains('br')) br.classList.add('on');
     if (btn.dataset.k === 'fact') { var src = btn.parentNode.querySelector('.kids .br'); if (src) src.classList.add('on'); }
+    hl();
     show(btn.dataset.id);
     window.mutzSelect && window.mutzSelect({entity_id: btn.dataset.entity, name: btn.dataset.label});
   }
