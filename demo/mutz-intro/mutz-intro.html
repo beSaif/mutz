@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mutz Opening Splash</title>
+<style>
+/* Layout: one centred square stage (the logo page), a thin review bar under it.
+   Single light look on purpose: the app's white paper and black ink, Bern red for the scarf, Bern yellow for the honey. */
+:root{
+  --red:#E30613; --black:#111111; --grey:#5E5E5E; --rule:#D9D9D9; --panel2:#F2F2F2; --paper:#FFFFFF;
+  --font:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--black);font:15px/1.5 var(--font);display:flex;flex-direction:column;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;cursor:pointer;padding-block:16px}
+.stage svg{width:100%;height:100%;max-width:600px;max-height:600px;display:block;overflow:visible}
+.stage svg g{transform-box:view-box}
+#eyes,#happy,#lid{transform-box:fill-box;transform-origin:center}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-block:12px;border-top:1px solid var(--rule)}
+.b{font:700 14px/1.2 var(--font);padding:0 16px;min-height:44px;border:1px solid var(--black);background:var(--paper);color:var(--black);cursor:pointer}
+.b:hover{background:var(--panel2)}
+.b[aria-pressed="true"]{background:var(--black);color:var(--paper)}
+.b:focus-visible,input:focus-visible{outline:2px solid var(--black);outline-offset:2px}
+.scrub{display:flex;align-items:center;gap:10px;flex:1 1 220px;min-width:0}
+.scrub input{flex:1;min-width:0;accent-color:var(--black)}
+.t{font-size:13px;color:var(--grey);font-variant-numeric:tabular-nums;min-width:4.5em}
+.lb{font-size:12px;color:var(--grey);flex-basis:100%}
+#clock{position:absolute;width:0;height:0;overflow:hidden}
+</style>
+
+<div class="stage" id="stage" aria-label="Mutz opening animation. Click to skip.">
+<svg viewBox="0 0 400 400" role="img" aria-label="Mutz the bear tears through a honeycomb of pages and finds a full pot of honey">
+  <defs id="defs"></defs>
+
+  <g id="pot" style="transform-origin:200px 190px" opacity="0">
+    <!-- The jar from the pitch deck: rounded body, thick black outline, black lid, Bern-yellow honey with a wavy surface. -->
+    <g transform="translate(162.5 144.25) scale(.75)">
+      <clipPath id="potIn"><path d="M30 20C14 22 6 34 6 54V86C6 106 22 118 50 118C78 118 94 106 94 86V54C94 34 86 22 70 20Z"/></clipPath>
+      <path d="M30 20C14 22 6 34 6 54V86C6 106 22 118 50 118C78 118 94 106 94 86V54C94 34 86 22 70 20Z" fill="#fff"/>
+      <g clip-path="url(#potIn)"><g id="honey"><path id="wave" fill="#FFCC00" d="M-100 0q12.5-4 25 0t25 0t25 0t25 0t25 0t25 0t25 0t25 0t25 0t25 0t25 0t25 0V140H-100Z"/></g></g>
+      <path d="M30 20C14 22 6 34 6 54V86C6 106 22 118 50 118C78 118 94 106 94 86V54C94 34 86 22 70 20Z" fill="none" stroke="#111" stroke-width="8" stroke-linejoin="round"/>
+      <rect id="lid" x="25" y="3" width="50" height="17" rx="4" fill="#111"/>
+    </g>
+  </g>
+
+  <g id="hive"></g>
+  <g id="claws"></g>
+  <g id="paws"></g>
+
+  <g id="mzMove">
+    <g id="mzHop" style="transform-origin:310px 353px">
+      <g transform="translate(258.8 257) scale(1.6)">
+        <g id="earL"><circle cx="14" cy="14" r="10" fill="#111"/><circle cx="14" cy="14" r="4" fill="#fff"/></g>
+        <g id="earR"><circle cx="50" cy="14" r="10" fill="#111"/><circle cx="50" cy="14" r="4" fill="#fff"/></g>
+        <ellipse cx="32" cy="33" rx="24" ry="22" fill="#111"/>
+        <ellipse cx="32" cy="41" rx="10" ry="7" fill="#fff"/>
+        <ellipse cx="32" cy="38" rx="4" ry="2.6" fill="#111"/>
+        <g id="eyes"><circle cx="23" cy="29" r="2.6" fill="#fff"/><circle cx="41" cy="29" r="2.6" fill="#fff"/></g>
+        <g id="happy" opacity="0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M20 30.5q3-4.6 6 0"/><path d="M38 30.5q3-4.6 6 0"/></g>
+        <path d="M8 52h48v8H8z" fill="#E30613"/>
+      </g>
+      <!-- His paw on the jar in the last scene; claws curl over the outline. -->
+      <g id="grab" opacity="0" style="transform-origin:345px 329px">
+        <g transform="translate(355 329) rotate(-25) scale(.85)">
+          <path d="M9 -8.5H18M11 0H20M9 8.5H18" stroke="#111" stroke-width="3.6" stroke-linecap="round"/>
+          <ellipse rx="13" ry="11.5" fill="#111"/><ellipse cx="-3" rx="5" ry="4" fill="#fff"/>
+          <circle cx="5" cy="-6" r="1.8" fill="#fff"/><circle cx="7.2" r="1.8" fill="#fff"/><circle cx="5" cy="6" r="1.8" fill="#fff"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <g id="word" opacity="0"><text x="200" y="272" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-weight="700" font-size="52" letter-spacing="-1.5" fill="#111">mutz</text></g>
+  <g id="tag" opacity="0"><text x="200" y="297" text-anchor="middle" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="11" letter-spacing="2.4" fill="#5E5E5E">EXPERTISE NAVIGATOR · BERN</text></g>
+</svg>
+</div>
+
+<div class="bar">
+  <button class="b" id="replay" type="button">Replay</button>
+  <button class="b" id="play" type="button">Pause</button>
+  <button class="b" id="slow" type="button" aria-pressed="false">Slow motion</button>
+  <div class="scrub"><input id="scrub" type="range" min="0" max="5800" step="10" value="0" aria-label="Timeline"><span class="t" id="time">0.0 s</span></div>
+  <span class="lb">Prototype of the opening splash. In the app, a click or any key skips to the last frame, and reduced-motion users see only the last frame.</span>
+</div>
+<div id="clock"></div>
+
+<script>
+const T = 5800, R = 26, S = 24, CX = 200, CY = 190, SQ3 = Math.sqrt(3), D = 380;
+const $ = id => document.getElementById(id);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let anims = [], rate = 1, master;
+
+// Three claw swipes; the last one runs through the centre where the pot hides.
+const SW = [
+  {a:[60,70],  b:[190,330], t:1550},
+  {a:[345,80], b:[245,330], t:2250},
+  {a:[70,116], b:[330,264], t:2950},
+];
+SW.forEach(s => {
+  const dx = s.b[0]-s.a[0], dy = s.b[1]-s.a[1], L = Math.hypot(dx,dy);
+  Object.assign(s, {L, u:[dx/L,dy/L], n:[-dy/L,dx/L], ang:Math.atan2(dy,dx)*180/Math.PI});
+});
+
+function rngf(seed){return () => {seed = seed+0x6D2B79F5|0; let t = Math.imul(seed^seed>>>15, 1|seed); t = t+Math.imul(t^t>>>7, 61|t)^t; return ((t^t>>>14)>>>0)/4294967296}}
+const f2 = v => v.toFixed(2);
+const pt = p => f2(p[0])+','+f2(p[1]);
+
+function reg(a){ a.playbackRate = rate; anims.push(a); return a; }
+// One animation per element and property, keyframes at absolute ms, so scrubbing maps 1:1 to the timeline.
+function track(el, frames){
+  const end = frames[frames.length-1][0];
+  return reg(el.animate(frames.map(([t,p,e]) => ({...p, offset:t/end, easing:e||'linear'})), {duration:end, fill:'both'}));
+}
+
+function hexPts(x,y,s){
+  const out = [];
+  for (let k=0;k<6;k++){ const a = (60*k-90)*Math.PI/180; out.push([x+s*Math.cos(a), y+s*Math.sin(a)]); }
+  return out;
+}
+
+// A cell is one crawled page: hairline hexagon, a black title line, grey text lines.
+function page(c, rng){
+  let s = `<polygon points="${hexPts(c.x,c.y,S).map(pt).join(' ')}" fill="#fff" stroke="#111" stroke-width="1"/>`;
+  const x0 = c.x-14;
+  s += `<line x1="${f2(x0)}" y1="${f2(c.y-9)}" x2="${f2(x0+12+rng()*9)}" y2="${f2(c.y-9)}" stroke="#111" stroke-width="2.6"/>`;
+  for (const dy of [-2.5,3,8.5]) s += `<line x1="${f2(x0)}" y1="${f2(c.y+dy)}" x2="${f2(x0+18+rng()*11)}" y2="${f2(c.y+dy)}" stroke="#A8A8A8" stroke-width="1.5"/>`;
+  return s;
+}
+
+function segHit(c, s){
+  const px = c.x-s.a[0], py = c.y-s.a[1];
+  const t = Math.max(0, Math.min(1, (px*s.u[0]+py*s.u[1])/s.L));
+  return {t, d:Math.hypot(c.x-(s.a[0]+s.u[0]*t*s.L), c.y-(s.a[1]+s.u[1]*t*s.L))};
+}
+
+function build(){
+  const rng = rngf(11), defs = [], cells = [];
+  for (let q=-3;q<=3;q++) for (let r=-3;r<=3;r++){
+    const ring = Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r));
+    if (ring<=3) cells.push({x:CX+R*SQ3*(q+r/2), y:CY+R*1.5*r, ring});
+  }
+  let html = '';
+  cells.forEach((c,i) => {
+    c.body = page(c, rng);
+    for (let k=0;k<3;k++){
+      const h = segHit(c, SW[k]);
+      if (h.d < 21 || (k===2 && c.ring<=1)){ c.k = k; c.tear = SW[k].t + h.t*D + 40; break; }
+    }
+    let inner = `<g class="whole" style="transform-origin:${f2(c.x)}px ${f2(c.y)}px">${c.body}</g>`;
+    if (c.k !== undefined){
+      const {u,n} = SW[c.k], cut = [];
+      for (let s=-34;s<=34;s+=4){ const j = (s===-34||s===34) ? 0 : (rng()-.5)*4.4; cut.push([c.x+u[0]*s+n[0]*j, c.y+u[1]*s+n[1]*j]); }
+      const side = sg => cut.concat([[c.x+u[0]*34+n[0]*34*sg, c.y+u[1]*34+n[1]*34*sg],[c.x-u[0]*34+n[0]*34*sg, c.y-u[1]*34+n[1]*34*sg]]).map(pt).join(' ');
+      defs.push(`<clipPath id="hA${i}"><polygon points="${side(1)}"/></clipPath><clipPath id="hB${i}"><polygon points="${side(-1)}"/></clipPath><clipPath id="hx${i}"><polygon points="${hexPts(c.x,c.y,S).map(pt).join(' ')}"/></clipPath>`);
+      const edge = `<polyline points="${cut.map(pt).join(' ')}" clip-path="url(#hx${i})" fill="none" stroke="#9A9A9A" stroke-width="1.3"/>`;
+      const half = (id,sg) => `<g class="h" data-sg="${sg}" style="transform-origin:${f2(c.x+n[0]*9*sg)}px ${f2(c.y+n[1]*9*sg)}px"><g clip-path="url(#${id})">${c.body}${edge}</g></g>`;
+      inner += `<g class="halves" opacity="0">${half('hA'+i,1)}${half('hB'+i,-1)}</g>`;
+    }
+    html += `<g class="cell" style="transform-origin:${f2(c.x)}px ${f2(c.y)}px">${inner}</g>`;
+  });
+  $('defs').innerHTML = defs.join('');
+  $('hive').innerHTML = html;
+
+  $('claws').innerHTML = SW.map(s => [-8.5,0,8.5].map(o => {
+    const a = [s.a[0]+s.n[0]*o, s.a[1]+s.n[1]*o], b = [s.b[0]+s.n[0]*o, s.b[1]+s.n[1]*o];
+    return `<line x1="${f2(a[0])}" y1="${f2(a[1])}" x2="${f2(b[0])}" y2="${f2(b[1])}" stroke="#111" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="${f2(s.L)} ${f2(s.L+10)}" stroke-dashoffset="${f2(s.L)}"/>`;
+  }).join('')).join('');
+
+  $('paws').innerHTML = SW.map(() => `<g class="paw" opacity="0">
+    <path d="M9 -8.5H21M11 0H24M9 8.5H21" stroke="#111" stroke-width="3.4" stroke-linecap="round"/>
+    <ellipse rx="14" ry="12.5" fill="#111"/><ellipse cx="-3" rx="5.5" ry="4.5" fill="#fff"/>
+    <circle cx="5" cy="-6.5" r="1.9" fill="#fff"/><circle cx="7.5" r="1.9" fill="#fff"/><circle cx="5" cy="6.5" r="1.9" fill="#fff"/></g>`).join('');
+  return {cells, rng};
+}
+
+function run(){
+  anims.forEach(a => a.cancel()); anims = [];
+  const {cells, rng} = build();
+  const ease = 'cubic-bezier(.5,0,.85,.6)'; // paper falling: slow start, gravity at the end
+
+  // 1. The hive of pages builds outward from the centre.
+  document.querySelectorAll('#hive .cell').forEach((el,i) => {
+    const c = cells[i];
+    reg(el.animate([{transform:'scale(0)',opacity:0},{transform:'scale(1.08)',opacity:1,offset:.6},{transform:'scale(1)',opacity:1}],
+      {duration:520, delay:c.ring*170+rng()*90, easing:'ease-out', fill:'both'}));
+    const whole = el.querySelector('.whole');
+    if (c.k !== undefined){
+      // 3. Torn on the swipe: the page swaps for its two halves, which fly apart and fall.
+      reg(whole.animate([{opacity:1},{opacity:0}], {delay:c.tear, duration:1, fill:'both'}));
+      reg(el.querySelector('.halves').animate([{opacity:0},{opacity:1}], {delay:c.tear, duration:1, fill:'both'}));
+      const n = SW[c.k].n;
+      el.querySelectorAll('.h').forEach(h => {
+        const sg = +h.dataset.sg, rot = sg*(30+rng()*35), dx = n[0]*sg, dy = n[1]*sg;
+        reg(h.animate([
+          {transform:'translate(0px,0px) rotate(0deg)', opacity:1},
+          {transform:`translate(${f2(dx*8)}px,${f2(dy*8-3)}px) rotate(${f2(rot*.15)}deg)`, opacity:1, offset:.18},
+          {transform:`translate(${f2(dx*36+(rng()-.5)*20)}px,320px) rotate(${f2(rot)}deg)`, opacity:0}
+        ], {duration:1200+rng()*250, delay:c.tear, easing:ease, fill:'both'}));
+      });
+    } else {
+      // 4. Once the pot is found, the rest of the hive crumbles away.
+      const ox = (c.x-CX)*.25+(rng()-.5)*20, rot = (rng()-.5)*90;
+      reg(whole.animate([
+        {transform:'translate(0px,0px) rotate(0deg)', opacity:1},
+        {transform:`translate(${f2(ox*.2)}px,-6px) rotate(${f2(rot*.1)}deg)`, opacity:1, offset:.15},
+        {transform:`translate(${f2(ox)}px,320px) rotate(${f2(rot)}deg)`, opacity:0}
+      ], {duration:1050, delay:3350+Math.hypot(c.x-CX,c.y-CY)*1.8+rng()*160, easing:ease, fill:'both'}));
+    }
+  });
+
+  // The hive jolts a little on each swipe.
+  const still = {transform:'translate(0px,0px)'}, jolt = [[0,still]];
+  SW.forEach(s => { const hit = s.t+D; jolt.push([hit-1,still],[hit+60,{transform:'translate(1.5px,2px)'}],[hit+180,still]); });
+  jolt.push([T,still]); track($('hive'), jolt);
+
+  // 2. Claw swipes: the paw leads, three scratch marks draw behind it.
+  const paws = document.querySelectorAll('#paws .paw'), lines = document.querySelectorAll('#claws line');
+  SW.forEach((s,k) => {
+    const at = d => `translate(${f2(s.a[0]+s.u[0]*d)}px,${f2(s.a[1]+s.u[1]*d)}px) rotate(${f2(s.ang)}deg)`;
+    track(paws[k], [[0,{opacity:0,transform:at(-60)}],[s.t-140,{opacity:0,transform:at(-60)},'ease-out'],
+      [s.t,{opacity:1,transform:at(-22)},'cubic-bezier(.5,0,.7,1)'],[s.t+D,{opacity:1,transform:at(s.L-22)},'ease-out'],
+      [s.t+D+200,{opacity:0,transform:at(s.L+20)}]]);
+    for (let j=0;j<3;j++){
+      const L = f2(s.L)+'px';
+      track(lines[k*3+j], [[0,{strokeDashoffset:L,opacity:1}],[s.t,{strokeDashoffset:L,opacity:1},'ease-in'],
+        [s.t+D,{strokeDashoffset:'0px',opacity:1}],[s.t+D+350,{strokeDashoffset:'0px',opacity:1},'ease-out'],
+        [s.t+D+1000,{strokeDashoffset:'0px',opacity:0}]]);
+    }
+  });
+
+  // Mutz rises in, leans into each swipe, jumps when the pot is full, then settles beside it.
+  const at0 = 'translate(0px,0px)';
+  track($('mzMove'), [[0,{transform:'translate(0px,170px)'}],[650,{transform:'translate(0px,170px)'},'cubic-bezier(.25,1.35,.45,1)'],
+    [1300,{transform:at0}],[4500,{transform:at0},'cubic-bezier(.6,0,.25,1)'],[5150,{transform:'translate(-135px,-147px)'}]]);
+  const hop = (y,r) => ({transform:`translateY(${y}px) rotate(${r}deg)`}), rest = hop(0,0);
+  track($('mzHop'), [[0,rest],[1300,rest,'ease-out'],[1500,hop(-4,-9),'ease-in-out'],[1950,rest],
+    [2000,rest,'ease-out'],[2200,hop(-4,8),'ease-in-out'],[2650,rest],
+    [2700,rest,'ease-out'],[2900,hop(-4,-5),'ease-in-out'],[3350,rest],
+    [4150,rest,'ease-out'],[4300,hop(-10,0),'ease-in'],[4430,rest],
+    [5150,rest,'ease-out'],[5330,hop(-3,7),'ease-in-out'],[5480,hop(0,4)]]);
+  // The grab: his paw pops onto the jar as they meet.
+  track($('grab'), [[0,{opacity:0,transform:'scale(.3)'}],[5100,{opacity:0,transform:'scale(.3)'},'cubic-bezier(.3,1.5,.5,1)'],[5320,{opacity:1,transform:'scale(1)'}]]);
+  const eye = (o,s) => ({opacity:o, transform:`scaleY(${s})`});
+  track($('eyes'), [[0,eye(1,1)],[1300,eye(1,1)],[1360,eye(1,.1)],[1440,eye(1,1)],[3200,eye(1,1)],[3260,eye(1,.1)],[3340,eye(1,1)],[4150,eye(1,1)],[4200,eye(0,1)]]);
+  track($('happy'), [[0,{opacity:0}],[4150,{opacity:0}],[4200,{opacity:1}]]);
+  ['earL','earR'].forEach((id,i) => {
+    const y = v => ({transform:`translateY(${v}px)`}), o = i*80;
+    track($(id), [[0,y(0)],[1300+o,y(0)],[1360+o,y(-1.5)],[1440+o,y(0)],[4150+o,y(0)],[4210+o,y(-2)],[4300+o,y(0)],[4330+o,y(-1.2)],[4400+o,y(0)]]);
+  });
+
+  // 5. The pot appears where the last swipe opened the hive, fills thin then full, and the lid pops.
+  const pot = (o,x,y,s,r=0) => ({opacity:o, transform:`translate(${x}px,${y}px) rotate(${r}deg) scale(${s})`});
+  track($('pot'), [[0,pot(0,0,0,.9)],[3080,pot(0,0,0,.9),'ease-out'],[3350,pot(1,0,0,1)],[4500,pot(1,0,0,1),'cubic-bezier(.6,0,.25,1)'],
+    [5150,pot(1,38,-29.75,1),'ease-out'],[5330,pot(1,36,-35,1,-8),'ease-in-out'],[5480,pot(1,37,-32,1,-5)]]);
+  // Honey level in jar units: empty below the base, thin near the bottom, strong up to the shoulders, with a small slosh.
+  const lvl = v => ({transform:`translateY(${v}px)`});
+  track($('honey'), [[0,lvl(126)],[3350,lvl(126),'ease-out'],[3650,lvl(100)],[3780,lvl(100),'cubic-bezier(.3,0,.2,1)'],
+    [4100,lvl(33),'ease-in-out'],[4350,lvl(37.5),'ease-in-out'],[4550,lvl(36)]]);
+  reg($('wave').animate([{transform:'translateX(0px)'},{transform:'translateX(-50px)'}], {duration:1000, delay:3300, iterations:2.5, fill:'both'}));
+  const lid = (y,r) => ({transform:`translate(0px,${y}px) rotate(${r}deg)`});
+  track($('lid'), [[0,lid(0,0)],[4100,lid(0,0),'ease-out'],[4230,lid(-14,-16),'ease-in'],[4380,lid(0,0),'ease-out'],[4440,lid(-3,3),'ease-in'],[4500,lid(0,0)]]);
+
+  // 6. The wordmark sets under the lockup.
+  const up = (o,y) => ({opacity:o, transform:`translateY(${y}px)`});
+  track($('word'), [[0,up(0,10)],[5000,up(0,10),'cubic-bezier(.2,.7,.2,1)'],[5450,up(1,0)]]);
+  track($('tag'), [[0,up(0,8)],[5150,up(0,8),'cubic-bezier(.2,.7,.2,1)'],[5600,up(1,0)]]);
+
+  master = reg($('clock').animate([{opacity:0},{opacity:1}], {duration:T, fill:'both'}));
+  master.onfinish = () => { $('play').textContent = 'Play'; };
+  $('play').textContent = 'Pause';
+  if (reduced) skip();
+}
+
+function skip(){ anims.forEach(a => a.finish()); $('play').textContent = 'Play'; }
+function pauseAll(){ anims.forEach(a => a.pause()); $('play').textContent = 'Play'; }
+function playAll(){
+  if (master.playState === 'finished' || master.currentTime >= T) return run();
+  // play() rewinds finished animations, so only resume the ones still ahead of the playhead.
+  anims.forEach(a => { if (a.currentTime < a.effect.getComputedTiming().endTime) a.play(); });
+  $('play').textContent = 'Pause';
+}
+
+$('stage').addEventListener('click', skip);
+document.addEventListener('keydown', e => { if (!e.target.closest('.bar') && e.key !== 'Tab') skip(); });
+$('replay').addEventListener('click', run);
+$('play').addEventListener('click', () => master.playState === 'running' ? pauseAll() : playAll());
+$('slow').addEventListener('click', e => {
+  rate = rate === 1 ? .35 : 1;
+  e.currentTarget.setAttribute('aria-pressed', rate !== 1);
+  anims.forEach(a => a.playbackRate = rate);
+});
+$('scrub').addEventListener('input', e => {
+  pauseAll();
+  anims.forEach(a => a.currentTime = +e.target.value);
+});
+(function tick(){
+  if (master){ const t = Math.min(T, master.currentTime || 0); $('scrub').value = t; $('time').textContent = (t/1000).toFixed(1)+' s'; }
+  requestAnimationFrame(tick);
+})();
+
+run();
+</script>
